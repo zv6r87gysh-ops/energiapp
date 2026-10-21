@@ -9,4 +9,4 @@
 | Pahlén Calidi VP                 | WiFi planerad             | Bekräftat API, mätstöd, säkra driftgränser; annars extern energimätare                            |
 | Thermotech EC8 / Qvantum         | Ej ansluten               | Verifierad kompatibilitet; inga aktiva styrreglage i fas 1                                        |
 
-Publik elprisläsning är verifierad och implementerad. Ingen hårdvaruintegration är ansluten. Home Assistant är inte ett krav. Demoenhetsguiden gör inga nätverksanrop och tar inte emot hemligheter.
+Publik elprisläsning är verifierad och implementerad. Ingen hårdvaruintegration är ansluten. Home Assistant är inte ett krav. Guiden för egna enheter sparar endast modell och icke-hemligt enhets-ID lokalt. Den gör inga anslutningstester och visar alltid Förberedd – ej ansluten tills en verifierad hårdvaruintegration finns.

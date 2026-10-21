@@ -1413,3 +1413,351 @@ th {
     font-size: 20px;
   }
 }
+
+.device-hub-heading {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+}
+.device-hub-heading > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.device-hub-heading h2 {
+  margin: 0 0 6px;
+}
+.device-hub-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.device-hub-heading .muted {
+  font-size: 10px;
+}
+.device-hub-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: #edf3f8;
+  color: #587d9b;
+  flex-shrink: 0;
+}
+.device-dialog {
+  margin: auto;
+  color: var(--text);
+}
+.device-dialog::backdrop {
+  background: #152c2670;
+  backdrop-filter: blur(5px);
+}
+.device-dialog .eyebrow {
+  display: block;
+  margin-bottom: 10px;
+}
+.device-dialog .modal-heading {
+  margin-bottom: 4px;
+}
+.device-kind-grid {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0 4px;
+}
+.device-kind-grid button {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 15px;
+  padding: 19px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+}
+.device-kind-grid button:hover {
+  background: var(--bg);
+  border-color: #80a895;
+}
+.device-kind-grid button > svg:first-child {
+  color: #538b79;
+  flex-shrink: 0;
+}
+.device-kind-grid button > span {
+  flex: 1;
+}
+.device-kind-grid strong {
+  display: block;
+  font-size: 13px;
+}
+.device-kind-grid small {
+  display: block;
+  color: var(--muted);
+  margin-top: 7px;
+  line-height: 1.6;
+  font-size: 11px;
+}
+.device-details {
+  margin-top: 22px;
+}
+.device-id-help,
+.device-next-step {
+  display: flex;
+  gap: 12px;
+  padding: 15px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.device-id-help svg,
+.device-next-step svg {
+  flex-shrink: 0;
+  color: #5b8f7b;
+  margin-top: 3px;
+}
+.device-id-help p,
+.device-next-step p {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0;
+}
+.device-id-help strong {
+  display: block;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.device-next-step strong {
+  font-size: 12px;
+}
+.device-dialog-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+.device-dialog-actions .button:last-child {
+  margin-left: auto;
+}
+.device-error {
+  padding: 12px 15px;
+  border-radius: 8px;
+  color: #a64835;
+  background: #fff0e9;
+  font-size: 12px;
+}
+.device-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 11px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  background: var(--bg);
+  color: #398567;
+  margin: 18px 0 0;
+}
+.device-success svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.device-review {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin: 20px 0;
+}
+.owned-devices {
+  margin-top: 20px;
+}
+.owned-device {
+  border-top: 1px solid var(--line);
+  padding: 23px 0 5px;
+}
+.owned-device-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.owned-device-top > div {
+  flex: 1;
+  min-width: 150px;
+}
+.owned-device h3 {
+  font-size: 14px;
+  margin: 0 0 5px;
+}
+.owned-device-top p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.device-facts {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+}
+.device-facts > div {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) minmax(0, 1.3fr);
+  gap: 10px;
+  font-size: 11px;
+}
+.device-facts dt {
+  color: var(--muted);
+}
+.device-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.device-empty {
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
+}
+.dark .device-hub-icon {
+  background: #233b46;
+  color: #96b8d1;
+}
+.dark .device-error {
+  background: #462e29;
+  color: #f0b19e;
+}
+@media (max-width: 1050px) {
+  .device-hub-heading {
+    flex-wrap: wrap;
+  }
+  .device-hub-heading > .button {
+    margin-left: 63px;
+  }
+}
+@media (max-width: 800px) {
+  .device-hub-heading {
+    gap: 12px;
+  }
+  .device-hub-heading > .button {
+    margin-left: 0;
+    width: 100%;
+  }
+  .device-details {
+    grid-template-columns: 1fr;
+  }
+  .device-dialog-actions .button {
+    flex: 1;
+  }
+  .device-kind-grid button {
+    padding: 16px;
+  }
+}
+
+.simulation-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px 12px;
+  flex-wrap: wrap;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.simulation-heading > span:last-child {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+.simulation-pulse {
+  width: 8px;
+  height: 8px;
+  background: #2d9c7b;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px #2d9c7b18;
+}
+.simulation-dashboard .metrics .card p {
+  margin: 0;
+  font-size: 10px;
+}
+.simulation-dashboard .toolbar h2 {
+  margin: 0 auto 0 0;
+}
+.sim-device-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.sim-device-status {
+  padding: 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-left: 3px solid #799992;
+  border-radius: 9px;
+  margin: 15px 0;
+  font-size: 12px;
+}
+.sim-device-status strong {
+  display: block;
+  font-size: 12px;
+}
+.sim-device-status span {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.sim-state-price-paused {
+  border-left-color: #d69c38;
+}
+.sim-state-running {
+  border-left-color: #269a75;
+}
+.sim-state-waiting-prices {
+  border-left-color: #b48b55;
+}
+.sim-rule {
+  border: 1px solid var(--line);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 15px 0;
+  min-width: 0;
+}
+.sim-rule legend {
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.nav-category-label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.nav-control-state {
+  display: block;
+  font-size: 9px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.nav-control-state.state-running {
+  color: #258469;
+}
+.nav-control-state.state-price-paused {
+  color: #b57825;
+}
+.nav-control-state.state-waiting-prices {
+  color: #9b7b53;
+}
+.sidebar nav {
+  min-height: 0;
+  overflow-y: auto;
+}
+@media (max-width: 800px) {
+  .simulation-heading > span:last-child {
+    margin-left: 0;
+    width: 100%;
+    line-height: 1.7;
+  }
+  .simulation-dashboard .metric-value {
+    font-size: 24px;
+  }
+  .sim-rule {
+    padding: 16px;
+  }
+}

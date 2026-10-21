@@ -28,7 +28,7 @@ Vid begränsade hemkatalogsrättigheter: `npm ci --cache /workspace/.npm-cache`.
 
 ## Funktioner
 
-Alla tio huvudkategorier har separata routes. Översikt, förbrukning, kostnadsprognos, elpriser för fyra områden, pooldemo, laddplanering, fordonsregister, fem frånkopplade värmezoner, statistik, besparingsscenarier och inställningar ingår. Mobil bottennavigation har en meny för samtliga kategorier. Ljust/mörkt tema, lokalt sparade hushåll, redigerbara avgifter, demoenhetsguide och lokala simulerade inbjudningar ingår.
+Alla tio huvudkategorier har separata routes. Översikt, förbrukning, kostnadsprognos, elpriser för fyra områden, pooldemo, laddplanering, fordonsregister, fem frånkopplade värmezoner, statistik, besparingsscenarier och inställningar ingår. Mobil bottennavigation har en meny för samtliga kategorier. Ljust/mörkt tema, lokalt sparade hushåll, redigerbara avgifter, guide för registrering av egna enheter och lokala simulerade inbjudningar ingår.
 
 Bilväljaren söker bland 18 märken. Modellnamn är sökförslag; **variant, årsmodell och tekniska specifikationer anges manuellt och är inte en verifierad fordonsdatabas**. Den förifyllda EX30-bilens batteri och laddeffekt är demoantaganden. Flera bilar, redigering, borttagning och standardbil stöds. Zaptec antas inte kunna identifiera bilen eller läsa batterinivå.
 
@@ -36,9 +36,9 @@ PWA-manifest, PNG-ikoner och en service worker finns. Vid offline-navigation vis
 
 ## Demoantaganden och begränsningar
 
-Demots fasta referensdag är 21 oktober 2026 kl. 14.00 Europe/Stockholm. Hushållsgraferna är illustrativa. Elpriserna hämtas separat från en verklig källa och följer aktuell svensk kalender, inte demots fasta datum. Kvartstidsstämplar lagras i UTC, tidszonens dygnsgränser testas separat för 23/25-timmarsdygn. Diagrammens modellvärden är inte underlag för verkliga beslut. Dashboardens och kostnadssidans totalsummor härleds från en gemensam demoserie. Statistikens anpassade datumintervall filtrerar demots tillgängliga dygn, 1–21 oktober 2026.
+Den levande familjemodellen följer aktuell svensk kalender och verkliga spotpriser. Kvartstidsstämplar lagras i UTC och visas i Europe/Stockholm. Hushållsvärden är modellerade, inte uppmätta. Historiska månadsserier och månadsprognoser byggda på den tidigare statiska demodagen visas inte längre som underlag för modellen. Prishistorik krävs för sådana jämförelser.
 
-Kostnadsmodellen använder avgifter exklusive moms, energiskatt exakt en gång och moms exakt en gång. Effektavgift är ett manuellt månadsbelopp och tidsberoende nätavgift ett manuellt vägt öre-tillägg. Prognosen använder demots förbrukning hittills, ett antaget förbrukningsvägt spotpris på 62 öre/kWh och proportionerade fasta avgifter. Den är en dygnstakt med illustrativt ±15 %-intervall. Besparingshistorik är modellerad demonstration; poolbesparing är inte verifierad och används inte som faktisk effekt. Konstant pooldrift är en separat hypotetisk jämförelse med olika energibehov.
+Kostnadsmodellen använder avgifter exklusive moms, energiskatt exakt en gång och moms exakt en gång. Rörliga kostnader i familjemodellen använder samma verkliga pris och förbrukningskvart. Effektavgift är ett manuellt månadsbelopp och tidsberoende nätavgift ett manuellt vägt tillägg. Fasta avgifter ingår inte i jämförelsen mellan driftlägen. Poolbesparing är inte verifierad; konstant drift visas endast som ett separat hypotetiskt scenario.
 
 Laddplanen väljer billigaste tillåtna kvartar före sluttiden nästa demodygn med AC-gräns, laddförlust och manuellt energibehov. Den visar om tiden eller prisgränsen hindrar målet. Den tar inte hänsyn till verklig lastbalansering, bilens laddkurva eller fysisk styrning. All start/paus och poolstyrning påverkar bara lokal demostatus.
 
@@ -63,3 +63,15 @@ I Codex-miljön: använd `NODE_USE_ENV_PROXY=1 npm run dev` för att Node ska an
 Knappen **Aktivera smart styrning** öppnar en kategoriväljare som finns på alla sidor. Pool och billaddare kan aktiveras i demonstrationen. Golvvärme och övriga enheter visas men är spärrade tills integrationer och kompatibilitet har verifierats. All aktivering är uttryckligen simulering och skickar inga hårdvarukommandon.
 
 Val, aktivt läge och paus sparas per hushåll i webbläsaren. Huvudknappen och poolens/laddarens egna reglage använder samma inställning. **Pausa alla** pausar de smarta demovalen men behåller kategorierna; **Stäng av och rensa val** tar bort dem. Manuellt startad simulerad laddning är ett separat reglage och stoppas inte av att smart planering pausas. Redigering i dialogen sparas först när användaren bekräftar. Äldre lokala demoinställningar startar avstängda i den nya husstyrningen.
+
+## Levande familjemodell
+
+Förbrukningen på översikten och förbruknings-, kostnads-, statistik- och besparingssidorna kommer nu från en gemensam modell för två vuxna och två barn. Den följer verklig svensk tid, varierar var femte sekund och använder dagens verkliga kvartpriser för energikostnad, avgifter och moms. Modellen räknas om med aktuella inställningar; grafen är inte uppmätt eller loggad historik. Grundlasten representerar hushåll, rutiner och uppvärmning. Pool och bil har separata dagliga energibehov och driftfönster.
+
+Under Inställningar finns regler per kategori: fast gräns i öre/kWh eller procent av högsta priset under kommande 24 förflutna timmar. Priset **lika med eller över** gränsen pausar modellen. Procentregeln inväntar en komplett publicerad 24-timmarsperiod; den gissar inte morgondagens priser. Om alla framtida priser är noll/negativa skapas ingen positiv prispaus. Kategoriernas status visas i navigationen och på respektive sida. Manuell laddstart åsidosätter prisregeln endast i modellen.
+
+Besparingsvyn visar en normaliserad prisskillnad för samma levererade energi. Otillgodosett eller uppskjutet energibehov redovisas separat och räknas inte som besparing. Fasta avgifter ingår inte i den rörliga driftjämförelsen. En verifierad poolkomfortmodell, historisk prislagring och verklig styrning återstår. Golvvärme är fortfarande ej ansluten och kan inte prisstyras.
+
+## Egna enheter
+
+Knappen Lägg till egen enhet öppnar en guide för poolens WiFi-box, realtidsmätare, billaddare eller annan modell. Tillverkare, exakt modell och serienummer/enhets-ID krävs. ID-kontrollen validerar bara formuläret och förhindrar dubbletter inom samma hushåll; den autentiserar inte hos tillverkaren. Enheter sparas lokalt med status **Förberedd – ej ansluten**, kan redigeras och tas bort. Inga lösenord eller API-nycklar ska anges. En registrering aktiverar inga mätvärden eller styrkommandon.
