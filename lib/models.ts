@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { SmartControl } from "./smart-control";
 export type DataMode = "demo" | "connected";
 export type Role = "owner" | "admin" | "member" | "viewer";
 export interface HouseholdEntity {
@@ -136,4 +137,5 @@ export interface Household {
   invitations: HouseholdInvitation[];
   charging: boolean;
   smart: boolean;
+  smartControl?: SmartControl;
 }

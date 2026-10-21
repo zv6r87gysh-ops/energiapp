@@ -37,6 +37,13 @@ import {
 } from "recharts";
 import { Button } from "./ui/button";
 import { PricePanel } from "./price-panel";
+import { SmartControlPanel } from "./smart-control";
+import {
+  applySmartControl,
+  readSmartControl,
+  categoryActive,
+  changeSmartCategory,
+} from "@/lib/smart-control";
 import type { PriceArea } from "@/lib/prices/contracts";
 import {
   catalog,
@@ -289,6 +296,11 @@ export default function EnergyApp({ section }: { section: string }) {
     setHomes((list) =>
       list.map((h) => (h.id === home.id ? { ...h, ...patch } : h)),
     );
+  const smartControl = readSmartControl(home);
+  const poolMode =
+    home.pool.mode === "Smart" && !categoryActive(smartControl, "pool")
+      ? "Manuellt"
+      : home.pool.mode;
   const prices = demoSeries(96, home.region);
   const metrics = demoMetrics(home);
   const nowPrice = prices[56].price;
@@ -477,6 +489,11 @@ export default function EnergyApp({ section }: { section: string }) {
               </button>
             </div>
           )}
+          <SmartControlPanel
+            key={home.id}
+            control={smartControl}
+            onChange={(next) => update(applySmartControl(home, next))}
+          />
           {section === "oversikt" && (
             <>
               <div className="metrics">
@@ -576,8 +593,7 @@ export default function EnergyApp({ section }: { section: string }) {
                     <div>
                       <b>Poolen</b>
                       <small>
-                        {number(home.pool.temperature)} °C · {home.pool.mode} ·
-                        Demo
+                        {number(home.pool.temperature)} °C · {poolMode} · Demo
                       </small>
                     </div>
                     <Link href="/pool">
@@ -907,9 +923,19 @@ export default function EnergyApp({ section }: { section: string }) {
                   </Field>
                   <Field label="Simulerat driftläge">
                     <select
-                      value={home.pool.mode}
+                      value={poolMode}
                       onChange={(e) =>
-                        update({ pool: { ...home.pool, mode: e.target.value } })
+                        update({
+                          ...applySmartControl(
+                            home,
+                            changeSmartCategory(
+                              smartControl,
+                              "pool",
+                              e.target.value === "Smart",
+                            ),
+                          ),
+                          pool: { ...home.pool, mode: e.target.value },
+                        })
                       }
                     >
                       {[
@@ -926,7 +952,11 @@ export default function EnergyApp({ section }: { section: string }) {
                   </Field>
                 </Card>
                 <Card title="Planerad drift · Demo">
-                  <p className="large-text">10.00 – 14.00</p>
+                  <p className="large-text">
+                    {categoryActive(smartControl, "pool")
+                      ? "10.00 – 14.00"
+                      : "Smart simulering av"}
+                  </p>
                   <p>
                     Temperaturintervall: 27–28 °C. Modellerad månadsenergi: 246
                     kWh. Månadskostnad:{" "}
@@ -982,7 +1012,13 @@ export default function EnergyApp({ section }: { section: string }) {
                 />
               </div>
               <div className="two-col">
-                <Card title="Smart laddning">
+                <Card
+                  title={
+                    categoryActive(smartControl, "charging")
+                      ? "Smart laddning · Demo"
+                      : "Laddplanering · Demo"
+                  }
+                >
                   <div className="car-heading">
                     <Car size={42} />
                     <div>
@@ -1074,9 +1110,21 @@ export default function EnergyApp({ section }: { section: string }) {
                     </Button>
                     <Button
                       className="secondary"
-                      onClick={() => update({ smart: !home.smart })}
+                      onClick={() =>
+                        update(
+                          applySmartControl(
+                            home,
+                            changeSmartCategory(
+                              smartControl,
+                              "charging",
+                              !categoryActive(smartControl, "charging"),
+                            ),
+                          ),
+                        )
+                      }
                     >
-                      Smart simulering: {home.smart ? "på" : "av"}
+                      Smart simulering:{" "}
+                      {categoryActive(smartControl, "charging") ? "på" : "av"}
                     </Button>
                   </div>
                   <p className="muted">

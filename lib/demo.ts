@@ -57,7 +57,13 @@ export const initialHousehold: Household = {
   devices: [],
   invitations: [],
   charging: false,
-  smart: true,
+  smart: false,
+  smartControl: {
+    mode: "demo",
+    enabled: false,
+    categories: [],
+    updatedAt: null,
+  },
 };
 export const zones = [
   "Nedervåning",
