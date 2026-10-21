@@ -396,25 +396,32 @@ export default function EnergyApp({ section }: { section: string }) {
               </button>
             </div>
           )}
-          <SmartControlPanel
-            key={home.id}
-            control={smartControl}
-            onChange={(next) => update(applySmartControl(home, next))}
-          />
-          <DeviceManager
-            key={`devices-${home.id}`}
-            householdId={home.id}
-            devices={home.devices}
-            onChange={(devices) => update({ devices })}
-            showList={section === "installningar"}
-            defaultKind={
-              section === "pool"
-                ? "pool-wifi"
-                : section === "laddning"
-                  ? "charger"
-                  : "energy-meter"
-            }
-          />
+          {["oversikt", "forbrukning"].includes(section) && (
+            <SmartControlPanel
+              key={home.id}
+              control={smartControl}
+              onChange={(next) => update(applySmartControl(home, next))}
+            />
+          )}
+          {["pool", "golvvarme", "laddning", "installningar"].includes(
+            section,
+          ) && (
+            <DeviceManager
+              key={`devices-${home.id}`}
+              householdId={home.id}
+              devices={home.devices}
+              onChange={(devices) => update({ devices })}
+              showList={section === "installningar"}
+              showConnect={section !== "installningar"}
+              defaultKind={
+                section === "pool"
+                  ? "pool-wifi"
+                  : section === "laddning"
+                    ? "charger"
+                    : "other"
+              }
+            />
+          )}
           {section === "oversikt" && (
             <>
               <SimulationDashboard simulation={sim} message={live.message} />
@@ -528,7 +535,14 @@ export default function EnergyApp({ section }: { section: string }) {
             <SimulationDashboard
               simulation={sim}
               message={live.message}
-              view={section === "kostnad" ? "cost" : "consumption"}
+              totals={live.totals}
+              view={
+                section === "kostnad"
+                  ? "cost"
+                  : section === "forbrukning"
+                    ? "consumption"
+                    : "statistics"
+              }
             />
           )}
           {section === "elpriser" && (

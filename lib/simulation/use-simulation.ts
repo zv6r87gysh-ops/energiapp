@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Household } from "../models";
 import { priceDaySchema, type PriceDay } from "../prices/contracts";
 import { swedishDate } from "../prices/time";
+import { energyTotals, readLedger } from "./totals";
 import { simulateHousehold } from "./engine";
 export function useHouseholdSimulation(home: Household) {
   const [clock, setClock] = useState<number | null>(null);
@@ -93,7 +94,56 @@ export function useHouseholdSimulation(home: Household) {
     () => (clock === null ? null : simulateHousehold(home, prices, clock)),
     [home, prices, clock],
   );
+  const storageKey = `energihem-energy-v1/${home.id}`;
+  const [stored, setStored] = useState<{
+    key: string;
+    raw: string | null;
+  } | null>(null);
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = localStorage.getItem(storageKey);
+    } catch {
+      /* Browser storage unavailable. */
+    }
+    queueMicrotask(() => setStored({ key: storageKey, raw }));
+  }, [storageKey]);
+  const totals = useMemo(
+    () =>
+      simulation && stored?.key === storageKey
+        ? energyTotals(
+            readLedger(stored.raw),
+            simulation.now,
+            simulation.energy,
+          )
+        : null,
+    [simulation, stored, storageKey],
+  );
+  useEffect(() => {
+    if (!simulation || stored?.key !== storageKey) return;
+    // Read the latest ledger on each tick so midnight preserves yesterday's final snapshot.
+    try {
+      const ledger = readLedger(localStorage.getItem(storageKey));
+      const date = swedishDate(new Date(simulation.now));
+      const next = [
+        ...ledger.filter(
+          (e) => e.date !== date && e.date.slice(0, 7) === date.slice(0, 7),
+        ),
+        { date, energy: simulation.energy, through: simulation.now },
+      ];
+      const raw = JSON.stringify(next);
+      localStorage.setItem(storageKey, raw);
+      queueMicrotask(() =>
+        setStored((previous) =>
+          previous?.raw === raw ? previous : { key: storageKey, raw },
+        ),
+      );
+    } catch {
+      /* Live daily values still work without browser storage. */
+    }
+  }, [simulation, storageKey, stored?.key]);
   return {
+    totals,
     simulation,
     prices,
     message:

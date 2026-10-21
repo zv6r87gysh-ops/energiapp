@@ -75,3 +75,9 @@ Besparingsvyn visar en normaliserad prisskillnad för samma levererade energi. O
 ## Egna enheter
 
 Knappen Lägg till egen enhet öppnar en guide för poolens WiFi-box, realtidsmätare, billaddare eller annan modell. Tillverkare, exakt modell och serienummer/enhets-ID krävs. ID-kontrollen validerar bara formuläret och förhindrar dubbletter inom samma hushåll; den autentiserar inte hos tillverkaren. Enheter sparas lokalt med status **Förberedd – ej ansluten**, kan redigeras och tas bort. Inga lösenord eller API-nycklar ska anges. En registrering aktiverar inga mätvärden eller styrkommandon.
+
+### Placering och ackumulerad förbrukning
+
+Smart styrning visas på Översikt och Aktuell förbrukning. Enhetsguiden visas endast under Pool, Golvvärme och Elbilsladdning; registrerade enheter hanteras fortsatt under Inställningar.
+
+Aktuell förbrukning visar total modellerad energi idag och denna månad, uppdaterad var femte sekund. Dagens modell räknas om med aktuella regler. Dagliga snapshots sparas lokalt per hushåll i `energihem-energy-v1/<householdId>` och summeras inom svensk kalendermånad. Saknade och delvis sparade dagar anges uttryckligen: månadsräknaren är inte en komplett mätarhistorik. Stängd app, annan webbläsare eller rensad lagring ger luckor; inga historiska förbrukningsvärden fabriceras. En verklig månadsförbrukning kräver en ansluten mätare med historik.

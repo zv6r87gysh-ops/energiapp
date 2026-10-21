@@ -12,10 +12,10 @@ async function fillDevice(page: Page, name = "Poolens WiFi-box") {
     .getByRole("button", { name: "Kontrollera uppgifter", exact: true })
     .click();
 }
-test("enheter kan registreras från översikten och hanteras i inställningar", async ({
+test("enheter kan registreras från poolfliken och hanteras i inställningar", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/pool");
   await page
     .getByRole("button", { name: "Lägg till egen enhet", exact: true })
     .click();
@@ -58,7 +58,7 @@ test("enheter kan registreras från översikten och hanteras i inställningar", 
 test("validerar ID, stoppar dubbletter och aktiverar inte smart styrning", async ({
   page,
 }) => {
-  await page.goto("/installningar");
+  await page.goto("/pool");
   await page
     .getByRole("button", { name: "Lägg till egen enhet", exact: true })
     .click();
@@ -83,15 +83,17 @@ test("validerar ID, stoppar dubbletter och aktiverar inte smart styrning", async
   await expect(dialog.getByRole("alert")).toContainText("minst tre tecken");
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
+  await page.goto("/forbrukning");
   await expect(
     page.getByRole("button", { name: "Aktivera smart styrning", exact: true }),
   ).toBeVisible();
+  await page.goto("/installningar");
   await expect(
     page.getByRole("article", { name: "Enhet: Poolens WiFi-box" }),
   ).toHaveCount(1);
 });
 test("registrerade enheter hålls isär mellan hushåll", async ({ page }) => {
-  await page.goto("/installningar");
+  await page.goto("/pool");
   await page
     .getByRole("button", { name: "Lägg till egen enhet", exact: true })
     .click();
@@ -100,6 +102,7 @@ test("registrerade enheter hålls isär mellan hushåll", async ({ page }) => {
     .getByRole("dialog")
     .getByRole("button", { name: "Spara enhet", exact: true })
     .click();
+  await page.goto("/installningar");
   await page.getByLabel("Nytt hushållsnamn").fill("Grannens demo");
   await page
     .getByRole("button", { name: "Skapa hushåll", exact: true })

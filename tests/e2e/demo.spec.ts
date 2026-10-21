@@ -67,7 +67,7 @@ test("hushållens fordon hålls åtskilda", async ({ page }) => {
 test("enhetsguiden registrerar utan att påstå en riktig anslutning", async ({
   page,
 }) => {
-  await page.goto("/installningar");
+  await page.goto("/pool");
   await page
     .getByRole("button", { name: "Lägg till egen enhet", exact: true })
     .click();
@@ -88,6 +88,7 @@ test("enhetsguiden registrerar utan att påstå en riktig anslutning", async ({
   await dialog
     .getByRole("button", { name: "Spara enhet", exact: true })
     .click();
+  await page.goto("/installningar");
   await expect(
     page.getByRole("article", { name: "Enhet: Min energimätare" }),
   ).toContainText("Förberedd – ej ansluten");

@@ -1,4 +1,5 @@
 "use client";
+import type { EnergyTotals } from "@/lib/simulation/totals";
 import { useState } from "react";
 import { Car, Settings2, Waves } from "lucide-react";
 import {
@@ -49,10 +50,12 @@ export function SimulationDashboard({
   simulation,
   message,
   view = "overview",
+  totals,
 }: {
   simulation: HouseholdSimulation | null;
   message: string;
   view?: string;
+  totals?: EnergyTotals | null;
 }) {
   const [period, setPeriod] = useState("Idag");
   if (!simulation)
@@ -87,6 +90,35 @@ export function SimulationDashboard({
         Elprisetjustnu.se. Uppdateras var femte sekund. Grafen räknas om med
         dina aktuella regler; den är inte loggad historik.
       </p>
+      {view === "consumption" && totals && (
+        <section className="card" aria-label="Ackumulerad förbrukning">
+          <h2>Total förbrukning</h2>
+          <div className="metrics">
+            <div className="metric">
+              <span>Total förbrukning idag</span>
+              <div className="metric-value">
+                {number(totals.today, 2)} <small>kWh</small>
+              </div>
+            </div>
+            <div className="metric">
+              <span>Total förbrukning denna månad</span>
+              <div className="metric-value">
+                {number(totals.month, 2)} <small>kWh</small>
+              </div>
+            </div>
+          </div>
+          <p className="muted">
+            Modellvärden · uppdateras var femte sekund. Månadssumman sparas i
+            den här webbläsaren för valt hushåll och omfattar {totals.days} av{" "}
+            {totals.expectedDays} dagar hittills denna månad (svensk tid). Dagar
+            utan underlag ingår inte.
+            {totals.partialDays > 0
+              ? ` ${totals.partialDays} tidigare dagar har endast delvis underlag.`
+              : ""}{" "}
+            Dagens värde räknas om med aktuella styrregler.
+          </p>
+        </section>
+      )}
       {!s.priceAvailable && (
         <p className="warning" role="status">
           {message} Kostnader och prisbaserad styrning visas inte som

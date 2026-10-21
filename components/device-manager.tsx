@@ -44,12 +44,14 @@ export function DeviceManager({
   devices,
   onChange,
   showList = false,
+  showConnect = true,
   defaultKind = "energy-meter",
 }: {
   householdId: string;
   devices: Device[];
   onChange: (devices: Device[]) => void;
   showList?: boolean;
+  showConnect?: boolean;
   defaultKind?: DeviceKind;
 }) {
   const [step, setStep] = useState(0);
@@ -128,27 +130,31 @@ export function DeviceManager({
   return (
     <>
       <section className="card device-hub" aria-label="Egna enheter">
-        <div className="device-hub-heading">
-          <div className="device-hub-icon">
-            <Link2 size={23} />
+        {showConnect ? (
+          <div className="device-hub-heading">
+            <div className="device-hub-icon">
+              <Link2 size={23} />
+            </div>
+            <div>
+              <h2>Koppla in dina egna enheter</h2>
+              <p>
+                Poolens WiFi-box, elmätare eller billaddare. Börja med modell
+                och enhetsnummer.
+              </p>
+              <span className="muted">
+                {prepared.length
+                  ? `${prepared.length} ${prepared.length === 1 ? "enhet förberedd" : "enheter förberedda"} · ingen verifierad anslutning ännu`
+                  : "Inga egna enheter är anslutna ännu."}
+              </span>
+            </div>
+            <Button ref={trigger} onClick={open}>
+              <Plus size={17} />
+              Lägg till egen enhet
+            </Button>
           </div>
-          <div>
-            <h2>Koppla in dina egna enheter</h2>
-            <p>
-              Poolens WiFi-box, elmätare eller billaddare. Börja med modell och
-              enhetsnummer.
-            </p>
-            <span className="muted">
-              {prepared.length
-                ? `${prepared.length} ${prepared.length === 1 ? "enhet förberedd" : "enheter förberedda"} · ingen verifierad anslutning ännu`
-                : "Inga egna enheter är anslutna ännu."}
-            </span>
-          </div>
-          <Button ref={trigger} onClick={open}>
-            <Plus size={17} />
-            Lägg till egen enhet
-          </Button>
-        </div>
+        ) : (
+          <h2>Dina registrerade enheter</h2>
+        )}
         {!showList && prepared.length > 0 && (
           <Link className="text-link" href="/installningar">
             Hantera dina enheter <ChevronRight size={15} />
@@ -164,8 +170,9 @@ export function DeviceManager({
           <div className="owned-devices">
             {own.length === 0 ? (
               <p className="muted device-empty">
-                Lägg till din första enhet med knappen ovan. Den sparas för ditt
-                valda hushåll och visas här med tydlig anslutningsstatus.
+                Lägg till en enhet under Pool, Golvvärme eller Elbilsladdning.
+                Den sparas för ditt valda hushåll och visas här med tydlig
+                anslutningsstatus.
               </p>
             ) : (
               own.map((device) => {
