@@ -1,0 +1,12 @@
+# Hårdvaruintegrationer
+
+| Integration                      | Status         | Krävs före verklig anslutning                                                                     |
+| -------------------------------- | -------------- | ------------------------------------------------------------------------------------------------- |
+| Svenska kvartspriser             | Demo           | Verifierad leverantör, villkor, publiceringstid, 23/25-timmarsdygn och skattehantering            |
+| Zaptec                           | Ej ansluten    | Officiell API-dokumentation, serverautentisering, rättighetskontroll, konfliktskydd och auditlogg |
+| Zaptec Sense P1                  | Ej installerad | Bekräftad KM-kompatibilitet och installation; ingen aktiv lastbalansering antas                   |
+| Boo Energi Power Hub KM / Bitvis | Planerad       | Verifierat protokoll, datafält och eventuell lokal gateway                                        |
+| Pahlén Calidi VP                 | WiFi planerad  | Bekräftat API, mätstöd, säkra driftgränser; annars extern energimätare                            |
+| Thermotech EC8 / Qvantum         | Ej ansluten    | Verifierad kompatibilitet; inga aktiva styrreglage i fas 1                                        |
+
+Ingen verklig integration har verifierats eller implementerats. Home Assistant är inte ett krav. Demoenhetsguiden gör inga nätverksanrop och tar inte emot hemligheter.
