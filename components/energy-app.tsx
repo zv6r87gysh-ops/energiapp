@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { PricePanel } from "./price-panel";
+import { WeatherPanel, WeatherSettings } from "./weather-panel";
+import { useWeather } from "@/lib/weather/use-weather";
 import { SmartControlPanel } from "./smart-control";
 import { DeviceManager } from "./device-manager";
 import {
@@ -204,6 +206,7 @@ export default function EnergyApp({ section }: { section: string }) {
       : home.pool.mode;
   const live = useHouseholdSimulation(home);
   const sim = live.simulation;
+  const outdoor = useWeather(home, live.prices, sim?.now ?? null);
 
   const car = home.vehicles.find((v) => v.isDefault) ?? home.vehicles[0];
   const plan = car
@@ -424,6 +427,15 @@ export default function EnergyApp({ section }: { section: string }) {
           )}
           {section === "oversikt" && (
             <>
+              <WeatherPanel
+                key={`weather-${home.id}-${home.postcode}`}
+                home={home}
+                weather={outdoor.weather}
+                plan={outdoor.plan}
+                message={outdoor.message}
+                now={sim?.now ?? null}
+                onPostcode={(postcode) => update({ postcode })}
+              />
               <SimulationDashboard simulation={sim} message={live.message} />
               <div className="dashboard-grid">
                 <Card className="insight">
@@ -1011,6 +1023,16 @@ export default function EnergyApp({ section }: { section: string }) {
           )}
           {section === "installningar" && (
             <>
+              {loaded && (
+                <WeatherSettings
+                  key={`weather-settings-${home.id}-${JSON.stringify(home.thermalSettings)}`}
+                  home={home}
+                  onSave={(thermalSettings) => {
+                    update({ thermalSettings });
+                    setNotice("Värmeunderlaget har sparats för hushållet.");
+                  }}
+                />
+              )}
               {loaded && (
                 <SimulationSettingsForm
                   key={`sim-settings-${home.id}-${JSON.stringify(home.simulationSettings)}`}

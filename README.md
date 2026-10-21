@@ -81,3 +81,7 @@ Knappen Lägg till egen enhet öppnar en guide för poolens WiFi-box, realtidsm�
 Smart styrning visas på Översikt och Aktuell förbrukning. Enhetsguiden visas endast under Pool, Golvvärme och Elbilsladdning; registrerade enheter hanteras fortsatt under Inställningar.
 
 Aktuell förbrukning visar total modellerad energi idag och denna månad, uppdaterad var femte sekund. Dagens modell räknas om med aktuella regler. Dagliga snapshots sparas lokalt per hushåll i `energihem-energy-v1/<householdId>` och summeras inom svensk kalendermånad. Saknade och delvis sparade dagar anges uttryckligen: månadsräknaren är inte en komplett mätarhistorik. Stängd app, annan webbläsare eller rensad lagring ger luckor; inga historiska förbrukningsvärden fabriceras. En verklig månadsförbrukning kräver en ansluten mätare med historik.
+
+### Väder på Översikt
+
+Väderfliken hämtar riktig prognos för angivet svenskt postnummer från MET Norway (Yr:s prognosleverantör), med idag/imorgon i svensk tid. Saknat väder ersätts aldrig med demo. Användaren behöver inte ange tekniska värmeförlustvärden. Självlärande poolplanering är förberedd och inväntar en verifierad boxanslutning med verklig temperatur och värmedrift; den nuvarande registreringsguiden levererar inte dessa mätningar. Läs [väder och poolinlärning](docs/weather-and-pool-learning.md) för datakällor, begränsningar och livekontroll.

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ThermalSettings } from "./weather/contracts";
 import type { SmartControl } from "./smart-control";
 import type { DeviceKind } from "./devices";
 import type { SimulationSettings } from "./simulation/engine";
@@ -143,4 +144,6 @@ export interface Household {
   smart: boolean;
   smartControl?: SmartControl;
   simulationSettings?: SimulationSettings;
+  postcode?: string;
+  thermalSettings?: ThermalSettings;
 }
