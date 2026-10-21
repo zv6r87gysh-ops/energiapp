@@ -57,3 +57,9 @@ Vercel: importera repositoryt, välj Next.js, installera med `npm ci`, bygg med 
 Integrationens villkor och live-data för samtliga fyra områden verifierades 21 oktober 2026. Prishämtningen är aktiv som standard och kräver inga nycklar eller Vercel-inställningar. Valfritt: `ELECTRICITY_PRICES_ENABLED=false` stänger av den. Hushållsförbrukning, laddplanering och kostnadsprognoser är fortfarande demo. Se [teknik, verifiering och källans villkor](docs/electricity-prices.md).
 
 I Codex-miljön: använd `NODE_USE_ENV_PROXY=1 npm run dev` för att Node ska använda den tillåtna nätverksproxyn vid externa anrop. Detta behövs inte på Vercel.
+
+## Smart styrning av huset · Demo
+
+Knappen **Aktivera smart styrning** öppnar en kategoriväljare som finns på alla sidor. Pool och billaddare kan aktiveras i demonstrationen. Golvvärme och övriga enheter visas men är spärrade tills integrationer och kompatibilitet har verifierats. All aktivering är uttryckligen simulering och skickar inga hårdvarukommandon.
+
+Val, aktivt läge och paus sparas per hushåll i webbläsaren. Huvudknappen och poolens/laddarens egna reglage använder samma inställning. **Pausa alla** pausar de smarta demovalen men behåller kategorierna; **Stäng av och rensa val** tar bort dem. Manuellt startad simulerad laddning är ett separat reglage och stoppas inte av att smart planering pausas. Redigering i dialogen sparas först när användaren bekräftar. Äldre lokala demoinställningar startar avstängda i den nya husstyrningen.

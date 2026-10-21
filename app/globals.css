@@ -1226,3 +1226,190 @@ th {
 .price-color-explanation {
   margin-top: 8px;
 }
+
+.smart-home {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 23px;
+}
+.smart-home-active {
+  border-color: #cce7da;
+  background: linear-gradient(
+    115deg,
+    var(--card),
+    color-mix(in srgb, var(--card) 70%, #dff0e6)
+  );
+}
+.smart-home-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  background: #eaf5ee;
+  color: #248467;
+  border-radius: 13px;
+  flex-shrink: 0;
+}
+.smart-home-copy {
+  flex: 1;
+  min-width: 0;
+}
+.smart-home-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.smart-home-title h2 {
+  margin: 0;
+  font-size: 15px;
+}
+.smart-home-copy p {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.smart-home-copy p > span {
+  display: block;
+}
+.smart-home-actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.smart-dialog {
+  margin: auto;
+  color: var(--text);
+}
+.smart-dialog::backdrop {
+  background: #152c2670;
+  backdrop-filter: blur(5px);
+}
+.smart-dialog .eyebrow {
+  display: block;
+  font-size: 9px;
+  margin-bottom: 10px;
+}
+.smart-dialog .modal-heading {
+  margin-bottom: 5px;
+}
+.smart-dialog h2 {
+  margin-bottom: 10px;
+}
+.smart-categories {
+  border: 0;
+  padding: 0;
+  margin: 20px 0;
+  display: grid;
+  gap: 12px;
+}
+.smart-category {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.smart-category.checked {
+  border-color: #4b9c7e;
+  background: color-mix(in srgb, var(--card) 88%, #c2e8d2);
+}
+.smart-category.unavailable {
+  cursor: default;
+  background: var(--bg);
+}
+.smart-category-icon {
+  color: #54967d;
+  flex-shrink: 0;
+}
+.smart-category.unavailable .smart-category-icon {
+  color: var(--muted);
+}
+.smart-category-copy {
+  flex: 1;
+  min-width: 0;
+}
+.smart-category-copy strong {
+  display: block;
+  font-size: 13px;
+}
+.smart-category-copy small {
+  display: block;
+  margin: 6px 0 9px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 11px;
+}
+.smart-category input {
+  width: 19px;
+  height: 19px;
+  min-height: 19px;
+  accent-color: #25886b;
+  flex-shrink: 0;
+}
+.smart-category input:disabled {
+  opacity: 0.45;
+}
+.smart-demo-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 13px;
+  background: var(--bg);
+  border-radius: 8px;
+  color: var(--muted);
+}
+.smart-demo-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #49866c;
+}
+.smart-demo-note p {
+  margin: 0;
+  font-size: 11px;
+}
+.smart-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.smart-dialog-actions > button:last-child {
+  margin-left: auto;
+}
+@media (max-width: 1050px) {
+  .smart-home {
+    flex-wrap: wrap;
+  }
+  .smart-home-actions {
+    width: 100%;
+    padding-left: 64px;
+  }
+}
+@media (max-width: 800px) {
+  .smart-home {
+    padding: 18px;
+    gap: 12px;
+  }
+  .smart-home-actions {
+    padding-left: 0;
+  }
+  .smart-home-actions .button {
+    flex: 1;
+  }
+  .smart-category {
+    padding: 14px;
+    gap: 11px;
+  }
+  .smart-dialog-actions .button {
+    flex-grow: 1;
+  }
+  .smart-dialog .modal-heading h2 {
+    font-size: 20px;
+  }
+}

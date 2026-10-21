@@ -30,3 +30,9 @@ Mätserier bör partitioneras efter tid och indexeras på household_id och times
 ## Fas 4: innan styrning tillåts
 
 Separera optimeringsförslag från kommandoutförande. Kräv uttryckligt aktiverad styrning, manuellt åsidosättande, exklusivt ägarskap av schemaläggning, kommandobegränsning, tillverkarens driftgränser och auditlogg. Fel/offline ska ge säkert standardläge och larm. Poolmodellen måste kalibreras mot värmeförlust och komfort. Golvvärme byggs först efter verifierad kompatibilitet och säkerhetsanalys. Notifikationer, riktig sparanalys och prognosmodeller återstår.
+
+## SmartControl i den lokala demonstrationen
+
+`lib/smart-control.ts` innehåller Zod-schemat och övergångarna för husets val av pool/billaddare. Inställningen är knuten till `Household.smartControl`, med endast `mode: demo`, valda kategorier, aktivt läge och UTC-tid för senaste ändring. Äldre hushåll utan inställningen får en avstängd standard. Ogiltiga sparade kategorier, dubbletter, anslutet läge och aktivt läge utan val avvisas.
+
+`components/smart-control.tsx` använder en native dialog med fokusfälla, Escape och bekräftad lagring. Poolens smartläge och laddningens tidigare smartflagga synkroniseras genom `applySmartControl`. Paus behåller valen och stänger av simulerad optimering. Manuell laddstatus, temperaturmål och separata hushåll bevaras. Detta är en inställningssimulering, inte en bakgrundsscheduler eller en implementerad hårdvarustyrmotor. Verklig aktivering kräver fortfarande fas 2–4:s serverbehörigheter, verifierade integrationer och driftsskydd.

@@ -7,7 +7,7 @@ export function Button({
   className,
   asChild = false,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }) {
+}: React.ComponentPropsWithRef<"button"> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "button";
   return <Comp className={twMerge(clsx("button", className))} {...props} />;
 }
