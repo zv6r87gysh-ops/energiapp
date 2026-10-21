@@ -76,10 +76,10 @@ it("coalesces simultaneous requests and conditionally refreshes only after Expir
 it("returns an unavailable state for missing, corrupt or blocked providers and backs off", async () => {
   const f = vi.fn().mockResolvedValue(new Response(null, { status: 404 }));
   vi.stubGlobal("fetch", f);
-  const r = await get();
+  const r = await get("99999");
   expect(r.status).toBe(502);
   expect((await r.json()).data).toBeNull();
-  await get();
+  await get("99999");
   expect(f).toHaveBeenCalledTimes(1);
 });
 it("rejects wrong weather units and never serves fabricated forecast", async () => {
@@ -91,4 +91,37 @@ it("rejects wrong weather units and never serves fabricated forecast", async () 
     .mockResolvedValueOnce(Response.json(bad));
   vi.stubGlobal("fetch", f);
   expect((await (await get()).json()).status).toBe("unavailable");
+});
+it("serves a labelled real-district forecast for 13250 when the exact postcode is absent", async () => {
+  const f = vi
+    .fn()
+    .mockResolvedValueOnce(new Response(null, { status: 404 }))
+    .mockResolvedValueOnce(Response.json(metFixture()));
+  vi.stubGlobal("fetch", f);
+  const r = await get("13250");
+  expect(r.status).toBe(200);
+  const body = await r.json();
+  expect(body.data.postcode).toBe("13250");
+  expect(body.data.place).toBe("Saltsjö-Boo");
+  expect(body.data.locationPrecision).toBe("district");
+  expect(body.data.locationArea).toBe("132xx");
+  expect(body.data.locationSource).toBe("GeoNames");
+  expect(f.mock.calls[1][0]).toContain("lat=59.3173&lon=18.255");
+});
+it("reports weather-service failure separately from missing postcode", async () => {
+  const f = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json(locationFixture))
+    .mockResolvedValueOnce(new Response(null, { status: 403 }));
+  vi.stubGlobal("fetch", f);
+  expect((await (await get()).json()).code).toBe("forecast-unavailable");
+});
+it("does not guess an area for an unknown district", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
+  );
+  const r = await get("99999");
+  expect((await r.json()).code).toBe("postcode-not-found");
+  expect(r.headers.get("Retry-After")).toBe("60");
 });

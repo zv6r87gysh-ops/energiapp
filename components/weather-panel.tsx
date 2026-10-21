@@ -124,6 +124,12 @@ export function WeatherPanel({
             ) : (
               <p>Prognos för denna dag saknas. Inga värden fylls i.</p>
             )}
+            {weather.locationPrecision === "district" && (
+              <p className="muted" role="status">
+                Områdesprognos för {weather.place} ({weather.locationArea}).
+                Exakt punkt för {weather.postcode} saknas i postnummerlistan.
+              </p>
+            )}
             <p className="muted">
               {day === 0
                 ? "Temperaturspann för återstående prognostimmar idag."
@@ -155,13 +161,21 @@ export function WeatherPanel({
             {priceTime(weather.issuedAt)}, hämtad kl.{" "}
             {priceTime(weather.fetchedAt)}. Plats:{" "}
             <a
-              href={`https://api.zippopotam.us/se/${weather.postcode}`}
+              href={
+                weather.locationSource === "GeoNames"
+                  ? "https://github.com/zauberware/postal-codes-json-xml-csv"
+                  : `https://api.zippopotam.us/se/${weather.postcode}`
+              }
               target="_blank"
               rel="noreferrer"
             >
-              Zippopotam.us / GeoNames
+              {weather.locationSource ?? "Zippopotam.us / GeoNames"}
             </a>
-            , ungefärlig postnummerpunkt.
+            ,{" "}
+            {weather.locationPrecision === "district"
+              ? "ungefärlig områdespunkt"
+              : "ungefärlig postnummerpunkt"}
+            .
           </p>
         </>
       )}

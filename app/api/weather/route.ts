@@ -1,5 +1,11 @@
+import { districtLocation } from "../../../lib/weather/districts";
 import { postcodeSchema, type Weather } from "../../../lib/weather/contracts";
 import { parseLocation, parseForecast } from "../../../lib/weather/provider";
+import {
+  WeatherError,
+  type WeatherErrorCode,
+} from "../../../lib/weather/errors";
+export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 const agent = "Energihem/1.0 https://github.com/zv6r87gysh-ops/energiapp";
 const locations = new Map<
@@ -11,13 +17,13 @@ const forecasts = new Map<
   { data: Weather; modified: string | null; until: number }
 >();
 const pending = new Map<string, Promise<Weather>>();
-const cooldown = new Map<string, number>();
+const cooldown = new Map<string, { until: number; code: WeatherErrorCode }>();
 const headers = { "Cache-Control": "no-store" };
 function prune() {
   for (const [k, v] of locations)
     if (v.until <= Date.now()) locations.delete(k);
-  for (const [k, until] of cooldown)
-    if (until <= Date.now()) cooldown.delete(k);
+  for (const [k, entry] of cooldown)
+    if (entry.until <= Date.now()) cooldown.delete(k);
   // Keep caches bounded, including entries retained for conditional requests.
   for (const map of [locations, forecasts, cooldown])
     while (map.size > 100) map.delete(map.keys().next().value!);
@@ -26,23 +32,37 @@ async function load(postcode: string): Promise<Weather> {
   prune();
   const cached = forecasts.get(postcode);
   if (cached && cached.until > Date.now()) return cached.data;
-  if ((cooldown.get(postcode) ?? 0) > Date.now())
-    throw Error("Vänta före nytt försök");
+  const previous = cooldown.get(postcode);
+  if (previous && previous.until > Date.now())
+    throw new WeatherError(previous.code);
+  let stage: "location" | "forecast" = "location";
   try {
     let location = locations.get(postcode)?.value;
     if (!location) {
-      const r = await fetch(`https://api.zippopotam.us/se/${postcode}`, {
-        cache: "no-store",
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!r.ok) throw Error("Postnumret kunde inte slås upp");
-      location = parseLocation(await r.json(), postcode);
+      try {
+        const r = await fetch(`https://api.zippopotam.us/se/${postcode}`, {
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+          signal: AbortSignal.timeout(10000),
+        });
+        if (r.status === 404) throw new WeatherError("postcode-not-found");
+        if (!r.ok) throw new WeatherError("location-unavailable");
+        try {
+          location = parseLocation(await r.json(), postcode);
+        } catch {
+          throw new WeatherError("location-invalid");
+        }
+      } catch (error) {
+        const district = districtLocation(postcode);
+        if (!district) throw error;
+        location = district;
+      }
       locations.set(postcode, {
         value: location,
         until: Date.now() + 86400000,
       });
     }
+    stage = "forecast";
     const r = await fetch(
       `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${location.latitude}&lon=${location.longitude}`,
       {
@@ -55,23 +75,29 @@ async function load(postcode: string): Promise<Weather> {
         },
       },
     );
-    if (!r.ok && r.status !== 304) throw Error("Väderkällan svarade inte");
+    if (!r.ok && r.status !== 304)
+      throw new WeatherError("forecast-unavailable");
     const now = Date.now();
     const expires = Date.parse(r.headers.get("Expires") ?? "");
     const until = Math.max(
       now + 60000,
       Number.isFinite(expires) ? expires : now + 1800000,
     );
-    const data =
-      r.status === 304 && cached
-        ? {
-            ...cached.data,
-            fetchedAt: new Date(now).toISOString(),
-            expiresAt: new Date(until).toISOString(),
-          }
-        : parseForecast(await r.json(), location, until, now);
+    let data: Weather;
+    try {
+      data =
+        r.status === 304 && cached
+          ? {
+              ...cached.data,
+              fetchedAt: new Date(now).toISOString(),
+              expiresAt: new Date(until).toISOString(),
+            }
+          : parseForecast(await r.json(), location, until, now);
+    } catch {
+      throw new WeatherError("forecast-invalid");
+    }
     if (now - Date.parse(data.issuedAt) > 6 * 3600000)
-      throw Error("Inaktuell prognos");
+      throw new WeatherError("forecast-invalid");
     forecasts.set(postcode, {
       data,
       until,
@@ -79,8 +105,16 @@ async function load(postcode: string): Promise<Weather> {
     });
     return data;
   } catch (e) {
-    cooldown.set(postcode, Date.now() + 60000);
-    throw e;
+    const error =
+      e instanceof WeatherError
+        ? e
+        : new WeatherError(
+            stage === "location"
+              ? "location-unavailable"
+              : "forecast-unavailable",
+          );
+    cooldown.set(postcode, { until: Date.now() + 60000, code: error.code });
+    throw error;
   }
 }
 export async function GET(request: Request) {
@@ -104,15 +138,17 @@ export async function GET(request: Request) {
     }
     const data = await job;
     return Response.json({ status: "available", data }, { headers });
-  } catch {
+  } catch (e) {
+    const error =
+      e instanceof WeatherError ? e : new WeatherError("forecast-unavailable");
     return Response.json(
       {
         status: "unavailable",
         data: null,
-        message:
-          "Väderprognosen eller postnumret kunde inte verifieras. Försök igen senare. Inga demovärden används.",
+        code: error.code,
+        message: error.message,
       },
-      { status: 502, headers },
+      { status: 502, headers: { ...headers, "Retry-After": "60" } },
     );
   } finally {
     pending.delete(postcode.data);

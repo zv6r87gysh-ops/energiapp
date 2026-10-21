@@ -108,3 +108,47 @@ test("postnummerbyte och felsvar rensar gammalt väder; inställningar sparas pe
     "Ange hushållets postnummer",
   );
 });
+
+test("samma postnummer kan hämtas igen efter fel och områdesprognos märks", async ({
+  page,
+}) => {
+  await prepare(page);
+  let requests = 0;
+  await page.route("**/api/weather?*", async (route) => {
+    requests++;
+    if (requests === 1)
+      await route.fulfill({
+        status: 502,
+        json: {
+          status: "unavailable",
+          code: "forecast-unavailable",
+          data: null,
+        },
+      });
+    else
+      await route.fulfill({
+        json: {
+          status: "available",
+          data: {
+            ...weatherFixture(),
+            postcode: "13250",
+            locationPrecision: "district",
+            locationArea: "132xx",
+            locationSource: "GeoNames",
+          },
+        },
+      });
+  });
+  await page.goto("/");
+  const widget = page.locator(".weather-widget");
+  await expect(widget).toContainText("MET Norway kunde inte nås");
+  // Retry the unchanged saved postcode. This previously did not issue a new request.
+  await widget.getByRole("button", { name: "Visa väder", exact: true }).click();
+  // The deliberately mismatched result must not be shown for 13230.
+  await expect(widget).toContainText("fel plats");
+  await widget.getByLabel("Postnummer", { exact: true }).fill("13250");
+  await widget.getByRole("button", { name: "Visa väder", exact: true }).click();
+  await expect(widget).toContainText("Områdesprognos för Saltsjö-Boo (132xx)");
+  await expect(widget).toContainText("Exakt punkt för 13250 saknas");
+  expect(requests).toBeGreaterThanOrEqual(3);
+});

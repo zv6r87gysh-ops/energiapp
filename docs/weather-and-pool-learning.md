@@ -33,3 +33,11 @@ Planen är separat från den befintliga simulerade dagsgrafen och ger inga verkl
 - `npm test`: deterministiska fixturer för parser, felhantering, cache, kalibrering och planering. Testtelemetri skapas bara i `tests/fixtures`, aldrig i appen.
 - `RUN_LIVE_WEATHER_TESTS=1 NODE_USE_ENV_PROXY=1 npx vitest run tests/weather.live.test.ts`: riktig postnummer- och MET-hämtning, separat opt-in.
 - `npm run test:e2e`: postnummer, dagflikar, källmärkning, vänteläge utan boxmätningar, fel vid platsbyte och hushållsseparering på dator och mobil.
+
+### Reservuppslagning för postnummer som saknas
+
+Zippopotam.us saknar bland annat 13250 (verifierat HTTP 404). Vid misslyckad uppslagning används en lokal, källbelagd GeoNames-tabell endast för entydiga tresiffriga postnummerområden. UI:t märker detta som **områdesprognos** och anger att exakt postnummerpunkt saknas. Detta validerar inte att ett okänt postnummer existerar. Prognosvärdena hämtas fortfarande från MET Norway, aldrig från en lokal vädertabell.
+
+`lib/weather/postal-districts.json` är ett bearbetat utdrag från https://github.com/zauberware/postal-codes-json-xml-csv/tree/b4be5a6e3c30c65dc7846e09ec9b70d65d0db7f5 (GeoNames, CC BY 4.0; datasetuppdatering 2026-07-31). Underlaget är `data/SE.zip`, `zipcodes.se.json`. Endast områden med minst tre listade postnummer och exakt samma ort (utan skillnad i stora/små bokstäver), latitud och longitud behålls. Svenska koordinatgränser valideras. 232 områden uppfyller kraven. Området 132xx har 39 listade poster som alla ger Saltsjö-Boo, 59.3173/18.255. Ingen koordinat för just 13250 hittas på.
+
+Felmeddelanden skiljer nu på okänt postnummer, otillgänglig postnummertjänst och fel i MET-prognosen. Knappen Visa väder gör ett nytt försök även för samma sparade postnummer; serverns cache och backoff gäller fortfarande. Route-budgeten är 30 sekunder så att de två externa anropens tidsgränser ryms även i Vercel.

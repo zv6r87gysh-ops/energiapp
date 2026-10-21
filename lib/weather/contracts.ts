@@ -9,6 +9,12 @@ export const weatherSchema = z.object({
   latitude: z.number().min(55).max(70),
   longitude: z.number().min(10).max(25),
   source: z.literal("MET Norway"),
+  locationPrecision: z.enum(["postcode", "district"]).optional(),
+  locationArea: z
+    .string()
+    .regex(/^\d{3}xx$/)
+    .optional(),
+  locationSource: z.enum(["Zippopotam.us / GeoNames", "GeoNames"]).optional(),
   issuedAt: z.iso.datetime(),
   fetchedAt: z.iso.datetime(),
   expiresAt: z.iso.datetime(),
@@ -25,6 +31,16 @@ export const weatherSchema = z.object({
     .max(300),
 });
 export type Weather = z.infer<typeof weatherSchema>;
+export type WeatherLocation = Pick<
+  Weather,
+  | "postcode"
+  | "place"
+  | "latitude"
+  | "longitude"
+  | "locationPrecision"
+  | "locationArea"
+  | "locationSource"
+>;
 export const thermalSettingsSchema = z.object({
   enabled: z.boolean(),
   tolerance: z.number().min(0.1).max(5),

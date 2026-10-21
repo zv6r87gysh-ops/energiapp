@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { postcodeSchema, weatherSchema, type Weather } from "./contracts";
+import {
+  postcodeSchema,
+  weatherSchema,
+  type Weather,
+  type WeatherLocation,
+} from "./contracts";
 const locationSchema = z.object({
   "country abbreviation": z.literal("SE"),
   "post code": postcodeSchema,
@@ -45,13 +50,15 @@ const metSchema = z.object({
       .min(1),
   }),
 });
-export function parseLocation(raw: unknown, postcode: string) {
+export function parseLocation(raw: unknown, postcode: string): WeatherLocation {
   const data = locationSchema.parse(raw);
   if (data["post code"] !== postcode)
     throw Error("Fel postnummer från geokodning");
   const p = data.places[0];
   return {
     postcode,
+    locationPrecision: "postcode",
+    locationSource: "Zippopotam.us / GeoNames",
     place: p["place name"],
     latitude: Math.trunc(p.latitude * 10000) / 10000,
     longitude: Math.trunc(p.longitude * 10000) / 10000,
@@ -59,7 +66,7 @@ export function parseLocation(raw: unknown, postcode: string) {
 }
 export function parseForecast(
   raw: unknown,
-  location: ReturnType<typeof parseLocation>,
+  location: WeatherLocation,
   expiresAt: number,
   now: number,
 ): Weather {

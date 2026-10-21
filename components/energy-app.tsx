@@ -434,7 +434,10 @@ export default function EnergyApp({ section }: { section: string }) {
                 plan={outdoor.plan}
                 message={outdoor.message}
                 now={sim?.now ?? null}
-                onPostcode={(postcode) => update({ postcode })}
+                onPostcode={(postcode) => {
+                  if (home.postcode === postcode) outdoor.refresh();
+                  else update({ postcode });
+                }}
               />
               <SimulationDashboard simulation={sim} message={live.message} />
               <div className="dashboard-grid">

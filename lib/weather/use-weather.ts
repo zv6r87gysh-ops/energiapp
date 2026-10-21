@@ -6,6 +6,7 @@ import {
   weatherSchema,
   type Weather,
 } from "./contracts";
+import { weatherErrorMessage } from "./errors";
 import { learnPoolBehavior, type PoolTelemetry } from "../pool/learning";
 import { weatherHeatingPlan } from "./planner";
 import type { Household } from "../models";
@@ -19,6 +20,7 @@ export function useWeather(
   const postcode = postcodeSchema.safeParse(home.postcode ?? "");
   const code = postcode.success ? postcode.data : "";
   const key = `${home.id}/${code}`;
+  const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState<{
     key: string;
     data: Weather | null;
@@ -41,20 +43,24 @@ export function useWeather(
         });
         const raw = await r.json();
         if (!r.ok || raw.status !== "available")
-          throw Error("Källan svarade inte");
+          throw Error(
+            weatherErrorMessage(raw.code) ??
+              "Väderprognosen kunde inte hämtas. Försök igen om en minut.",
+          );
         const data = weatherSchema.parse(raw.data);
         if (data.postcode !== code || !forecastFresh(data, Date.now()))
-          throw Error("Fel plats eller inaktuell prognos");
+          throw Error(
+            "Prognosen gäller fel plats eller är inaktuell. Kontrollera även datum och klocka på din enhet.",
+          );
         retryAfter = Date.parse(data.expiresAt);
         if (mounted) setResult({ key, data, message: "" });
-      } catch {
+      } catch (error) {
         retryAfter = Date.now() + 60000;
         if (mounted)
           setResult({
             key,
             data: null,
-            message:
-              "Väderprognosen kunde inte verifieras. Inga demovärden används.",
+            message: `${error instanceof Error ? error.message : "Väderprognosen kunde inte hämtas."} Inga demovärden används.`,
           });
       } finally {
         busy = false;
@@ -74,7 +80,7 @@ export function useWeather(
       window.removeEventListener("focus", refresh);
       document.removeEventListener("visibilitychange", refresh);
     };
-  }, [key, code]);
+  }, [key, code, attempt]);
   const weather =
     result?.key === key &&
     result.data &&
@@ -94,6 +100,10 @@ export function useWeather(
     [home, weather, prices, now, learning],
   );
   return {
+    refresh: () => {
+      setResult(null);
+      setAttempt((n) => n + 1);
+    },
     weather,
     learning,
     plan,
