@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
+  Rectangle,
+  type BarShapeProps,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -12,6 +14,7 @@ import {
 } from "recharts";
 import { Button } from "./ui/button";
 import { number } from "@/lib/energy";
+import { priceBands, classifyPrice, priceBandLabels } from "@/lib/prices/chart";
 import {
   priceDaySchema,
   type PriceArea,
@@ -44,9 +47,13 @@ export function PricePanel({
     const tick = () => setClock(Date.now());
     const timer = setInterval(tick, 30000);
     window.addEventListener("online", tick);
+    window.addEventListener("focus", tick);
+    document.addEventListener("visibilitychange", tick);
     return () => {
       clearInterval(timer);
       window.removeEventListener("online", tick);
+      window.removeEventListener("focus", tick);
+      document.removeEventListener("visibilitychange", tick);
     };
   }, []);
   useEffect(() => {
@@ -113,9 +120,20 @@ export function PricePanel({
   const next = data
     ? intervalAt(data.intervals, Math.floor(clock / 900000) * 900000 + 900000)
     : null;
+  const bands = priceBands(data?.intervals.map((p) => p.ore) ?? []);
   const points =
-    data?.intervals.map((p) => ({ time: priceTime(p.start), price: p.ore })) ??
-    [];
+    data?.intervals.map((p) => ({
+      time: priceTime(p.start),
+      price: p.ore,
+      start: p.start,
+      band: classifyPrice(p.ore, bands),
+      state:
+        Date.parse(p.end) <= clock
+          ? "past"
+          : p === current
+            ? "current"
+            : "future",
+    })) ?? [];
   const average = data
     ? data.intervals.reduce((s, p) => s + p.ore, 0) / data.intervals.length
     : null;
@@ -177,7 +195,7 @@ export function PricePanel({
         </div>
         <p className="muted">
           {data
-            ? `${data.date} · ${data.intervals.length} kvartar · Europe/Stockholm`
+            ? `${data.date} · ${data.intervals.length} kvartar · Svensk tid (Stockholm)`
             : message}
         </p>
         {!data && (
@@ -226,17 +244,36 @@ export function PricePanel({
                 ))}
               </div>
             )}
+            {current && (
+              <p className="price-now" data-testid="price-now">
+                <span className="price-now-dot" />
+                <strong>Nu {priceTime(new Date(clock).toISOString())}</strong>
+                <span>
+                  Aktuell kvart {priceTime(current.start)}–
+                  {priceTime(current.end)}
+                </span>
+              </p>
+            )}
             <div
               className="graph"
               role="img"
               aria-label="Publicerade kvartspriser"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={points}>
+                <BarChart
+                  data={points}
+                  margin={{ top: 24, right: 18, bottom: 0, left: 0 }}
+                >
                   <CartesianGrid vertical={false} stroke="var(--line)" />
-                  <XAxis dataKey="time" minTickGap={45} fontSize={10} />
+                  <XAxis
+                    dataKey="start"
+                    tickFormatter={(start: string) => priceTime(start)}
+                    minTickGap={45}
+                    fontSize={10}
+                  />
                   <YAxis width={45} fontSize={10} />
                   <Tooltip
+                    labelFormatter={(start) => priceTime(String(start), true)}
                     formatter={(v) => [
                       `${number(Number(v), 2)} öre/kWh`,
                       "Spotpris exkl. moms",
@@ -249,13 +286,86 @@ export function PricePanel({
                   <ReferenceLine y={0} stroke="var(--muted)" />
                   <Bar
                     dataKey="price"
-                    fill="#27957c"
-                    radius={[3, 3, 0, 0]}
                     isAnimationActive={false}
+                    activeBar={false}
+                    shape={({ index, x, y, width, height }: BarShapeProps) => {
+                      const point = points[index];
+                      return (
+                        <Rectangle
+                          x={x}
+                          y={y}
+                          width={width}
+                          height={height}
+                          radius={[3, 3, 0, 0]}
+                          fill={
+                            point.state === "past"
+                              ? "var(--price-past)"
+                              : `var(--price-${point.band})`
+                          }
+                          stroke={
+                            point.state === "current"
+                              ? "var(--price-now)"
+                              : "none"
+                          }
+                          strokeWidth={point.state === "current" ? 1.5 : 0}
+                          data-price-state={point.state}
+                          data-price-band={point.band}
+                          aria-label={`${point.state === "past" ? "Passerad" : point.state === "current" ? "Aktuell" : "Kommande"} kvart ${point.time}: ${number(point.price, 2)} öre/kWh · ${priceBandLabels[point.band]}`}
+                        />
+                      );
+                    }}
                   />
+                  {current && (
+                    <ReferenceLine
+                      x={current.start}
+                      stroke="var(--price-now)"
+                      strokeWidth={2}
+                      strokeDasharray="4 3"
+                      label={{
+                        value: "Nu",
+                        position: "top",
+                        fill: "var(--price-now-text)",
+                        fontWeight: 700,
+                        fontSize: 13,
+                      }}
+                    />
+                  )}
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            <div className="price-legend" aria-label="Grafens färger">
+              <span>
+                <i className="price-swatch price-swatch-past" />
+                Passerat
+              </span>
+              {current && (
+                <span>
+                  <i className="price-swatch price-swatch-now" />
+                  Nu · aktuell kvart
+                </span>
+              )}
+              <span>
+                <i className="price-swatch price-swatch-low" />
+                Billigt
+              </span>
+              <span>
+                <i className="price-swatch price-swatch-middle" />
+                Mellanpris
+              </span>
+              <span>
+                <i className="price-swatch price-swatch-high" />
+                Dyrt
+              </span>
+            </div>
+            <p className="muted price-color-explanation">
+              Färgerna jämför priser inom det valda dygnet.{" "}
+              {bands?.equal
+                ? "Alla kvartar har samma pris."
+                : bands
+                  ? `Grönt: högst ${number(bands.low, 2)} · Gult: upp till ${number(bands.high, 2)} · Rött: över ${number(bands.high, 2)} öre/kWh. Gränserna delar dygnets prisspann i tre lika delar.`
+                  : ""}{" "}
+              Passerade kvartar visas i grått.
+            </p>
             {cheapest && (
               <p>
                 Billigaste kvart:{" "}

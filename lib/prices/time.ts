@@ -54,11 +54,11 @@ export function intervalAt<T extends { start: string; end: string }>(
     ) ?? null
   );
 }
-export function priceTime(utc: string) {
+export function priceTime(utc: string, includeZone = false) {
   return new Intl.DateTimeFormat("sv-SE", {
     timeZone: zone,
     hour: "2-digit",
     minute: "2-digit",
-    timeZoneName: "shortOffset",
+    timeZoneName: includeZone ? "long" : undefined,
   }).format(new Date(utc));
 }

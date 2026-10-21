@@ -3,6 +3,7 @@ import {
   addDate,
   dayBounds,
   swedishDate,
+  priceTime,
   intervalAt,
 } from "../lib/prices/time";
 import { parsePriceDay, providerUrl } from "../lib/prices/provider";
@@ -87,4 +88,17 @@ describe("Verkliga prisers kontrakt och svensk tid", () => {
     expect(providerUrl("SE4", "2026-10-21")).toBe(
       "https://www.elprisetjustnu.se/api/v1/prices/2026/10-21_SE4.json",
     ));
+});
+
+describe("Svenska klockslag i gränssnittet", () => {
+  it("visar svensk sommartid utan GMT-suffix", () =>
+    expect(priceTime("2026-07-01T12:15:00Z")).toBe("14:15"));
+  it("visar svensk vintertid utan GMT-suffix", () =>
+    expect(priceTime("2026-12-01T12:15:00Z")).toBe("13:15"));
+  it("skiljer upprepade klockslag i verktygstipset vid vintertidsbyte", () => {
+    expect(priceTime("2026-10-25T00:15:00Z")).toBe("02:15");
+    expect(priceTime("2026-10-25T01:15:00Z")).toBe("02:15");
+    expect(priceTime("2026-10-25T00:15:00Z", true)).toContain("sommartid");
+    expect(priceTime("2026-10-25T01:15:00Z", true)).toContain("normaltid");
+  });
 });

@@ -1150,3 +1150,79 @@ th {
     scroll-behavior: auto !important;
   }
 }
+
+/* Spotpris: prisnivå och tidsläge är separata visuella signaler. */
+.app {
+  --price-past: #b4bdc3;
+  --price-now: #2563eb;
+  --price-now-text: #1d4ed8;
+  --price-low: #27957c;
+  --price-middle: #e4b43b;
+  --price-high: #dc625d;
+}
+.dark {
+  --price-past: #59696b;
+  --price-now: #80b3ff;
+  --price-now-text: #a4caff;
+  --price-low: #43b28f;
+  --price-middle: #ebc354;
+  --price-high: #ee8179;
+}
+.price-now {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  margin: 20px 0 0;
+  font-size: 12px;
+  color: var(--price-now-text);
+}
+.price-now > span:last-child {
+  color: var(--muted);
+  font-size: 11px;
+}
+.price-now-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--price-now);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--price-now) 12%, transparent);
+}
+.price-legend {
+  display: flex;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 14px 0 6px;
+}
+.price-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.price-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.price-swatch-past {
+  background: var(--price-past);
+}
+.price-swatch-now {
+  background: var(--price-now);
+}
+.price-swatch-low {
+  background: var(--price-low);
+}
+.price-swatch-middle {
+  background: var(--price-middle);
+}
+.price-swatch-high {
+  background: var(--price-high);
+}
+.price-color-explanation {
+  margin-top: 8px;
+}

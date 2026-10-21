@@ -21,3 +21,11 @@ Felläge, avstängd integration och opublicerad morgondag skiljs åt. Prisuppgif
 I Codex-miljön används befintlig nätverksproxy: starta Node med `NODE_USE_ENV_PROXY=1` när servern behöver extern åtkomst. Node 24:s inbyggda proxyhantering bevarar TLS-verifiering. Vercel använder sin vanliga nätverksåtkomst och behöver inte denna variabel. Domänerna `www.elprisetjustnu.se` och `elprisetjustnu.se` är tillåtna i molnmiljön.
 
 Översiktens aktuella elpris och prisgraf samt sidan Elpriser använder denna källa. Hushållsförbrukning, besparingar, pool och laddplanering fortsätter vara separata demoberäkningar. De får inte tolkas som verkliga kostnadsbesparingar.
+
+## Grafens tids- och prisfärger
+
+Alla klockslag visas i Europe/Stockholm, med automatisk sommar-/vintertid. Axeln visar svenska klockslag utan GMT-suffix. Verktygstipset använder svensk benämning för sommar-/normaltid så att upprepade 02-klockslag kan skiljas åt. Staplar och nu-linje använder unika UTC-tidsstämplar internt även när lokala klockslag upprepas.
+
+Passerade kvartar är grå, den aktuella kvarten har blå kontur och en vertikal Nu-linje. Nu-raden visar aktuellt svenskt klockslag och kvartens intervall. Markeringen uppdateras var 30:e sekund och när sidan återfår fokus. Morgondagen visar ingen Nu-markering.
+
+Prisnivåer jämförs relativt det valda dygnet: dess lägsta–högsta pris delas i tre lika stora prisintervall. Grönt visar den lägre tredjedelen, gult mitten och rött den högre. Detta är inte fasta absoluta prisgränser eller percentiler över antalet kvartar. Lika priser visas neutralt gula. Passerad tid förblir grå oavsett prisnivå; priset och dess nivå kan fortfarande avläsas via tillgänglig stapeltext och verktygstips.
