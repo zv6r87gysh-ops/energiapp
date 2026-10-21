@@ -1,3 +1,4 @@
+import { swedishDate, addDate, dayBounds } from "../../lib/prices/time";
 import { test, expect } from "@playwright/test";
 import { sections } from "../../lib/demo";
 test("alla tio sidor fungerar utan horisontell scroll", async ({ page }) => {
@@ -97,4 +98,91 @@ test("PWA visar tydligt offlinetillstånd", async ({ page, context }) => {
     page.getByRole("heading", { name: "Du är offline." }),
   ).toBeVisible();
   await context.setOffline(false);
+});
+
+test("prissidan skiljer saknade priser från demopriser", async ({ page }) => {
+  await page.route("**/api/electricity-prices?*", async (route) => {
+    const url = new URL(route.request().url());
+    const area = url.searchParams.get("area");
+    const day = url.searchParams.get("day");
+    const date = addDate(swedishDate(), day === "tomorrow" ? 1 : 0);
+    await route.fulfill({
+      status: 200,
+      json: {
+        status: day === "tomorrow" ? "unpublished" : "unavailable",
+        area,
+        date,
+        data: null,
+        message:
+          day === "tomorrow"
+            ? "Morgondagens priser har ännu inte publicerats."
+            : "Priser kunde inte hämtas.",
+      },
+    });
+  });
+  await page.goto("/elpriser");
+  await expect(page.getByRole("status")).toContainText(
+    "Inga demopriser används som ersättning",
+  );
+  await expect(
+    page.getByRole("img", { name: "Publicerade kvartspriser" }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Imorgon", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Morgondagens priser har ännu inte publicerats",
+  );
+  await page.getByLabel("Elområde").selectOption("SE4");
+  await expect(
+    page.getByRole("heading", { name: "Spotpriser · SE4" }),
+  ).toBeVisible();
+});
+
+test("visar validerade priser med källa och rensar vid områdesbyte", async ({
+  page,
+}) => {
+  await page.route("**/api/electricity-prices?*", async (route) => {
+    const u = new URL(route.request().url());
+    const area = u.searchParams.get("area");
+    const date = swedishDate();
+    const { start, end } = dayBounds(date);
+    const intervals = Array.from(
+      { length: (end - start) / 900000 },
+      (_, i) => ({
+        start: new Date(start + i * 900000).toISOString(),
+        end: new Date(start + (i + 1) * 900000).toISOString(),
+        ore: area === "SE4" ? 84 : 42,
+      }),
+    );
+    await route.fulfill({
+      status: 200,
+      json: {
+        status: "available",
+        area,
+        date,
+        data: {
+          area,
+          date,
+          source: "Elprisetjustnu.se",
+          sourceUrl: "https://www.elprisetjustnu.se/elpris-api",
+          fetchedAt: new Date().toISOString(),
+          intervals,
+        },
+        message: "Spotpriser exklusive moms och avgifter.",
+      },
+    });
+  });
+  await page.goto("/elpriser");
+  await expect(
+    page.getByRole("img", { name: "Publicerade kvartspriser" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Elprisetjustnu.se" }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".metric-value").filter({ hasText: /^42 / }),
+  ).toHaveCount(3);
+  await page.getByLabel("Elområde").selectOption("SE4");
+  await expect(
+    page.locator(".metric-value").filter({ hasText: /^84 / }),
+  ).toHaveCount(3);
 });

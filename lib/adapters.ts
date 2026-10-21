@@ -9,7 +9,7 @@ export interface PriceAdapter {
 export const integrationStatus = [
   {
     name: "Svenska kvartspriser",
-    status: "Demo – leverantör och villkor ska verifieras",
+    status: "Elprisetjustnu.se · offentlig serverbaserad prisadapter",
   },
   { name: "Zaptec", status: "Inte ansluten – officiellt API ska verifieras" },
   {
@@ -26,7 +26,7 @@ export const integrationStatus = [
     status: "Ej installerad – KM-kompatibilitet ej verifierad",
   },
 ];
-// No production adapter or hardware command implementation is provided in phase 1.
+// Public prices are read-only. No hardware command implementation is provided.
 export function hardwareCommand(): never {
   throw new Error("Verklig hårdvarustyrning är inte tillgänglig i fas 1");
 }

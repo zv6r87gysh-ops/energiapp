@@ -1,6 +1,6 @@
 # Energihem
 
-Svensk, responsiv energiapplikation byggd med Next.js App Router, TypeScript strict, Tailwind CSS, en shadcn/ui-baserad lokal Button-komponent, Lucide, Recharts och Zod. **Fas 1 är en lokal demo. Ingen hårdvara eller användarautentisering är ansluten.**
+Svensk, responsiv energiapplikation byggd med Next.js App Router, TypeScript strict, Tailwind CSS, en shadcn/ui-baserad lokal Button-komponent, Lucide, Recharts och Zod. **Hushållets värden är demo. Elpriser hämtas från en publik källa. Ingen hårdvara eller användarautentisering är ansluten.**
 
 ## Starta lokalt
 
@@ -36,7 +36,7 @@ PWA-manifest, PNG-ikoner och en service worker finns. Vid offline-navigation vis
 
 ## Demoantaganden och begränsningar
 
-Demots fasta referensdag är 21 oktober 2026 kl. 14.00 Europe/Stockholm. Priser och grafer är illustrativa, inte historiska marknadsdata. Kvartstidsstämplar lagras i UTC, tidszonens dygnsgränser testas separat för 23/25-timmarsdygn. Diagrammens modellvärden är inte underlag för verkliga beslut. Dashboardens och kostnadssidans totalsummor härleds från en gemensam demoserie. Statistikens anpassade datumintervall filtrerar demots tillgängliga dygn, 1–21 oktober 2026.
+Demots fasta referensdag är 21 oktober 2026 kl. 14.00 Europe/Stockholm. Hushållsgraferna är illustrativa. Elpriserna hämtas separat från en verklig källa och följer aktuell svensk kalender, inte demots fasta datum. Kvartstidsstämplar lagras i UTC, tidszonens dygnsgränser testas separat för 23/25-timmarsdygn. Diagrammens modellvärden är inte underlag för verkliga beslut. Dashboardens och kostnadssidans totalsummor härleds från en gemensam demoserie. Statistikens anpassade datumintervall filtrerar demots tillgängliga dygn, 1–21 oktober 2026.
 
 Kostnadsmodellen använder avgifter exklusive moms, energiskatt exakt en gång och moms exakt en gång. Effektavgift är ett manuellt månadsbelopp och tidsberoende nätavgift ett manuellt vägt öre-tillägg. Prognosen använder demots förbrukning hittills, ett antaget förbrukningsvägt spotpris på 62 öre/kWh och proportionerade fasta avgifter. Den är en dygnstakt med illustrativt ±15 %-intervall. Besparingshistorik är modellerad demonstration; poolbesparing är inte verifierad och används inte som faktisk effekt. Konstant pooldrift är en separat hypotetisk jämförelse med olika energibehov.
 
@@ -49,3 +49,11 @@ Se [arkitektur och nästa faser](docs/architecture.md) och [integrationsstatus](
 ## Framtida driftsättning
 
 Vercel: importera repositoryt, välj Next.js, installera med `npm ci`, bygg med `npm run build`. Fas 1 kräver inga hemligheter. Publicering till Vercel har inte utförts. Säker fleranvändardrift kräver fas 2: Supabase Auth, migrationer, RLS och serverbaserad behörighetskontroll. Använd aldrig en service role-nyckel i frontend. Riktiga integrationer införs först efter protokoll-, säkerhets- och villkorsgranskning.
+
+## Verkliga elpriser
+
+Översiktens elpris och prisgraf samt sidan Elpriser hämtar publicerade kvartspriser från Elprisetjustnu.se via en serverroute. SE1–SE4, aktuellt pris, nästa kvart, dygnsstatistik och morgondagens priser när de publicerats stöds. Källa och hämtningstid visas. Spotpriset är exklusive moms, skatter, påslag och nätavgifter. Leverantörens valutakurs kan ge mindre avvikelser från officiella SEK-priser. Fel ersätts aldrig med demopriser.
+
+Integrationens villkor och live-data för samtliga fyra områden verifierades 21 oktober 2026. Prishämtningen är aktiv som standard och kräver inga nycklar eller Vercel-inställningar. Valfritt: `ELECTRICITY_PRICES_ENABLED=false` stänger av den. Hushållsförbrukning, laddplanering och kostnadsprognoser är fortfarande demo. Se [teknik, verifiering och källans villkor](docs/electricity-prices.md).
+
+I Codex-miljön: använd `NODE_USE_ENV_PROXY=1 npm run dev` för att Node ska använda den tillåtna nätverksproxyn vid externa anrop. Detta behövs inte på Vercel.

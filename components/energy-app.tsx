@@ -36,6 +36,8 @@ import {
   YAxis,
 } from "recharts";
 import { Button } from "./ui/button";
+import { PricePanel } from "./price-panel";
+import type { PriceArea } from "@/lib/prices/contracts";
 import {
   catalog,
   demoSeries,
@@ -212,7 +214,6 @@ export default function EnergyApp({ section }: { section: string }) {
   const [period, setPeriod] = useState("Idag");
   const [from, setFrom] = useState("2026-10-01");
   const [to, setTo] = useState("2026-10-21");
-  const [day, setDay] = useState("Idag");
   const [scenario, setScenario] = useState("normal");
   const [vehicleOpen, setVehicleOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -431,7 +432,9 @@ export default function EnergyApp({ section }: { section: string }) {
               <p>
                 {section === "oversikt"
                   ? "Här är läget för din energi. Lite mer insikt, lite mindre kostnad."
-                  : "Din energi, samlad på ett ställe. Alla värden är simulerade."}
+                  : section === "elpriser"
+                    ? "Publicerade spotpriser visas bara när källan är verifierad och tillgänglig."
+                    : "Din energi, samlad på ett ställe. Hushållsvärdena är simulerade."}
               </p>
             </div>
             <select
@@ -452,7 +455,8 @@ export default function EnergyApp({ section }: { section: string }) {
               Du utforskar Energihem i demoläge
             </span>
             <small>
-              Simulerade data · 21 oktober 2026 kl. 14.00 · {home.region}
+              Hushållsdata: Demo · 21 oktober 2026 kl. 14.00 · {home.region} ·
+              Elpriser har separat källa
             </small>
           </div>
           {offline && (
@@ -483,12 +487,7 @@ export default function EnergyApp({ section }: { section: string }) {
                   note="Simulerad effekt"
                   accent
                 />
-                <Metric
-                  label="Elpris just nu"
-                  value={String(nowPrice)}
-                  unit="öre/kWh"
-                  note="Spotpris exkl. moms"
-                />
+                <PricePanel area={home.region as PriceArea} compact />
                 <Metric
                   label="Prognos för oktober"
                   value={money(prediction.total)}
@@ -548,16 +547,7 @@ export default function EnergyApp({ section }: { section: string }) {
                     Se din besparing <ArrowUpRight size={18} />
                   </Link>
                 </Card>
-                <Card title="Dagens elpriser">
-                  <div className="chart-meta">
-                    <span>{home.region} · kvartspris</span>
-                    <span>öre/kWh · exkl. moms</span>
-                  </div>
-                  <Graph data={prices} field="price" bars label="öre/kWh" />
-                  <Link className="text-link" href="/elpriser">
-                    Utforska elpriser <ChevronRight size={16} />
-                  </Link>
-                </Card>
+                <PricePanel area={home.region as PriceArea} chartOnly />
                 <Card title="Ditt hem just nu">
                   <div className="device-row">
                     <span className="device-icon">
@@ -854,77 +844,8 @@ export default function EnergyApp({ section }: { section: string }) {
                     <option key={a}>{a}</option>
                   ))}
                 </select>
-                <div className="segmented">
-                  {["Idag", "Imorgon"].map((d) => (
-                    <Button
-                      key={d}
-                      className={day === d ? "active" : "secondary"}
-                      onClick={() => setDay(d)}
-                    >
-                      {d}
-                    </Button>
-                  ))}
-                </div>
               </div>
-              <div className="metrics">
-                <Metric
-                  label="Nuvarande kvart"
-                  value={String(nowPrice)}
-                  unit="öre/kWh"
-                  note="Demo kl. 14.00 svensk tid"
-                />
-                <Metric
-                  label="Nästa kvart"
-                  value={String(prices[57].price)}
-                  unit="öre/kWh"
-                  note="Demo kl. 14.15"
-                />
-                <Metric
-                  label="Dagens genomsnitt"
-                  value={number(prices.reduce((s, p) => s + p.price, 0) / 96)}
-                  unit="öre/kWh"
-                  note="Exklusive moms och avgifter"
-                />
-                <Metric
-                  label="Lägst / högst"
-                  value={`${Math.min(...prices.map((p) => p.price))} / ${Math.max(...prices.map((p) => p.price))}`}
-                  unit="öre"
-                  note="Simulerade kvartsvärden"
-                />
-              </div>
-              <Card
-                title={`${day === "Idag" ? "21" : "22"} oktober · ${home.region} · Demo`}
-              >
-                <Graph
-                  data={
-                    day === "Idag"
-                      ? prices
-                      : prices.map((p) => ({
-                          ...p,
-                          price: Math.round(p.price * 0.9),
-                        }))
-                  }
-                  field="price"
-                  bars
-                  label="öre/kWh"
-                />
-                <div className="chart-footer">
-                  <span>
-                    Billigt <b>00.00–06.00</b>
-                  </span>
-                  <span>
-                    Dyrt <b>17.00–20.00</b>
-                  </span>
-                  <span>
-                    Referenskvart <b>14.00</b>
-                  </span>
-                </div>
-                <p className="muted">
-                  Demopriser. Morgondagens kurva är simulerad och inte
-                  publicerade marknadspriser. Rekommenderad pooldrift:
-                  10.00–14.00, med hänsyn till komfort och obruten drift.
-                </p>
-              </Card>
+              <PricePanel area={home.region as PriceArea} />
             </>
           )}
           {section === "pool" && (
@@ -1815,7 +1736,9 @@ export default function EnergyApp({ section }: { section: string }) {
           )}
           <footer>
             Energihem <span>Lite smartare. Lite grönare.</span>
-            <small>Demo · Inga verkliga mätvärden eller styrkommandon</small>
+            <small>
+              Hushållsdata: Demo · Elpriser: separat källa · Inga styrkommandon
+            </small>
           </footer>
         </main>
       </div>
