@@ -41,3 +41,7 @@ Zippopotam.us saknar bland annat 13250 (verifierat HTTP 404). Vid misslyckad upp
 `lib/weather/postal-districts.json` är ett bearbetat utdrag från https://github.com/zauberware/postal-codes-json-xml-csv/tree/b4be5a6e3c30c65dc7846e09ec9b70d65d0db7f5 (GeoNames, CC BY 4.0; datasetuppdatering 2026-07-31). Underlaget är `data/SE.zip`, `zipcodes.se.json`. Endast områden med minst tre listade postnummer och exakt samma ort (utan skillnad i stora/små bokstäver), latitud och longitud behålls. Svenska koordinatgränser valideras. 232 områden uppfyller kraven. Området 132xx har 39 listade poster som alla ger Saltsjö-Boo, 59.3173/18.255. Ingen koordinat för just 13250 hittas på.
 
 Felmeddelanden skiljer nu på okänt postnummer, otillgänglig postnummertjänst och fel i MET-prognosen. Knappen Visa väder gör ett nytt försök även för samma sparade postnummer; serverns cache och backoff gäller fortfarande. Route-budgeten är 30 sekunder så att de två externa anropens tidsgränser ryms även i Vercel.
+
+### Väderrad i tretimmarssteg
+
+Översikt visar 00, 03, 06, 09, 12, 15, 18 och 21 i svensk tid för vald dag. Symbolerna kommer från MET:s `symbol_code` och skiljer mellan sol, måne, växlande molnighet, moln, regn, snöblandat regn, snö, åska och dimma. Temperatur och symbol avser prognosen vid klockslaget, inte ett tretimmarsmedel. Saknade timmar visas med streck och saknade symboler gissas inte. MET levererar normalt inte historiken för den redan passerade delen av dagen. Tidsraden klarar även dygn med 23 eller 25 timmar och kan svepas på mobil.

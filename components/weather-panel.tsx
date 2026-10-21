@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CloudSun, Thermometer, Wind } from "lucide-react";
+import { WeatherTimeline } from "./weather-timeline";
 import { Button } from "./ui/button";
 import { number } from "@/lib/energy";
 import { addDate, priceTime, swedishDate } from "@/lib/prices/time";
@@ -124,6 +125,7 @@ export function WeatherPanel({
             ) : (
               <p>Prognos för denna dag saknas. Inga värden fylls i.</p>
             )}
+            <WeatherTimeline weather={weather} date={date} />
             {weather.locationPrecision === "district" && (
               <p className="muted" role="status">
                 Områdesprognos för {weather.place} ({weather.locationArea}).

@@ -152,3 +152,42 @@ test("samma postnummer kan hämtas igen efter fel och områdesprognos märks", a
   await expect(widget).toContainText("Exakt punkt för 13250 saknas");
   expect(requests).toBeGreaterThanOrEqual(3);
 });
+test("vädersymboler och temperaturer visas i tretimmarssteg hela dygnet", async ({
+  page,
+}) => {
+  await prepare(page);
+  await page.route("**/api/weather?*", async (route) => {
+    const weather = weatherFixture();
+    weather.hours.forEach((h, i) => {
+      h.symbol = ["clearsky_day", "cloudy", "rain"][Math.floor(i / 3) % 3];
+    });
+    await route.fulfill({ json: { status: "available", data: weather } });
+  });
+  await page.goto("/");
+  const today = page.getByRole("region", {
+    name: "Väder var tredje timme 2026-10-21",
+    exact: true,
+  });
+  await expect(today.getByRole("listitem")).toHaveCount(8);
+  await expect(today.getByText("Saknas", { exact: true })).toHaveCount(4);
+  await page.getByRole("tab", { name: "Imorgon", exact: true }).click();
+  const tomorrow = page.getByRole("region", {
+    name: "Väder var tredje timme 2026-10-22",
+    exact: true,
+  });
+  await expect(tomorrow.getByRole("listitem")).toHaveCount(8);
+  await expect(tomorrow.getByText("Saknas", { exact: true })).toHaveCount(0);
+  await expect(
+    tomorrow.getByText("Soligt", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    tomorrow.getByText("Regn", { exact: true }).first(),
+  ).toBeAttached();
+  await expect(tomorrow.locator("time").first()).toHaveText("00:00");
+  await expect(tomorrow.locator("time").last()).toHaveText("21:00");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
