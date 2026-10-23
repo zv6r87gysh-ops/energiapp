@@ -45,3 +45,11 @@ Felmeddelanden skiljer nu på okänt postnummer, otillgänglig postnummertjänst
 ### Väderrad i tretimmarssteg
 
 Översikt visar 00, 03, 06, 09, 12, 15, 18 och 21 i svensk tid för vald dag. Symbolerna kommer från MET:s `symbol_code` och skiljer mellan sol, måne, växlande molnighet, moln, regn, snöblandat regn, snö, åska och dimma. Temperatur och symbol avser prognosen vid klockslaget, inte ett tretimmarsmedel. Saknade timmar visas med streck och saknade symboler gissas inte. MET levererar normalt inte historiken för den redan passerade delen av dagen. Tidsraden klarar även dygn med 23 eller 25 timmar och kan svepas på mobil.
+
+### Interaktivt husfoto på Översikt
+
+Fotot väljs med `Välj ditt husfoto` (JPG, PNG eller WebP, högst 15 MB). Bildfilen från chatten är inte monterad i arbetsytan, så den kan inte byggas in som en publicerad standardbild. Användaren väljer samma foto i appen. Originalfilen ändras inte och skickas inte till någon bildtjänst; Blob lagras i IndexedDB per hushåll i denna webbläsare. Vid lagringsfel kan bilden visas för det pågående besöket med tydligt besked om att den inte sparats.
+
+Konturerna är anpassade till det bifogade perspektivfotot: pool, hus, schematiska golvslingor och billaddare vid uppfarten. Huset öppnar Aktuell förbrukning, övriga punkter respektive kategorivy. Hovring/fokus visar glöd och kostnadsinformation utan att navigera; klick på konturen eller Öppna navigerar. Mobilens markörknappar väljer information före separat navigering. Kategoriknappar finns också under fotot för tangentbord och små skärmar.
+
+Dagens kostnader kommer från befintlig hushållsmodell: pool och laddare använder respektive delkostnad, huset totalen minus dessa två. Golvvärme saknar separat mätning/delkostnad och visar detta uttryckligen, med husets summa som tydligt märkt referens. Inga uppmätta kostnader eller exakta golvslingor påstås finnas.

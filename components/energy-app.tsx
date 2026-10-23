@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { PricePanel } from "./price-panel";
+import { InteractiveHouse } from "./interactive-house";
 import { WeatherPanel, WeatherSettings } from "./weather-panel";
 import { useWeather } from "@/lib/weather/use-weather";
 import { SmartControlPanel } from "./smart-control";
@@ -427,6 +428,11 @@ export default function EnergyApp({ section }: { section: string }) {
           )}
           {section === "oversikt" && (
             <>
+              <InteractiveHouse
+                key={`house-photo-${home.id}`}
+                householdId={home.id}
+                simulation={sim}
+              />
               <WeatherPanel
                 key={`weather-${home.id}-${home.postcode}`}
                 home={home}
