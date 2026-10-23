@@ -64,24 +64,37 @@ test("hushållens fordon hålls åtskilda", async ({ page }) => {
   await expect(page.locator(".vehicle-row")).toHaveCount(1);
 });
 
-test("enhetsguiden skapar endast demoenheter", async ({ page }) => {
-  await page.goto("/installningar");
-  await page.getByRole("button", { name: "Lägg till demoenhet" }).click();
+test("enhetsguiden registrerar utan att påstå en riktig anslutning", async ({
+  page,
+}) => {
+  await page.goto("/pool");
+  await page
+    .getByRole("button", { name: "Lägg till egen enhet", exact: true })
+    .click();
   const dialog = page.getByRole("dialog");
-  for (let i = 1; i < 6; i++)
-    await dialog.getByRole("button", { name: "Nästa", exact: true }).click();
+  await dialog.getByRole("button", { name: "Realtidsmätare för el" }).click();
+  await dialog
+    .getByLabel("Enhetens namn", { exact: true })
+    .fill("Min energimätare");
+  await dialog.getByLabel("Tillverkare", { exact: true }).fill("Bitvis");
+  await dialog.getByLabel("Exakt modell", { exact: true }).fill("Power Hub KM");
+  await dialog
+    .getByLabel("Serienummer / Enhets-ID", { exact: true })
+    .fill("HUB-12345");
+  await dialog
+    .getByRole("button", { name: "Kontrollera uppgifter", exact: true })
+    .click();
+  await expect(dialog).toContainText("Numret verifieras inte mot tillverkaren");
+  await dialog
+    .getByRole("button", { name: "Spara enhet", exact: true })
+    .click();
+  await page.goto("/installningar");
   await expect(
-    dialog.getByRole("button", { name: "Nästa", exact: true }),
-  ).toBeDisabled();
-  await dialog.getByRole("button", { name: "Testa demonstration" }).click();
-  await dialog.getByRole("button", { name: "Nästa", exact: true }).click();
-  await dialog.getByRole("button", { name: "Slutför demo" }).click();
+    page.getByRole("article", { name: "Enhet: Min energimätare" }),
+  ).toContainText("Förberedd – ej ansluten");
   await expect(
-    page.getByText("Min energimätare", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByText(/Power Hub KM · Demo · Simulerad anslutning/),
-  ).toBeVisible();
+    page.getByRole("article", { name: "Enhet: Min energimätare" }),
+  ).toContainText("Ingen avläsning");
 });
 test("PWA visar tydligt offlinetillstånd", async ({ page, context }) => {
   await page.goto("/");

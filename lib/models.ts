@@ -1,5 +1,8 @@
 import { z } from "zod";
+import type { ThermalSettings } from "./weather/contracts";
 import type { SmartControl } from "./smart-control";
+import type { DeviceKind } from "./devices";
+import type { SimulationSettings } from "./simulation/engine";
 export type DataMode = "demo" | "connected";
 export type Role = "owner" | "admin" | "member" | "viewer";
 export interface HouseholdEntity {
@@ -24,8 +27,10 @@ export interface Device extends HouseholdEntity {
   name: string;
   manufacturer: string;
   model: string;
-  source: "demo";
+  source: "demo" | "registered";
   status: string;
+  kind?: DeviceKind;
+  identifier?: string;
 }
 export interface DeviceConnection extends HouseholdEntity {
   deviceId: string;
@@ -138,4 +143,7 @@ export interface Household {
   charging: boolean;
   smart: boolean;
   smartControl?: SmartControl;
+  simulationSettings?: SimulationSettings;
+  postcode?: string;
+  thermalSettings?: ThermalSettings;
 }

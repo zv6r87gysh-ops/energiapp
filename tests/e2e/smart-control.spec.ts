@@ -36,6 +36,7 @@ test("väljer kategorier, sparar och synkar med pool och laddare", async ({
   await page.goto("/pool");
   await expect(page.getByLabel("Simulerat driftläge")).toHaveValue("Smart");
   await page.getByLabel("Simulerat driftläge").selectOption("Manuellt");
+  await page.goto("/forbrukning");
   await expect(
     page.getByRole("region", { name: "Husets smarta styrning" }),
   ).toContainText("Valda kategorier: Billaddare");
@@ -43,6 +44,7 @@ test("väljer kategorier, sparar och synkar med pool och laddare", async ({
   await page
     .getByRole("button", { name: "Smart simulering: på", exact: true })
     .click();
+  await page.goto("/forbrukning");
   await expect(
     page.getByRole("button", { name: "Aktivera smart styrning", exact: true }),
   ).toBeVisible();
@@ -130,6 +132,7 @@ test("äldre lokala inställningar aktiverar inte huset och hushållens val är 
   await page
     .getByRole("button", { name: "Skapa hushåll", exact: true })
     .click();
+  await page.goto("/forbrukning");
   await expect(
     page.getByRole("button", { name: "Aktivera smart styrning", exact: true }),
   ).toBeVisible();
