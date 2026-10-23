@@ -61,7 +61,9 @@ const names: Record<SmartCategory, string> = {
 export function SmartControlPanel({
   control,
   onChange,
+  compact = false,
 }: {
+  compact?: boolean;
   control: SmartControl;
   onChange: (control: SmartControl) => void;
 }) {
@@ -104,7 +106,7 @@ export function SmartControlPanel({
   return (
     <>
       <section
-        className={`card smart-home ${control.enabled ? "smart-home-active" : ""}`}
+        className={`card smart-home ${control.enabled ? "smart-home-active" : ""} ${compact ? "smart-home-compact" : ""}`}
         aria-label="Husets smarta styrning"
       >
         <div className="smart-home-icon">

@@ -371,6 +371,21 @@ export default function EnergyApp({ section }: { section: string }) {
               ))}
             </select>
           </div>
+          {section === "oversikt" && (
+            <InteractiveHouse
+              key={`house-photo-${home.id}`}
+              householdId={home.id}
+              simulation={sim}
+              controls={
+                <SmartControlPanel
+                  key={home.id}
+                  compact
+                  control={smartControl}
+                  onChange={(next) => update(applySmartControl(home, next))}
+                />
+              }
+            />
+          )}
           <div className="demo-banner">
             <span>
               <span className="status-dot" />
@@ -400,7 +415,7 @@ export default function EnergyApp({ section }: { section: string }) {
               </button>
             </div>
           )}
-          {["oversikt", "forbrukning"].includes(section) && (
+          {section === "forbrukning" && (
             <SmartControlPanel
               key={home.id}
               control={smartControl}
@@ -428,11 +443,6 @@ export default function EnergyApp({ section }: { section: string }) {
           )}
           {section === "oversikt" && (
             <>
-              <InteractiveHouse
-                key={`house-photo-${home.id}`}
-                householdId={home.id}
-                simulation={sim}
-              />
               <WeatherPanel
                 key={`weather-${home.id}-${home.postcode}`}
                 home={home}

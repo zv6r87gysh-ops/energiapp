@@ -11,9 +11,9 @@ const areas = [
     name: "Huset",
     href: "/forbrukning",
     icon: Home,
-    point: [52, 33],
+    point: [49.5, 28.5],
     shape:
-      "247,354 628,199 778,266 827,245 1233,382 1210,465 1070,783 704,867 269,668",
+      "247,354 628,199 778,266 827,245 1233,382 1207,405 1190,607 1056,827 704,855 405,752 269,669",
     note: "Husets modellkostnad, exklusive pool och billaddning.",
   },
   {
@@ -21,8 +21,8 @@ const areas = [
     name: "Golvvärme",
     href: "/golvvarme",
     icon: Flame,
-    point: [38, 50],
-    shape: "307,567 713,722 862,634 1069,710 704,879 288,714",
+    point: [37.5, 49.5],
+    shape: "405,647 704,758 857,671 1045,740 858,831 704,855 405,744",
     note: "Separat kostnad saknas. Huset totalt visas som referens; det är inte golvvärmens kostnad.",
   },
   {
@@ -30,7 +30,7 @@ const areas = [
     name: "Pool",
     href: "/pool",
     icon: Waves,
-    point: [36, 74],
+    point: [36.8, 72],
     shape: "438,856 869,1067 744,1187 305,971",
     note: "Poolens modellerade rörliga kostnad med publicerade elpriser.",
   },
@@ -39,8 +39,8 @@ const areas = [
     name: "Billaddare",
     href: "/laddning",
     icon: Car,
-    point: [43, 12],
-    shape: "572,146 663,124 718,163 704,226 641,243 574,208",
+    point: [39.8, 12.5],
+    shape: "574,180 611,149 658,143 695,159 700,185 678,211 636,223 583,207",
     note: "Billaddningens modellkostnad. Laddsymbolens placering är schematisk.",
   },
 ] as const;
@@ -48,7 +48,9 @@ type AreaId = (typeof areas)[number]["id"];
 export function InteractiveHouse({
   householdId,
   simulation,
+  controls,
 }: {
+  controls?: React.ReactNode;
   householdId: string;
   simulation: HouseholdSimulation | null;
 }) {
@@ -170,105 +172,105 @@ export function InteractiveHouse({
       {error && <p role="status">{error}</p>}
       {photo ? (
         <div className={`house-photo-scene house-active-${active}`}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- Local user-selected Blob URL, no remote image service. */}
-          <img
-            src={photo}
-            alt="Ditt hus med interaktiva markeringar för huset, golvvärmen, poolen och billaddaren"
-            width={1596}
-            height={1422}
-          />
-          <svg
-            viewBox="0 0 1596 1422"
-            className="house-photo-overlay"
-            aria-label="Kategorier på husfotot"
-          >
-            <defs>
-              <filter id={glow} x="-25%" y="-25%" width="150%" height="150%">
-                <feGaussianBlur stdDeviation="8" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            {areas.map((a) => (
-              <a
-                key={a.id}
-                href={a.href}
-                aria-label={`Öppna ${a.name}`}
-                aria-describedby={tooltip}
-                className={`house-hit house-hit-${a.id} ${active === a.id ? "is-active" : ""}`}
-                onMouseEnter={() => setActive(a.id)}
-                onFocus={() => setActive(a.id)}
-              >
-                <polygon
-                  points={a.shape}
-                  style={{
-                    filter: active === a.id ? `url(#${glow})` : undefined,
-                  }}
-                />
-                {a.id === "floor" && (
-                  <path
-                    className="house-floor-coils"
-                    d="M360 627l280 107q35 15 16 32l-275-106q-26-10-20 15l274 106q35 15 8 30L359 702 M767 710l151-56q31-13 41 11l-155 58q-31 12-7 29l154-59"
+          <div className="house-photo-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element -- Local user-selected Blob URL, no remote image service. */}
+            <img
+              src={photo}
+              alt="Ditt hus med interaktiva markeringar för huset, golvvärmen, poolen och billaddaren"
+              width={1596}
+              height={1422}
+            />
+            <svg
+              viewBox="0 0 1596 1422"
+              preserveAspectRatio="none"
+              className="house-photo-overlay"
+              aria-label="Kategorier på husfotot"
+            >
+              <defs>
+                <filter id={glow} x="-25%" y="-25%" width="150%" height="150%">
+                  <feGaussianBlur stdDeviation="8" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              {areas.map((a) => (
+                <a
+                  key={a.id}
+                  href={a.href}
+                  aria-label={`Öppna ${a.name}`}
+                  aria-describedby={tooltip}
+                  className={`house-hit house-hit-${a.id} ${active === a.id ? "is-active" : ""}`}
+                  onMouseEnter={() => setActive(a.id)}
+                  onFocus={() => setActive(a.id)}
+                >
+                  <polygon
+                    points={a.shape}
+                    style={{
+                      filter: active === a.id ? `url(#${glow})` : undefined,
+                    }}
                   />
-                )}
-              </a>
-            ))}
-          </svg>
-          {areas.map((a) => {
-            const Icon = a.icon;
-            return (
-              <button
-                key={a.id}
-                className={`house-photo-pin house-pin-${a.id}`}
-                style={{ left: `${a.point[0]}%`, top: `${a.point[1]}%` }}
-                aria-label={`Visa kostnad för ${a.name}`}
-                aria-pressed={active === a.id}
-                aria-describedby={tooltip}
-                onMouseEnter={() => setActive(a.id)}
-                onFocus={() => setActive(a.id)}
-                onClick={() => setActive(a.id)}
-              >
-                <Icon size={19} />
-                <span>{a.name}</span>
-              </button>
-            );
-          })}
-          <div
-            className="house-photo-hover-card"
-            aria-hidden="true"
-            style={{
-              left: `clamp(120px, ${area.point[0]}%, calc(100% - 120px))`,
-              top: `clamp(8px, calc(${area.point[1]}% + 26px), calc(100% - 125px))`,
-            }}
-          >
-            <strong>{area.name}</strong>
-            <span>
-              {active === "floor"
-                ? "Huset totalt hittills idag"
-                : "Kostnad hittills idag"}
-            </span>
-            <b>{cost == null ? "Underlag saknas" : money(cost)}</b>
-            <small>
-              {active === "floor"
-                ? "Separat golvvärmekostnad saknas"
-                : "Modellerad kostnad"}
-            </small>
+                  {a.id === "floor" && (
+                    <path
+                      className="house-floor-coils"
+                      d="M430 677l242 91q20 8 8 19l-245-92q-19-7-14 9l250 94q21 8 8 19l-244-92 M745 770l112-64 133 48q18 7 4 16l-123-44-109 62q-16 10 0 17l111-62 107 40"
+                    />
+                  )}
+                </a>
+              ))}
+            </svg>
+            {areas.map((a) => {
+              const Icon = a.icon;
+              return (
+                <button
+                  key={a.id}
+                  className={`house-photo-pin house-pin-${a.id}`}
+                  style={{ left: `${a.point[0]}%`, top: `${a.point[1]}%` }}
+                  aria-label={`Visa kostnad för ${a.name}`}
+                  aria-pressed={active === a.id}
+                  aria-describedby={tooltip}
+                  onMouseEnter={() => setActive(a.id)}
+                  onFocus={() => setActive(a.id)}
+                  onClick={() => setActive(a.id)}
+                >
+                  <Icon size={19} />
+                  <span>{a.name}</span>
+                </button>
+              );
+            })}
+            <div className="house-photo-hover-card" aria-hidden="true">
+              <strong>{area.name}</strong>
+              <span>
+                {active === "floor"
+                  ? "Huset totalt hittills idag"
+                  : "Kostnad hittills idag"}
+              </span>
+              <b>{cost == null ? "Underlag saknas" : money(cost)}</b>
+              <small>
+                {active === "floor"
+                  ? "Separat golvvärmekostnad saknas"
+                  : "Modellerad kostnad"}
+              </small>
+            </div>
           </div>
+          {controls && <div className="house-smart-controls">{controls}</div>}
         </div>
       ) : (
-        <button
-          className="house-photo-empty"
-          onClick={() => file.current?.click()}
-        >
-          <Camera size={38} />
-          <strong>Lägg till fotot på ditt hus</strong>
-          <span>
-            Välj samma foto som i chatten. Pool, hus, golvslingor och laddare
-            får interaktiva markeringar.
-          </span>
-        </button>
+        <div className="house-photo-placeholder">
+          <button
+            className="house-photo-empty"
+            onClick={() => file.current?.click()}
+          >
+            <Camera size={38} />
+            <strong>Lägg till fotot på ditt hus</strong>
+            <span>
+              Välj samma foto som i chatten. Pool, hus, golvslingor och laddare
+              får interaktiva markeringar.
+            </span>
+          </button>
+          {controls && <div className="house-smart-fallback">{controls}</div>}
+        </div>
       )}
       <div className="house-category-tabs" aria-label="Välj område på huset">
         {areas.map((a) => {

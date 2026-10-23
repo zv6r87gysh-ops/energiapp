@@ -42,12 +42,40 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
   await expect(
     card.getByText("Lägg till fotot på ditt hus", { exact: true }),
   ).toBeVisible();
+  expect(
+    await card.evaluate((element) =>
+      element.previousElementSibling?.classList.contains("page-heading"),
+    ),
+  ).toBe(true);
   await card
     .getByLabel("Välj husfoto", { exact: true })
     .setInputFiles(path.resolve("public/icon-512.png"));
   await expect(
     card.getByRole("img", { name: /Ditt hus med interaktiva/ }),
   ).toBeVisible();
+  const alignment = await card
+    .locator(".house-photo-scene")
+    .evaluate((scene) => {
+      const image = scene.querySelector("img")!;
+      const photo = image.getBoundingClientRect();
+      const overlay = scene.querySelector("svg")!.getBoundingClientRect();
+      return {
+        aspectError: Math.abs(
+          photo.width / photo.height - image.naturalWidth / image.naturalHeight,
+        ),
+        offsetX: Math.abs(photo.x - overlay.x),
+        offsetY: Math.abs(photo.y - overlay.y),
+        widthError: Math.abs(photo.width - overlay.width),
+        heightError: Math.abs(photo.height - overlay.height),
+      };
+    });
+  expect(alignment.aspectError).toBeLessThan(0.01);
+  expect(
+    alignment.offsetX +
+      alignment.offsetY +
+      alignment.widthError +
+      alignment.heightError,
+  ).toBeLessThan(2);
   await card
     .getByRole("button", { name: "Visa kostnad för Pool", exact: true })
     .click();
@@ -68,6 +96,23 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
     card.getByRole("link", { name: "Öppna Golvvärme →", exact: true }),
   ).toHaveAttribute("href", "/golvvarme");
   await expect(card.locator(".house-floor-coils")).toHaveCSS("opacity", "1");
+  const photoControls = card.locator(".house-smart-controls");
+  await photoControls
+    .getByRole("button", { name: "Aktivera smart styrning", exact: true })
+    .click();
+  const smartDialog = page.getByRole("dialog", {
+    name: "Vad vill du optimera?",
+  });
+  await smartDialog
+    .getByRole("checkbox", { name: "Pool", exact: true })
+    .check();
+  await smartDialog
+    .getByRole("button", { name: "Aktivera simulering", exact: true })
+    .click();
+  await expect(
+    photoControls.getByRole("region", { name: "Husets smarta styrning" }),
+  ).toContainText("Valda kategorier: Pool");
+
   await page.reload();
   await expect(
     card.getByRole("img", { name: /Ditt hus med interaktiva/ }),

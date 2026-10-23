@@ -1982,14 +1982,12 @@ th {
   position: relative;
   border-radius: 16px;
   overflow: hidden;
-  aspect-ratio: 1596/1422;
   background: #172b23;
 }
 .house-photo-scene > img {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: fill;
+  height: auto;
 }
 .house-photo-overlay {
   position: absolute;
@@ -2089,13 +2087,15 @@ th {
   line-height: 1.7;
 }
 .house-category-tabs {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin: 15px 0;
 }
 .house-category-tabs button {
   display: flex;
+  justify-content: center;
+  min-height: 42px;
   gap: 7px;
   align-items: center;
   padding: 10px 14px;
@@ -2179,7 +2179,8 @@ th {
 }
 .house-photo-hover-card {
   position: absolute;
-  transform: translateX(-50%);
+  top: 18px;
+  right: 18px;
   width: 224px;
   max-width: calc(100% - 20px);
   padding: 13px 15px;
@@ -2214,9 +2215,127 @@ th {
 }
 @media (max-width: 600px) {
   .house-photo-hover-card {
+    top: auto;
+    bottom: 10px;
+    right: 10px;
+    width: 155px;
     padding: 9px 12px;
   }
   .house-photo-hover-card b {
     font-size: 17px;
+  }
+}
+
+@media (max-width: 420px) {
+  .house-category-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .house-photo-hover-card {
+    width: 145px;
+  }
+  .house-photo-hover-card small {
+    font-size: 8px;
+  }
+}
+
+.house-smart-controls {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+}
+.house-smart-fallback {
+  margin-top: 12px;
+}
+.smart-home.smart-home-compact {
+  margin: 0;
+  padding: 13px 15px;
+  gap: 12px;
+  border: 1px solid #ffffff70;
+  border-radius: 13px;
+  background: #103932ed;
+  color: #f2fff8;
+  box-shadow: 0 5px 20px #0003;
+}
+.smart-home-compact .smart-home-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 10px;
+}
+.smart-home-compact .smart-home-title h2 {
+  font-size: 13px;
+}
+.smart-home-compact .smart-home-copy p {
+  color: #d6eee3;
+  font-size: 10px;
+  line-height: 1.6;
+}
+.smart-home-compact .smart-home-copy p > span {
+  color: #c3ddcf;
+}
+.smart-home-compact .smart-home-actions .button {
+  min-height: 40px;
+  padding: 10px 13px;
+  font-size: 11px;
+}
+.smart-home-compact .smart-home-actions .secondary {
+  background: transparent;
+  color: #f2fff8;
+  border-color: #ffffff70;
+}
+@media (max-width: 800px) {
+  .house-smart-controls {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+  .smart-home.smart-home-compact {
+    gap: 8px;
+    padding: 10px;
+    flex-wrap: wrap;
+  }
+  .smart-home-compact .smart-home-icon {
+    display: none;
+  }
+  .smart-home-compact .smart-home-copy {
+    flex-basis: 100%;
+  }
+  .smart-home-compact .smart-home-copy p {
+    margin-top: 4px;
+  }
+  .smart-home-compact .smart-home-actions {
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+  .smart-home-compact .smart-home-actions .button {
+    flex: 1;
+    justify-content: center;
+  }
+  .house-photo-scene .house-photo-hover-card {
+    display: none;
+  }
+}
+.house-photo-visual {
+  position: relative;
+}
+.house-photo-visual > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+@media (max-width: 800px) {
+  .house-smart-controls {
+    position: relative;
+    inset: auto;
+    padding: 10px;
+    background: #103932;
+  }
+  .house-smart-controls .smart-home-compact {
+    border: 0;
+    box-shadow: none;
+    padding: 4px;
+  }
+  .house-smart-controls .smart-home-copy {
+    display: none;
   }
 }
