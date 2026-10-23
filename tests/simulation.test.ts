@@ -201,3 +201,45 @@ it("modellens energiräknare går framåt även när momentan effekt sjunker", (
     previous = r.energy;
   }
 });
+
+describe("Hypotetisk besparing mot ständig drift", () => {
+  it("jämför full effekt från svensk midnatt med kategoriens modellkostnad", () => {
+    const home = structuredClone(initialHousehold);
+    const rows = prices().map((p) => ({ ...p, ore: 100 }));
+    const s = simulateHousehold(home, rows, Date.parse("2026-10-21T12:00:00Z"));
+    // 14 Swedish hours × 2 kW, minus 8 kWh delivered by the pool model.
+    expect(s.continuousComparison.pool).toBeCloseTo(
+      (20 * (100 + 6 + 28 + 43.9) * 1.25) / 100,
+      5,
+    );
+    // Charger reference: 14 h × 6 kW, minus the modeled 14 kWh daily requirement.
+    expect(s.continuousComparison.charging).toBeCloseTo(
+      (70 * (100 + 6 + 28 + 43.9) * 1.25) / 100,
+      5,
+    );
+    expect(s.continuousComparison.house).toBe(0);
+    expect(s.continuousComparison.floor).toBeNull();
+  });
+  it("visar inget belopp vid prisluckor eller saknad bil och behåller negativa skillnader", () => {
+    const home = structuredClone(initialHousehold);
+    const instant = Date.parse("2026-10-21T12:00:00Z");
+    expect(
+      simulateHousehold(
+        home,
+        prices().filter((_, i) => i !== 2),
+        instant,
+      ).continuousComparison.pool,
+    ).toBeNull();
+    home.vehicles = [];
+    expect(
+      simulateHousehold(home, prices(), instant).continuousComparison.charging,
+    ).toBeNull();
+    expect(
+      simulateHousehold(
+        home,
+        prices().map((p) => ({ ...p, ore: -300 })),
+        instant,
+      ).continuousComparison.pool,
+    ).toBeLessThan(0);
+  });
+});

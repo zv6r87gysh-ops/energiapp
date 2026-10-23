@@ -204,6 +204,8 @@ export function simulateHousehold(
     carCost = 0,
     normalPoolCost = 0,
     normalCarCost = 0,
+    nonstopPoolCost = 0,
+    nonstopCarCost = 0,
     unpriced = false;
   let lastPool = 0,
     lastCar = 0,
@@ -361,6 +363,22 @@ export function simulateHousehold(
     let pointCost: number | null = null,
       normalPointCost: number | null = null;
     if (price) {
+      // Hypothetical reference requested by the user: full device power from midnight.
+      // This deliberately uses different delivered energy; it is not price-shifting savings.
+      nonstopPoolCost += cost(
+        limits.pool * hours,
+        price.ore,
+        home.contract,
+        home.tariff,
+        false,
+      ).total;
+      nonstopCarCost += cost(
+        limits.charging * hours,
+        price.ore,
+        home.contract,
+        home.tariff,
+        false,
+      ).total;
       pointCost = cost(
         energyForPoint,
         price.ore,
@@ -508,6 +526,15 @@ export function simulateHousehold(
     cost: unpriced ? null : totalCost,
     normalCost: unpriced ? null : normalCost,
     matchedDifference: unpriced ? null : matchedDifference,
+    continuousComparison: {
+      pool: unpriced ? null : nonstopPoolCost - poolCost,
+      charging:
+        unpriced || !home.vehicles.length ? null : nonstopCarCost - carCost,
+      house: unpriced ? null : 0, // Background house load has no smart control in this model.
+      floor: null, // No separate heating model or verified consumption breakdown.
+      poolPower: limits.pool,
+      chargingPower: limits.charging,
+    },
     priceAvailable: !!currentPrice,
   };
 }

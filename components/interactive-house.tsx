@@ -145,6 +145,7 @@ export function InteractiveHouse({
         ? simulation?.devices.charging.cost
         : houseCost;
   const area = areas.find((a) => a.id === active)!;
+  const savings = simulation?.continuousComparison[active] ?? null;
   return (
     <section
       className="card interactive-house"
@@ -250,7 +251,7 @@ export function InteractiveHouse({
               aria-hidden="true"
               style={{
                 left: `clamp(118px, ${area.point[0]}%, calc(100% - 118px))`,
-                top: `clamp(8px, calc(${area.point[1]}% ${active === "pool" || active === "floor" ? "- 142px" : "+ 28px"}), calc(100% - 132px))`,
+                top: `clamp(8px, calc(${area.point[1]}% ${active === "pool" || active === "floor" ? "- 176px" : "+ 28px"}), calc(100% - 170px))`,
               }}
             >
               <strong>{area.name}</strong>
@@ -260,6 +261,10 @@ export function InteractiveHouse({
                   : "Kostnad hittills idag"}
               </span>
               <b>{cost == null ? "Underlag saknas" : money(cost)}</b>
+              <span className="house-savings">
+                Besparing mot ständig drift{" "}
+                <strong>{savings === null ? "—" : money(savings)}</strong>
+              </span>
               <small>
                 {active === "floor"
                   ? "Separat golvvärmekostnad saknas"
@@ -316,7 +321,19 @@ export function InteractiveHouse({
               : "Kostnad hittills idag"}
           </span>
           <b>{cost == null ? "Kostnadsunderlag saknas" : money(cost)}</b>
-          <small>{area.note} Modellvärden, inte uppmätt kostnad.</small>
+          <div className="house-savings">
+            Besparing mot ständig drift:{" "}
+            <strong>{savings === null ? "—" : money(savings)}</strong>
+          </div>
+          <small>
+            {area.note} Modellvärden, inte uppmätt kostnad. Hypotetisk
+            jämförelse från midnatt till nu: pool{" "}
+            {simulation?.continuousComparison.poolPower ?? 2} kW, laddare{" "}
+            {simulation?.continuousComparison.chargingPower ?? 6} kW utan
+            avbrott. Olika levererad energi; skillnaden är inte enbart effekten
+            av smart styrning. Husets baslast styrs inte och golvvärme saknar
+            separat jämförelse.
+          </small>
         </div>
         <Link className="button" href={area.href}>
           Öppna {area.name} →
