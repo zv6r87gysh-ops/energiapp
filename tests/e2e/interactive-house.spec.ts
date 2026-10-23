@@ -85,6 +85,7 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
   await expect(card.locator(".house-photo-hover-card")).toContainText(
     "Modellerad kostnad",
   );
+  await expect(card.locator(".house-photo-hover-card")).toBeVisible();
   await expect(
     card.getByRole("link", { name: "Öppna Pool →", exact: true }),
   ).toHaveAttribute("href", "/pool");

@@ -2179,8 +2179,9 @@ th {
 }
 .house-photo-hover-card {
   position: absolute;
-  top: 18px;
-  right: 18px;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
   width: 224px;
   max-width: calc(100% - 20px);
   padding: 13px 15px;
@@ -2215,10 +2216,6 @@ th {
 }
 @media (max-width: 600px) {
   .house-photo-hover-card {
-    top: auto;
-    bottom: 10px;
-    right: 10px;
-    width: 155px;
     padding: 9px 12px;
   }
   .house-photo-hover-card b {
@@ -2229,9 +2226,6 @@ th {
 @media (max-width: 420px) {
   .house-category-tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .house-photo-hover-card {
-    width: 145px;
   }
   .house-photo-hover-card small {
     font-size: 8px;
@@ -2311,9 +2305,6 @@ th {
     flex: 1;
     justify-content: center;
   }
-  .house-photo-scene .house-photo-hover-card {
-    display: none;
-  }
 }
 .house-photo-visual {
   position: relative;
@@ -2338,4 +2329,9 @@ th {
   .house-smart-controls .smart-home-copy {
     display: none;
   }
+}
+
+.house-photo-hover-card.is-visible {
+  opacity: 1;
+  visibility: visible;
 }

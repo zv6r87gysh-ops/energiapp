@@ -13,7 +13,7 @@ const areas = [
     icon: Home,
     point: [49.5, 28.5],
     shape:
-      "247,354 628,199 778,266 827,245 1233,382 1207,405 1190,607 1056,827 704,855 405,752 269,669",
+      "247,354 628,199 778,266 827,245 1233,382 1233,403 1207,419 1193,607 1046,825 858,912 704,855 405,752 270,696 262,380",
     note: "Husets modellkostnad, exklusive pool och billaddning.",
   },
   {
@@ -31,7 +31,7 @@ const areas = [
     href: "/pool",
     icon: Waves,
     point: [36.8, 72],
-    shape: "438,856 869,1067 744,1187 305,971",
+    shape: "427,831 901,1060 748,1220 247,979",
     note: "Poolens modellerade rörliga kostnad med publicerade elpriser.",
   },
   {
@@ -57,6 +57,11 @@ export function InteractiveHouse({
   const [photo, setPhoto] = useState<string | null>(null);
   const [active, setActive] = useState<AreaId>("house");
   const [error, setError] = useState("");
+  const [preview, setPreview] = useState(false);
+  function selectArea(id: AreaId) {
+    setActive(id);
+    setPreview(true);
+  }
   const file = useRef<HTMLInputElement>(null);
   const url = useRef<string | null>(null);
   const generation = useRef({ value: 0 });
@@ -144,6 +149,7 @@ export function InteractiveHouse({
     <section
       className="card interactive-house"
       aria-label="Ditt interaktiva hus"
+      onMouseLeave={() => setPreview(false)}
     >
       <div className="house-photo-heading">
         <div>
@@ -202,8 +208,8 @@ export function InteractiveHouse({
                   aria-label={`Öppna ${a.name}`}
                   aria-describedby={tooltip}
                   className={`house-hit house-hit-${a.id} ${active === a.id ? "is-active" : ""}`}
-                  onMouseEnter={() => setActive(a.id)}
-                  onFocus={() => setActive(a.id)}
+                  onMouseEnter={() => selectArea(a.id)}
+                  onFocus={() => selectArea(a.id)}
                 >
                   <polygon
                     points={a.shape}
@@ -230,16 +236,23 @@ export function InteractiveHouse({
                   aria-label={`Visa kostnad för ${a.name}`}
                   aria-pressed={active === a.id}
                   aria-describedby={tooltip}
-                  onMouseEnter={() => setActive(a.id)}
-                  onFocus={() => setActive(a.id)}
-                  onClick={() => setActive(a.id)}
+                  onMouseEnter={() => selectArea(a.id)}
+                  onFocus={() => selectArea(a.id)}
+                  onClick={() => selectArea(a.id)}
                 >
                   <Icon size={19} />
                   <span>{a.name}</span>
                 </button>
               );
             })}
-            <div className="house-photo-hover-card" aria-hidden="true">
+            <div
+              className={`house-photo-hover-card ${preview ? "is-visible" : ""}`}
+              aria-hidden="true"
+              style={{
+                left: `clamp(118px, ${area.point[0]}%, calc(100% - 118px))`,
+                top: `clamp(8px, calc(${area.point[1]}% ${active === "pool" || active === "floor" ? "- 142px" : "+ 28px"}), calc(100% - 132px))`,
+              }}
+            >
               <strong>{area.name}</strong>
               <span>
                 {active === "floor"
@@ -279,9 +292,9 @@ export function InteractiveHouse({
             <button
               key={a.id}
               aria-pressed={active === a.id}
-              onClick={() => setActive(a.id)}
-              onMouseEnter={() => setActive(a.id)}
-              onFocus={() => setActive(a.id)}
+              onClick={() => selectArea(a.id)}
+              onMouseEnter={() => selectArea(a.id)}
+              onFocus={() => selectArea(a.id)}
             >
               <Icon size={17} />
               {a.name}
