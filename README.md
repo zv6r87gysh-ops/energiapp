@@ -85,3 +85,11 @@ Aktuell förbrukning visar total modellerad energi idag och denna månad, uppdat
 ### Väder på Översikt
 
 Väderfliken hämtar riktig prognos för angivet svenskt postnummer från MET Norway (Yr:s prognosleverantör), med idag/imorgon i svensk tid. Saknat väder ersätts aldrig med demo. Användaren behöver inte ange tekniska värmeförlustvärden. Självlärande poolplanering är förberedd och inväntar en verifierad boxanslutning med verklig temperatur och värmedrift; den nuvarande registreringsguiden levererar inte dessa mätningar. Läs [väder och poolinlärning](docs/weather-and-pool-learning.md) för datakällor, begränsningar och livekontroll.
+
+### Utebelysning och Plejd
+
+Översikt har en av/på-förhandsvisning för spotlights på det egna husfotot, med sparat läge per hushåll. Plejd är ännu inte anslutet och inga riktiga lampor styrs. I Inställningar kan brygg- och gruppreferenser förberedas utan hemligheter. Adapterkontrakt och nästa anslutningssteg beskrivs i [utebelysning och Plejd](docs/outdoor-lighting.md).
+
+Husets originalfoto ingår nu som fast standardbild i bygget och visas även i nya Vercel-förhandsversioner utan uppladdning. Ett tidigare lokalt valt foto behålls och har företräde. Konturer och ljuseffekter anpassas till originalbildens bredare utsnitt.
+
+Husbilden har svensk klocka, kalenderårstid och prognosstyrda vädereffekter samt beräknat dagsljus för postnumrets plats. Ute- och poolbelysning kan förhandsvisas manuellt eller väljas separat i smartstyrningen för solnedgång/soluppgång. Ingen riktig belysning styrs ännu. Se [husets väder och ljusstyrning](docs/house-atmosphere.md).

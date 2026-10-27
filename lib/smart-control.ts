@@ -2,11 +2,18 @@ import { z } from "zod";
 import type { Household } from "./models";
 export const smartCategorySchema = z.enum(["pool", "charging"]);
 export type SmartCategory = z.infer<typeof smartCategorySchema>;
+export const smartControlCategorySchema = z.enum([
+  "pool",
+  "charging",
+  "outdoor-lighting",
+  "pool-lighting",
+]);
+export type SmartControlCategory = z.infer<typeof smartControlCategorySchema>;
 export const smartControlSchema = z
   .object({
     mode: z.literal("demo"),
     enabled: z.boolean(),
-    categories: z.array(smartCategorySchema).max(2),
+    categories: z.array(smartControlCategorySchema).max(4),
     updatedAt: z.iso.datetime().nullable(),
   })
   .refine(
@@ -28,12 +35,15 @@ export function readSmartControl(home: {
   const result = smartControlSchema.safeParse(home.smartControl);
   return result.success ? result.data : defaultSmartControl();
 }
-export function categoryActive(control: SmartControl, category: SmartCategory) {
+export function categoryActive(
+  control: SmartControl,
+  category: SmartControlCategory,
+) {
   return control.enabled && control.categories.includes(category);
 }
 export function changeSmartCategory(
   control: SmartControl,
-  category: SmartCategory,
+  category: SmartControlCategory,
   active: boolean,
 ): SmartControl {
   const categories = active

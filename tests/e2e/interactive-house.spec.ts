@@ -1,4 +1,10 @@
 import { test, expect } from "@playwright/test";
+// These cases exercise the local-upload/no-default scenario; bundled asset has its own tests.
+test.beforeEach(async ({ page }) => {
+  await page.route("**/house-photo.json", (route) =>
+    route.fulfill({ json: { householdId: "demo-home", url: null } }),
+  );
+});
 import { dayBounds } from "../../lib/prices/time";
 import path from "node:path";
 test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rätt kategori", async ({
@@ -43,8 +49,8 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
     card.getByText("Lägg till fotot på ditt hus", { exact: true }),
   ).toBeVisible();
   expect(
-    await card.evaluate((element) =>
-      element.previousElementSibling?.classList.contains("page-heading"),
+    await card.evaluate(
+      (element) => element.parentElement?.firstElementChild === element,
     ),
   ).toBe(true);
   await card
@@ -80,7 +86,9 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
     .getByRole("button", { name: "Visa kostnad för Pool", exact: true })
     .click();
   await expect(card.locator(".house-hit-pool")).toHaveClass(/is-active/);
-  await expect(card.getByRole("status")).toContainText("Kostnad hittills idag");
+  await expect(card.locator(".house-cost-tooltip")).toContainText(
+    "Kostnad hittills idag",
+  );
   await expect(card.locator(".house-cost-tooltip b")).toHaveText(/18\s+kr/);
   await expect(card.locator(".house-photo-hover-card")).toContainText(
     "Modellerad kostnad",
@@ -93,13 +101,14 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
     card.getByRole("link", { name: "Öppna Pool →", exact: true }),
   ).toHaveAttribute("href", "/pool");
   await card.getByRole("button", { name: "Golvvärme", exact: true }).click();
-  await expect(card.getByRole("status")).toContainText(
+  await expect(card.locator(".house-cost-tooltip")).toContainText(
     "Separat kostnad saknas",
   );
   await expect(
     card.getByRole("link", { name: "Öppna Golvvärme →", exact: true }),
   ).toHaveAttribute("href", "/golvvarme");
   await expect(card.locator(".house-floor-coils")).toHaveCSS("opacity", "1");
+  await card.locator(".house-photo-visual").hover();
   const photoControls = card.locator(".house-smart-controls");
   await photoControls
     .getByRole("button", { name: "Aktivera smart styrning", exact: true })
@@ -121,9 +130,7 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
   await expect(
     card.getByRole("img", { name: /Ditt hus med interaktiva/ }),
   ).toBeVisible();
-  await card
-    .getByRole("button", { name: "Visa kostnad för Billaddare", exact: true })
-    .click();
+  await card.getByRole("button", { name: "Billaddare", exact: true }).click();
   await card
     .getByRole("link", { name: "Öppna Billaddare →", exact: true })
     .click();
@@ -187,11 +194,43 @@ test("muspekare och tangentbordsfokus väljer markering utan att navigera", asyn
   await pool.hover();
   await expect(card.locator(".house-hit-pool")).toHaveClass(/is-active/);
   await expect(page).toHaveURL(/\/$/);
-  await card
-    .getByRole("button", { name: "Visa kostnad för Billaddare", exact: true })
-    .focus();
+  await page.mouse.move(0, 0);
+  await page.keyboard.press("Tab");
+  await card.getByRole("button", { name: "Billaddare", exact: true }).focus();
   await expect(card.locator(".house-hit-charging")).toHaveClass(/is-active/);
   await expect(
     card.getByRole("link", { name: "Öppna Billaddare →", exact: true }),
   ).toHaveAttribute("href", "/laddning");
+});
+test("en inbyggd standardbild visas utan ny uppladdning i en ny webbläsarsession", async ({
+  page,
+  browser,
+}) => {
+  async function prepare(p: import("@playwright/test").Page) {
+    await p.route("**/house-photo.json", (route) =>
+      route.fulfill({
+        json: { householdId: "demo-home", url: "/icon-512.png" },
+      }),
+    );
+    await p.goto("/");
+  }
+  await prepare(page);
+  const photo = page.getByRole("img", { name: /Ditt hus med interaktiva/ });
+  await expect(photo).toBeVisible();
+  await expect(photo).toHaveAttribute("src", "/icon-512.png");
+  const ctx = await browser.newContext();
+  try {
+    const fresh = await ctx.newPage();
+    await fresh.route("**/house-photo.json", (route) =>
+      route.fulfill({
+        json: { householdId: "demo-home", url: "/icon-512.png" },
+      }),
+    );
+    await fresh.goto("http://127.0.0.1:3000/");
+    await expect(
+      fresh.getByRole("img", { name: /Ditt hus med interaktiva/ }),
+    ).toBeVisible();
+  } finally {
+    await ctx.close();
+  }
 });

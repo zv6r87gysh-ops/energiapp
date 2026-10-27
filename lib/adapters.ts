@@ -20,6 +20,10 @@ export const integrationStatus = [
     name: "Pahlén Calidi VP",
     status: "WiFi planerad – API och energimätning ej verifierade",
   },
+  {
+    name: "Plejd · Utebelysning",
+    status: "Förberedd – ej ansluten; endast förhandsvisning på husbilden",
+  },
   { name: "Thermotech EC8", status: "Ej ansluten – ingen styrintegration" },
   {
     name: "Zaptec Sense P1",

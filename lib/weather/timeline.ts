@@ -51,3 +51,19 @@ export function threeHourlyWeather(weather: Weather, date: string) {
   }
   return slots;
 }
+
+// Only future forecast timestamps within 24 elapsed hours, also across DST/midnight.
+export function upcomingWeather(weather: Weather, now: number) {
+  const hour = 3600000;
+  const start = Math.ceil(now / hour) * hour;
+  const end = now + 24 * hour;
+  const slots = [];
+  for (let t = start; t < end; t += 3 * hour) {
+    slots.push({
+      time: priceTime(new Date(t).toISOString()),
+      timestamp: new Date(t).toISOString(),
+      forecast: weather.hours.find((h) => Date.parse(h.time) === t) ?? null,
+    });
+  }
+  return slots;
+}

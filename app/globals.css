@@ -2356,3 +2356,625 @@ th {
   display: inline;
   color: var(--text);
 }
+
+.outdoor-lighting-control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.outdoor-lighting-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #fff2d1;
+  color: #a16f1b;
+}
+.outdoor-lighting-copy {
+  flex: 1;
+  min-width: 180px;
+}
+.outdoor-lighting-copy strong {
+  font-size: 13px;
+}
+.outdoor-lighting-copy small {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 400;
+}
+.outdoor-lighting-copy p {
+  margin: 5px 0;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.outdoor-lighting-copy a {
+  font-size: 10px;
+  color: var(--muted);
+  text-decoration: underline;
+}
+.outdoor-lighting-switch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lighting-switch-track {
+  display: flex;
+  align-items: center;
+  width: 36px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 20px;
+  background: #82928b;
+}
+.lighting-switch-track > span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+}
+.outdoor-lighting-switch.is-on {
+  border-color: #d9b75b;
+  background: #fff4d6;
+  color: #745319;
+}
+.outdoor-lighting-switch.is-on .lighting-switch-track {
+  background: #bd8d29;
+}
+.outdoor-lighting-switch.is-on .lighting-switch-track > span {
+  transform: translateX(14px);
+}
+.outdoor-lighting-switch:focus-visible {
+  outline: 3px solid #ddb454;
+  outline-offset: 3px;
+}
+.outdoor-lighting-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.outdoor-light-wash {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.outdoor-lighting-overlay.is-on .outdoor-light-wash {
+  opacity: 1;
+}
+.outdoor-lighting-photo-status {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 7px 10px;
+  border: 1px solid #ffffff60;
+  border-radius: 8px;
+  background: #17372ad9;
+  color: #fff6dc;
+  font-size: 10px;
+  pointer-events: none;
+}
+#outdoor-lighting-settings .form-grid > label {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .outdoor-lighting-control {
+    padding: 12px;
+  }
+  .outdoor-lighting-copy {
+    min-width: 150px;
+  }
+  .outdoor-lighting-copy small {
+    display: block;
+    margin: 4px 0 0;
+  }
+  .outdoor-lighting-switch {
+    width: 100%;
+    justify-content: center;
+  }
+  .outdoor-lighting-photo-status {
+    font-size: 8px;
+    top: 8px;
+    left: 8px;
+    padding: 5px 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .outdoor-light-wash,
+  .lighting-switch-track > span {
+    transition: none;
+  }
+}
+@media (max-width: 800px) {
+  html {
+    scroll-padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+  main :is(button, input, select, textarea, a) {
+    scroll-margin-block: calc(90px + env(safe-area-inset-bottom));
+  }
+}
+@media (max-width: 800px) {
+  .modal :is(button, input, select, textarea, a) {
+    scroll-margin: 0;
+  }
+}
+
+/* No selected category, labels or outlines until the user points, focuses or taps. */
+.house-photo-pin {
+  opacity: 0;
+}
+.house-photo-pin[aria-pressed="true"],
+.house-photo-pin:focus-visible {
+  opacity: 1;
+}
+.house-cost-tooltip[hidden] {
+  display: none;
+}
+.outdoor-lighting-photo-status {
+  opacity: 0;
+}
+.outdoor-lighting-photo-status.is-visible {
+  opacity: 1;
+}
+.outdoor-light-fixtures {
+  opacity: 0;
+}
+.outdoor-lighting-overlay.is-on .outdoor-light-fixtures {
+  opacity: 1;
+}
+.house-smart-controls {
+  opacity: 0;
+  visibility: hidden;
+}
+.house-photo-scene:hover .house-smart-controls,
+.house-photo-scene:focus-within .house-smart-controls {
+  opacity: 1;
+  visibility: visible;
+}
+.house-category-tabs {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.lighting-hit-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.lighting-hit-overlay circle {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 2;
+  pointer-events: all;
+  cursor: pointer;
+}
+.lighting-hit-overlay path {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 40;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+.lighting-hit-overlay.is-active circle {
+  stroke: #ffe3a099;
+}
+.lighting-hit-overlay g:focus-visible circle {
+  stroke: #ffe3a0;
+}
+.house-lighting-popover {
+  position: absolute;
+  width: 274px;
+  max-width: calc(100% - 16px);
+  transform: translateX(-50%);
+  z-index: 3;
+}
+.house-lighting-popover[hidden] {
+  display: none;
+}
+.house-lighting-popover .outdoor-lighting-control {
+  padding: 12px;
+  margin: 0;
+  background: var(--card);
+  box-shadow: 0 8px 28px #0004;
+  gap: 9px;
+}
+.house-lighting-popover .outdoor-lighting-icon {
+  display: none;
+}
+.house-lighting-popover .outdoor-lighting-copy {
+  min-width: 0;
+  flex-basis: 100%;
+}
+.house-lighting-popover .outdoor-lighting-switch {
+  width: 100%;
+  justify-content: center;
+}
+@media (max-width: 800px) {
+  .house-smart-controls {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+@media (max-width: 600px) {
+  .house-category-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .house-category-tabs > button:first-child {
+    grid-column: 1/-1;
+  }
+}
+
+/* Small smart-control box pinned to the photo's upper-right corner. */
+.house-photo-scene .house-smart-controls {
+  position: absolute;
+  inset: 12px 12px auto auto;
+  width: 208px;
+  max-width: calc(100% - 24px);
+  padding: 0;
+  background: transparent;
+}
+.house-smart-controls .smart-home.smart-home-compact {
+  display: block;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #ffffff70;
+  border-radius: 10px;
+  background: #103932ed;
+  box-shadow: 0 4px 14px #0003;
+}
+.house-smart-controls .smart-home-icon,
+.house-smart-controls .smart-home-copy {
+  display: none;
+}
+.house-smart-controls .smart-home-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  width: 100%;
+}
+.house-smart-controls .smart-home-active .smart-home-actions {
+  grid-template-columns: 32px minmax(0, 1fr);
+}
+.house-smart-controls .smart-home-actions .button {
+  min-height: 34px;
+  padding: 7px 8px;
+  font-size: 10px;
+  justify-content: center;
+}
+.house-smart-controls .smart-home-actions .secondary {
+  padding: 7px;
+  font-size: 0;
+}
+@media (max-width: 600px) {
+  .house-photo-scene .house-smart-controls {
+    width: 52%;
+    max-width: 190px;
+    inset: 8px 8px auto auto;
+  }
+  .house-smart-controls .smart-home-actions .button {
+    font-size: 9px;
+    padding: 6px;
+  }
+  .house-smart-controls .smart-home-actions .secondary {
+    font-size: 0;
+  }
+}
+
+.house-scene-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 0 0 14px;
+}
+.house-clock {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-variant-numeric: tabular-nums;
+}
+.house-clock time {
+  font-size: 17px;
+  font-weight: 600;
+}
+.house-clock small,
+.house-scene-info > span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.house-scene-info > small {
+  flex-basis: 100%;
+  font-size: 9px;
+  color: var(--muted);
+}
+.house-photo-visual > img {
+  transition: filter 2s linear;
+}
+.house-atmosphere {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.house-atmosphere > div,
+.house-precipitation {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.house-night-wash {
+  background: linear-gradient(150deg, #061a4e30, #07172b26);
+}
+.house-sun-wash {
+  background: radial-gradient(ellipse at 15% 0%, #fff1bb42, transparent 65%);
+  mix-blend-mode: soft-light;
+}
+.house-cloud-wash {
+  background: linear-gradient(135deg, #e2edf31c, #21374b26 50%, #e6eef414);
+}
+.scene-partly .house-cloud-wash {
+  opacity: 0.45;
+}
+.house-fog-wash {
+  background: linear-gradient(180deg, #d8e2e966, #dce5e92b);
+}
+.house-rain-field {
+  animation: house-rain-fall 0.8s linear infinite;
+}
+.house-snow-field {
+  animation: house-snow-fall 9s linear infinite;
+}
+@keyframes house-rain-fall {
+  from {
+    transform: translate(0, -60px);
+  }
+  to {
+    transform: translate(-18px, 50px);
+  }
+}
+@keyframes house-snow-fall {
+  from {
+    transform: translate(0, -60px);
+  }
+  to {
+    transform: translate(12px, 40px);
+  }
+}
+/* Light is texture-preserving local illumination, not beams or fixture icons. */
+.lighting-hit-overlay.is-active circle {
+  stroke: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .house-photo-visual > img {
+    transition: none;
+  }
+  .house-rain-field,
+  .house-snow-field {
+    animation: none;
+  }
+}
+.smart-category.smart-subcategory {
+  margin-left: 24px;
+  border-left: 3px solid #71b69b;
+}
+.house-category-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 600px) {
+  .house-category-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .house-category-tabs > button:first-child {
+    grid-column: auto;
+  }
+}
+.pool-lamp-hit:focus-visible {
+  stroke: #8be6ff;
+}
+.house-photo-heading h1 {
+  margin: 6px 0 0;
+  font-size: 18px;
+  line-height: 1.3;
+}
+.house-photo-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+  max-width: 100%;
+}
+.house-photo-actions select {
+  max-width: 210px;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .house-photo-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .house-photo-actions select {
+    flex: 1;
+    max-width: 100%;
+    width: 140px;
+  }
+  .house-photo-actions .button {
+    font-size: 11px;
+    padding: 10px;
+  }
+}
+
+/* Keep navigation inside the photograph, separate selection from actual lamp power. */
+.house-photo-scene > .house-category-tabs {
+  position: absolute;
+  z-index: 5;
+  top: 12px;
+  left: 12px;
+  width: 164px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.house-photo-scene > .house-category-tabs button {
+  justify-content: flex-start;
+  background: #fffffff0;
+  color: #243b43;
+  border: 1px solid #ffffff90;
+  box-shadow: 0 2px 10px #0002;
+  padding: 9px;
+  min-height: 40px;
+  text-align: left;
+}
+.house-category-tabs button small {
+  margin-left: auto;
+  font-size: 10px;
+}
+.house-photo-scene > .house-category-tabs button[aria-pressed="true"] {
+  outline: 2px solid #5389b6;
+  outline-offset: 1px;
+}
+.house-photo-scene > .house-category-tabs button.lighting-is-on {
+  background: #14734c;
+  color: #fff;
+  border-color: #7de3a6;
+}
+.house-photo-scene > .house-category-tabs button:focus-visible {
+  outline: 3px solid #4c9df2;
+}
+.house-sun-times {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 12px;
+}
+.house-sun-times span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.house-sun-times svg {
+  color: #cb8b24;
+}
+.house-day-forecast {
+  width: 100%;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.house-forecast-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+.house-forecast-heading form {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.house-forecast-heading input {
+  width: 104px;
+  min-width: 0;
+  padding: 7px;
+  font-size: 12px;
+}
+.house-forecast-heading .button {
+  font-size: 11px;
+  padding: 8px;
+}
+.house-day-forecast .weather-timeline {
+  margin-top: 10px;
+}
+.house-day-forecast .weather-timeline li {
+  flex: 1 0 68px;
+}
+.house-day-forecast > small {
+  font-size: 10px;
+  color: var(--muted);
+}
+@media (max-width: 600px) {
+  .house-photo-scene > .house-category-tabs {
+    top: 8px;
+    left: 8px;
+    width: 120px;
+    gap: 4px;
+  }
+  .house-photo-scene > .house-category-tabs button {
+    font-size: 9px;
+    min-height: 30px;
+    padding: 5px;
+    gap: 4px;
+  }
+  .house-photo-scene > .house-category-tabs svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+  }
+  .house-category-tabs button small {
+    font-size: 8px;
+  }
+  .house-forecast-heading form {
+    width: 100%;
+  }
+}
+/* The house overview shows the whole day at once, including on a phone. */
+.house-day-forecast .weather-timeline ol {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  min-width: 0;
+  padding: 12px 6px;
+  gap: 10px 2px;
+}
+.house-day-forecast .weather-timeline li {
+  min-width: 0;
+  width: auto;
+  gap: 6px;
+  font-size: 11px;
+}
+.house-day-forecast .forecast-condition {
+  font-size: 9px;
+}
+@media (max-width: 600px) {
+  .house-day-forecast .weather-timeline ol {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.house-lighting-popover {
+  z-index: 6;
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  border-radius: 14px;
+}
+@media (max-width: 600px) {
+  .house-lighting-popover {
+    top: 8px !important;
+    left: 50% !important;
+  }
+}
+.house-photo-scene .house-smart-controls {
+  z-index: 7;
+}

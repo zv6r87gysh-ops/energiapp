@@ -1,4 +1,10 @@
 import { test, expect } from "@playwright/test";
+// These cases exercise the local-upload/no-default scenario; bundled asset has its own tests.
+test.beforeEach(async ({ page }) => {
+  await page.route("**/house-photo.json", (route) =>
+    route.fulfill({ json: { householdId: "demo-home", url: null } }),
+  );
+});
 import { weatherFixture, thermalHome, weatherNow } from "../fixtures/weather";
 async function prepare(page: import("@playwright/test").Page) {
   await page.clock.install({ time: new Date(weatherNow) });
@@ -165,11 +171,11 @@ test("vädersymboler och temperaturer visas i tretimmarssteg hela dygnet", async
   });
   await page.goto("/");
   const today = page.getByRole("region", {
-    name: "Väder var tredje timme 2026-10-21",
+    name: "Väder kommande 24 timmar",
     exact: true,
   });
   await expect(today.getByRole("listitem")).toHaveCount(8);
-  await expect(today.getByText("Saknas", { exact: true })).toHaveCount(4);
+  await expect(today.getByText("Saknas", { exact: true })).toHaveCount(0);
   await page.getByRole("tab", { name: "Imorgon", exact: true }).click();
   const tomorrow = page.getByRole("region", {
     name: "Väder var tredje timme 2026-10-22",

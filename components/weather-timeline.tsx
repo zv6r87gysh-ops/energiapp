@@ -11,22 +11,36 @@ import {
   CircleHelp,
 } from "lucide-react";
 import type { Weather } from "@/lib/weather/contracts";
-import { threeHourlyWeather, weatherSymbol } from "@/lib/weather/timeline";
+import {
+  threeHourlyWeather,
+  upcomingWeather,
+  weatherSymbol,
+} from "@/lib/weather/timeline";
+import { swedishDate } from "@/lib/prices/time";
 import { number } from "@/lib/energy";
 export function WeatherTimeline({
   weather,
   date,
+  label,
+  overview = false,
+  now,
 }: {
   weather: Weather;
   date: string;
+  label?: string;
+  overview?: boolean;
+  now?: number;
 }) {
-  const slots = threeHourlyWeather(weather, date);
+  const slots =
+    now === undefined
+      ? threeHourlyWeather(weather, date)
+      : upcomingWeather(weather, now);
   return (
     <>
       <div
         className="weather-timeline"
         role="region"
-        aria-label={`Väder var tredje timme ${date}`}
+        aria-label={label ?? `Väder var tredje timme ${date}`}
         tabIndex={0}
       >
         <ol>
@@ -58,6 +72,14 @@ export function WeatherTimeline({
                 className={!slot.forecast ? "weather-slot-missing" : ""}
               >
                 <time dateTime={slot.timestamp}>{slot.time}</time>
+                {now !== undefined && (
+                  <small>
+                    {swedishDate(new Date(slot.timestamp)) ===
+                    swedishDate(new Date(now))
+                      ? "Idag"
+                      : "Imorgon"}
+                  </small>
+                )}
                 {slot.forecast ? (
                   <Icon
                     className={`forecast-icon forecast-${condition.kind}`}
@@ -84,9 +106,17 @@ export function WeatherTimeline({
         </ol>
       </div>
       <p className="weather-timeline-note">
-        00–21 i tretimmarssteg · svensk tid · prognos vid respektive klockslag.
-        Passerade eller saknade prognostimmar fylls inte i. Svep för att se hela
-        dygnet.
+        {now !== undefined ? (
+          "Kommande 24 timmar · tretimmarssteg från nästa hela timme · svensk tid. Saknade prognosvärden fylls inte i."
+        ) : (
+          <>
+            00–21 i tretimmarssteg · svensk tid · prognos vid respektive
+            klockslag. Passerade eller saknade prognostimmar fylls inte i.{" "}
+            {overview
+              ? "Hela dygnet visas ovan."
+              : "Svep för att se hela dygnet."}
+          </>
+        )}
       </p>
     </>
   );

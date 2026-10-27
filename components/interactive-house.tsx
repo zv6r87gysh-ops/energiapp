@@ -1,9 +1,29 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { Camera, Car, Flame, Home, Waves } from "lucide-react";
-import { readHousePhoto, saveHousePhoto } from "@/lib/house-photo";
+import { Camera, Car, Flame, Home, Lightbulb, Waves } from "lucide-react";
+import {
+  readHousePhoto,
+  saveHousePhoto,
+  readBundledHousePhoto,
+} from "@/lib/house-photo";
 import type { HouseholdSimulation } from "@/lib/simulation/engine";
+import {
+  OutdoorLightingControl,
+  OutdoorLightingOverlay,
+  PoolLightingOverlay,
+} from "./outdoor-lighting";
+import { lightingPower } from "@/lib/lighting/automation";
+import type { SmartControl } from "@/lib/smart-control";
+import type { OutdoorLighting } from "@/lib/lighting/contracts";
+import { housePhotoLayout, photoPoint } from "@/lib/house-photo-layout";
+import {
+  HouseClock,
+  HouseWeatherEffects,
+  useHouseAtmosphere,
+} from "./house-atmosphere";
+import type { Weather } from "@/lib/weather/contracts";
+import type { SceneLocation } from "@/lib/scene/atmosphere";
 import { money } from "@/lib/energy";
 const areas = [
   {
@@ -47,18 +67,65 @@ const areas = [
 type AreaId = (typeof areas)[number]["id"];
 export function InteractiveHouse({
   householdId,
+  householdSelector,
   simulation,
   controls,
+  lighting,
+  onLightingManual,
+  smartControl,
+  weather,
+  location,
+  weatherMessage,
+  postcode,
+  onPostcode,
 }: {
+  weatherMessage: string;
+  postcode: string;
+  onPostcode: (postcode: string) => void;
   controls?: React.ReactNode;
+  householdSelector?: React.ReactNode;
+  weather: Weather | null;
+  location: SceneLocation | null;
+  lighting: OutdoorLighting;
+  onLightingManual: (group: "outdoor" | "pool", on: boolean) => void;
+  smartControl: SmartControl;
   householdId: string;
   simulation: HouseholdSimulation | null;
 }) {
+  const atmosphere = useHouseAtmosphere(weather, location);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [layout, setLayout] = useState(() => housePhotoLayout(1596, 1422));
   const [active, setActive] = useState<AreaId>("house");
   const [error, setError] = useState("");
   const [preview, setPreview] = useState(false);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function cancelHide() {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+  }
+  function clearPreview() {
+    cancelHide();
+    setPreview(false);
+  }
+  function scheduleHide() {
+    cancelHide();
+    hoverTimer.current = setTimeout(() => {
+      if (
+        document.activeElement?.matches(
+          ".house-hit:focus-visible,.house-photo-pin:focus-visible,.house-category-tabs button:focus-visible",
+        )
+      )
+        return;
+      clearPreview();
+    }, 180);
+  }
+  useEffect(
+    () => () => {
+      if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    },
+    [],
+  );
   function selectArea(id: AreaId) {
+    cancelHide();
     setActive(id);
     setPreview(true);
   }
@@ -71,19 +138,26 @@ export function InteractiveHouse({
     let mounted = true;
     const counter = generation.current;
     const current = ++counter.value;
-    void readHousePhoto(householdId)
-      .then((blob) => {
-        if (!mounted || generation.current.value !== current || !blob) return;
+    void (async () => {
+      let blob: Blob | null = null;
+      let storageFailed = false;
+      try {
+        blob = await readHousePhoto(householdId);
+      } catch {
+        storageFailed = true;
+      }
+      const bundled = blob ? null : await readBundledHousePhoto(householdId);
+      if (!mounted || generation.current.value !== current) return;
+      if (blob) {
         const next = URL.createObjectURL(blob);
         url.current = next;
         setPhoto(next);
-      })
-      .catch(() => {
-        if (mounted)
-          setError(
-            "Bildlagring är inte tillgänglig. Du kan ändå välja ett foto för detta besök.",
-          );
-      });
+      } else if (bundled) setPhoto(bundled);
+      else if (storageFailed)
+        setError(
+          "Bildlagring är inte tillgänglig. Du kan ändå välja ett foto för detta besök.",
+        );
+    })();
     return () => {
       mounted = false;
       counter.value++;
@@ -114,6 +188,7 @@ export function InteractiveHouse({
       }
       if (url.current) URL.revokeObjectURL(url.current);
       url.current = next;
+      setLayout(housePhotoLayout(image.naturalWidth, image.naturalHeight));
       setPhoto(next);
       setError("");
       try {
@@ -146,25 +221,64 @@ export function InteractiveHouse({
         : houseCost;
   const area = areas.find((a) => a.id === active)!;
   const savings = simulation?.continuousComparison[active] ?? null;
+  const exteriorState = lightingPower(
+    lighting,
+    smartControl,
+    "outdoor",
+    atmosphere?.altitude ?? null,
+  );
+  const poolState = lightingPower(
+    lighting,
+    smartControl,
+    "pool",
+    atmosphere?.altitude ?? null,
+  );
+  const shownLighting = {
+    ...lighting,
+    previewOn: exteriorState.on,
+    poolPreviewOn: poolState.on,
+  };
+  const areaPoint = photoPoint(area.point, layout);
   return (
     <section
       className="card interactive-house"
       aria-label="Ditt interaktiva hus"
-      onMouseLeave={() => setPreview(false)}
+      onPointerLeave={(e) => {
+        if (e.pointerType === "mouse") scheduleHide();
+      }}
     >
       <div className="house-photo-heading">
         <div>
           <span className="eyebrow">DITT HEM</span>
-          <h2>Utforska ditt hus</h2>
+          <h1>Utforska ditt hus</h1>
         </div>
-        <button
-          className="button secondary"
-          onClick={() => file.current?.click()}
-        >
-          <Camera size={16} />
-          {photo ? "Byt husfoto" : "Välj ditt husfoto"}
-        </button>
+        <div className="house-photo-actions">
+          {householdSelector}
+          <button
+            className="button secondary"
+            onClick={() => file.current?.click()}
+          >
+            <Camera size={16} />
+            {photo ? "Byt husfoto" : "Välj ditt husfoto"}
+          </button>
+        </div>
       </div>
+      <HouseClock
+        key={postcode}
+        scene={atmosphere}
+        location={location}
+        weather={weather}
+        message={weatherMessage}
+        postcode={postcode}
+        onPostcode={onPostcode}
+      />
+      {!photo && (
+        <OutdoorLightingControl
+          lighting={shownLighting}
+          automationLabel={exteriorState.label}
+          onChange={(next) => onLightingManual("outdoor", next.previewOn)}
+        />
+      )}
       <input
         ref={file}
         className="house-file-input"
@@ -178,7 +292,20 @@ export function InteractiveHouse({
       />
       {error && <p role="status">{error}</p>}
       {photo ? (
-        <div className={`house-photo-scene house-active-${active}`}>
+        <div
+          className={`house-photo-scene house-active-${preview ? active : "none"}`}
+          onPointerMove={(e) => {
+            if (e.pointerType !== "mouse") return;
+            const target = e.target as Element;
+            if (
+              target.closest(
+                ".house-hit,.house-photo-pin,.house-photo-hover-card,.house-category-tabs",
+              )
+            )
+              cancelHide();
+            else scheduleHide();
+          }}
+        >
           <div className="house-photo-visual">
             {/* eslint-disable-next-line @next/next/no-img-element -- Local user-selected Blob URL, no remote image service. */}
             <img
@@ -186,9 +313,36 @@ export function InteractiveHouse({
               alt="Ditt hus med interaktiva markeringar för huset, golvvärmen, poolen och billaddaren"
               width={1596}
               height={1422}
+              data-season={atmosphere?.season}
+              style={{
+                filter: atmosphere
+                  ? `brightness(${atmosphere.brightness}) saturate(${atmosphere.season === "winter" ? 0.72 : atmosphere.season === "summer" ? 1.08 : 0.94}) sepia(${atmosphere.season === "autumn" ? 0.12 : 0.02})`
+                  : undefined,
+              }}
+              onLoad={(event) =>
+                setLayout(
+                  housePhotoLayout(
+                    event.currentTarget.naturalWidth,
+                    event.currentTarget.naturalHeight,
+                  ),
+                )
+              }
+            />
+            <HouseWeatherEffects scene={atmosphere} />
+            <OutdoorLightingOverlay
+              on={exteriorState.on}
+              viewBox={layout.viewBox}
+              photo={photo}
+              brightness={atmosphere?.brightness ?? 1}
+            />
+            <PoolLightingOverlay
+              on={poolState.on}
+              photo={photo}
+              viewBox={layout.viewBox}
+              brightness={atmosphere?.brightness ?? 1}
             />
             <svg
-              viewBox="0 0 1596 1422"
+              viewBox={layout.viewBox}
               preserveAspectRatio="none"
               className="house-photo-overlay"
               aria-label="Kategorier på husfotot"
@@ -208,14 +362,17 @@ export function InteractiveHouse({
                   href={a.href}
                   aria-label={`Öppna ${a.name}`}
                   aria-describedby={tooltip}
-                  className={`house-hit house-hit-${a.id} ${active === a.id ? "is-active" : ""}`}
+                  className={`house-hit house-hit-${a.id} ${preview && active === a.id ? "is-active" : ""}`}
                   onMouseEnter={() => selectArea(a.id)}
                   onFocus={() => selectArea(a.id)}
                 >
                   <polygon
                     points={a.shape}
                     style={{
-                      filter: active === a.id ? `url(#${glow})` : undefined,
+                      filter:
+                        preview && active === a.id
+                          ? `url(#${glow})`
+                          : undefined,
                     }}
                   />
                   {a.id === "floor" && (
@@ -233,9 +390,12 @@ export function InteractiveHouse({
                 <button
                   key={a.id}
                   className={`house-photo-pin house-pin-${a.id}`}
-                  style={{ left: `${a.point[0]}%`, top: `${a.point[1]}%` }}
+                  style={{
+                    left: `${photoPoint(a.point, layout)[0]}%`,
+                    top: `${photoPoint(a.point, layout)[1]}%`,
+                  }}
                   aria-label={`Visa kostnad för ${a.name}`}
-                  aria-pressed={active === a.id}
+                  aria-pressed={preview && active === a.id}
                   aria-describedby={tooltip}
                   onMouseEnter={() => selectArea(a.id)}
                   onFocus={() => selectArea(a.id)}
@@ -250,8 +410,8 @@ export function InteractiveHouse({
               className={`house-photo-hover-card ${preview ? "is-visible" : ""}`}
               aria-hidden="true"
               style={{
-                left: `clamp(118px, ${area.point[0]}%, calc(100% - 118px))`,
-                top: `clamp(8px, calc(${area.point[1]}% ${active === "pool" || active === "floor" ? "- 176px" : "+ 28px"}), calc(100% - 170px))`,
+                left: `clamp(118px, ${areaPoint[0]}%, calc(100% - 118px))`,
+                top: `clamp(8px, calc(${areaPoint[1]}% ${active === "pool" || active === "floor" ? "- 176px" : "+ 28px"}), calc(100% - 170px))`,
               }}
             >
               <strong>{area.name}</strong>
@@ -272,6 +432,64 @@ export function InteractiveHouse({
               </small>
             </div>
           </div>
+          <div
+            className="house-category-tabs"
+            aria-label="Välj område på huset"
+          >
+            <button
+              type="button"
+              aria-label="Utebelysning"
+              className={exteriorState.on ? "lighting-is-on" : ""}
+              data-power={exteriorState.on ? "on" : "off"}
+              aria-pressed={exteriorState.on}
+              title={
+                exteriorState.on
+                  ? "Släck utebelysningen på bilden"
+                  : "Tänd utebelysningen på bilden"
+              }
+              onClick={() => {
+                clearPreview();
+                onLightingManual("outdoor", !exteriorState.on);
+              }}
+            >
+              <Lightbulb size={17} />
+              Utebelysning <small>{exteriorState.on ? "Tänd" : "Släckt"}</small>
+            </button>
+            <button
+              type="button"
+              aria-label="Poolbelysning"
+              className={poolState.on ? "lighting-is-on" : ""}
+              data-power={poolState.on ? "on" : "off"}
+              aria-pressed={poolState.on}
+              title={
+                poolState.on
+                  ? "Släck poolbelysningen på bilden"
+                  : "Tänd poolbelysningen på bilden"
+              }
+              onClick={() => {
+                clearPreview();
+                onLightingManual("pool", !poolState.on);
+              }}
+            >
+              <Lightbulb size={17} />
+              Poolbelysning <small>{poolState.on ? "Tänd" : "Släckt"}</small>
+            </button>
+            {areas.map((a) => {
+              const Icon = a.icon;
+              return (
+                <button
+                  key={a.id}
+                  aria-pressed={preview && active === a.id}
+                  onClick={() => selectArea(a.id)}
+                  onMouseEnter={() => selectArea(a.id)}
+                  onFocus={() => selectArea(a.id)}
+                >
+                  <Icon size={17} />
+                  {a.name}
+                </button>
+              );
+            })}
+          </div>
           {controls && <div className="house-smart-controls">{controls}</div>}
         </div>
       ) : (
@@ -290,25 +508,9 @@ export function InteractiveHouse({
           {controls && <div className="house-smart-fallback">{controls}</div>}
         </div>
       )}
-      <div className="house-category-tabs" aria-label="Välj område på huset">
-        {areas.map((a) => {
-          const Icon = a.icon;
-          return (
-            <button
-              key={a.id}
-              aria-pressed={active === a.id}
-              onClick={() => selectArea(a.id)}
-              onMouseEnter={() => selectArea(a.id)}
-              onFocus={() => selectArea(a.id)}
-            >
-              <Icon size={17} />
-              {a.name}
-            </button>
-          );
-        })}
-      </div>
       <div
         className="house-cost-tooltip"
+        hidden={!preview}
         id={tooltip}
         role="status"
         aria-live="polite"

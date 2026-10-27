@@ -22,7 +22,7 @@ test("panelerna visas endast på valda sidor och ackumulerad energi uppdateras",
       }),
     ).toHaveCount(["/pool", "/golvvarme", "/laddning"].includes(route) ? 1 : 0);
     await expect(
-      page.getByRole("region", { name: "Husets smarta styrning" }),
+      page.locator('section[aria-label="Husets smarta styrning"]'),
     ).toHaveCount(["/", "/forbrukning"].includes(route) ? 1 : 0);
   }
   await page.goto("/forbrukning");

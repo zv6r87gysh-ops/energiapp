@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Car,
+  Lightbulb,
   Flame,
   Pause,
   Play,
@@ -14,7 +15,7 @@ import {
 import { Button } from "./ui/button";
 import {
   type SmartControl,
-  type SmartCategory,
+  type SmartControlCategory,
   smartControlSchema,
 } from "@/lib/smart-control";
 const categories = [
@@ -25,6 +26,24 @@ const categories = [
     available: true,
     description: "Poolens smartläge och temperaturmål i demonstrationen.",
     status: "Demo tillgänglig",
+  },
+  {
+    id: "pool-lighting",
+    name: "Poolbelysning",
+    icon: Lightbulb,
+    available: true,
+    description:
+      "Underkategori till Pool. Ljusförhandsvisning från solnedgång till soluppgång, oberoende av poolvärmen.",
+    status: "Solstyrd förhandsvisning",
+  },
+  {
+    id: "outdoor-lighting",
+    name: "Utebelysning",
+    icon: Lightbulb,
+    available: true,
+    description:
+      "Samtliga utomhuslampor i förhandsvisningen följer solnedgång och soluppgång för platsen.",
+    status: "Solstyrd förhandsvisning",
   },
   {
     id: "charging",
@@ -54,9 +73,11 @@ const categories = [
     status: "Kommer senare",
   },
 ] as const;
-const names: Record<SmartCategory, string> = {
+const names: Record<SmartControlCategory, string> = {
   pool: "Pool",
   charging: "Billaddare",
+  "outdoor-lighting": "Utebelysning",
+  "pool-lighting": "Poolbelysning",
 };
 export function SmartControlPanel({
   control,
@@ -68,7 +89,7 @@ export function SmartControlPanel({
   onChange: (control: SmartControl) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<SmartCategory[]>([]);
+  const [selected, setSelected] = useState<SmartControlCategory[]>([]);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -209,11 +230,12 @@ export function SmartControlPanel({
               const Icon = category.icon;
               const available = category.available;
               const checked =
-                available && selected.includes(category.id as SmartCategory);
+                available &&
+                selected.includes(category.id as SmartControlCategory);
               return (
                 <label
                   key={category.id}
-                  className={`smart-category ${checked ? "checked" : ""} ${!available ? "unavailable" : ""}`}
+                  className={`smart-category ${category.id === "pool-lighting" ? "smart-subcategory" : ""} ${checked ? "checked" : ""} ${!available ? "unavailable" : ""}`}
                 >
                   <span className="smart-category-icon">
                     <Icon size={23} />
@@ -232,7 +254,7 @@ export function SmartControlPanel({
                     disabled={!available}
                     onChange={(e) => {
                       if (!available) return;
-                      const id = category.id as SmartCategory;
+                      const id = category.id as SmartControlCategory;
                       setSelected((list) =>
                         e.target.checked
                           ? [...list, id]

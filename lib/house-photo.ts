@@ -39,3 +39,31 @@ export async function saveHousePhoto(householdId: string, photo: Blob) {
     };
   });
 }
+
+// A bundled default follows the app between preview domains; IndexedDB cannot.
+// The original photo still has to be supplied as a repository asset before enabling this manifest.
+export async function readBundledHousePhoto(
+  householdId: string,
+): Promise<string | null> {
+  try {
+    const response = await fetch("/house-photo.json", { cache: "no-store" });
+    if (!response.ok) return null;
+    const value: unknown = await response.json();
+    if (
+      !value ||
+      typeof value !== "object" ||
+      !("householdId" in value) ||
+      !("url" in value)
+    )
+      return null;
+    if (
+      value.householdId !== householdId ||
+      typeof value.url !== "string" ||
+      !/^\/[A-Za-z0-9_/-]+\.(jpg|jpeg|png|webp)$/.test(value.url)
+    )
+      return null;
+    return value.url;
+  } catch {
+    return null;
+  }
+}
