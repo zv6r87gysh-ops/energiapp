@@ -508,9 +508,16 @@ export function InteractiveHouse({
               aria-label="Utebelysning"
               className={exteriorState.on ? "lighting-is-on" : ""}
               data-power={exteriorState.on ? "on" : "off"}
-              aria-pressed={lightingPreview && lightingGroup === "outdoor"}
-              onClick={() => selectLighting()}
-              onFocus={() => selectLighting()}
+              aria-pressed={exteriorState.on}
+              title={
+                exteriorState.on
+                  ? "Släck utebelysningen på bilden"
+                  : "Tänd utebelysningen på bilden"
+              }
+              onClick={() => {
+                clearPreview();
+                onLightingManual("outdoor", !exteriorState.on);
+              }}
             >
               <Lightbulb size={17} />
               Utebelysning <small>{exteriorState.on ? "Tänd" : "Släckt"}</small>
@@ -520,9 +527,16 @@ export function InteractiveHouse({
               aria-label="Poolbelysning"
               className={poolState.on ? "lighting-is-on" : ""}
               data-power={poolState.on ? "on" : "off"}
-              aria-pressed={lightingPreview && lightingGroup === "pool"}
-              onClick={selectPoolLighting}
-              onFocus={selectPoolLighting}
+              aria-pressed={poolState.on}
+              title={
+                poolState.on
+                  ? "Släck poolbelysningen på bilden"
+                  : "Tänd poolbelysningen på bilden"
+              }
+              onClick={() => {
+                clearPreview();
+                onLightingManual("pool", !poolState.on);
+              }}
             >
               <Lightbulb size={17} />
               Poolbelysning <small>{poolState.on ? "Tänd" : "Släckt"}</small>

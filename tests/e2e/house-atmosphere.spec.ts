@@ -57,9 +57,6 @@ test("svensk klocka och regnvisualisering använder prognosen och lamporna sakna
   ).toHaveText("12:00:02");
   await expect(page.locator(".house-rain-field")).toBeVisible();
   await page.getByRole("button", { name: "Utebelysning", exact: true }).click();
-  await page
-    .getByRole("switch", { name: "Förhandsvisa utebelysning", exact: true })
-    .click();
   const overlay = page.getByTestId("outdoor-lighting-overlay");
   await expect(overlay).toHaveAttribute("data-power", "on");
   await expect(overlay.locator("path")).toHaveCount(0);
@@ -106,9 +103,6 @@ test("utomhus- och poolbelysning följer solen; manuellt poolval påverkar inte 
   );
   await page
     .getByRole("button", { name: "Poolbelysning", exact: true })
-    .click();
-  await page
-    .getByRole("switch", { name: "Förhandsvisa poolbelysning", exact: true })
     .click();
   await expect(page.getByTestId("pool-lighting-overlay")).toHaveAttribute(
     "data-power",
@@ -204,11 +198,29 @@ test("bildknapparna ligger i fotot, grönt följer lampornas läge och dagens v�
   expect(nav!.x).toBeGreaterThan(photo!.x);
   expect(nav!.y + nav!.height).toBeLessThan(photo!.y + photo!.height);
   await pool.click();
-  await house
-    .getByRole("switch", { name: "Förhandsvisa poolbelysning", exact: true })
-    .click();
   await expect(pool).not.toHaveClass(/lighting-is-on/);
+  await expect(pool).toHaveAttribute("aria-pressed", "false");
   await expect(outdoor).toHaveClass(/lighting-is-on/);
+  await pool.click();
+  await expect(pool).toHaveAttribute("aria-pressed", "true");
+  await expect(house.getByTestId("pool-lighting-overlay")).toHaveAttribute(
+    "data-power",
+    "on",
+  );
+  await outdoor.click();
+  await expect(outdoor).toHaveAttribute("aria-pressed", "false");
+  await expect(house.getByTestId("outdoor-lighting-overlay")).toHaveAttribute(
+    "data-power",
+    "off",
+  );
+  await expect(pool).toHaveClass(/lighting-is-on/);
+  await outdoor.focus();
+  await page.keyboard.press("Space");
+  await expect(outdoor).toHaveAttribute("aria-pressed", "true");
+  await expect(house.getByTestId("outdoor-lighting-overlay")).toHaveAttribute(
+    "data-power",
+    "on",
+  );
   await page.route("**/api/weather?*", (route) =>
     route.fulfill({
       status: 502,

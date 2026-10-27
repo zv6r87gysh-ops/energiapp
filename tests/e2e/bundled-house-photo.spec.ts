@@ -41,9 +41,6 @@ test("originalfotot är inbyggt och rätt linjerat även i en tom ny session", a
   expect(box!.y - frame!.y).toBeLessThan(20);
   expect(frame!.x + frame!.width - (box!.x + box!.width)).toBeLessThan(20);
   await card.getByRole("button", { name: "Utebelysning", exact: true }).click();
-  await card
-    .getByRole("switch", { name: "Förhandsvisa utebelysning", exact: true })
-    .click();
   await expect(card.getByTestId("outdoor-lighting-overlay")).toHaveAttribute(
     "data-power",
     "on",

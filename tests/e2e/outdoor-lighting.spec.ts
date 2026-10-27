@@ -35,7 +35,7 @@ test("av/på visar spotlights på samma foto, sparas per hushåll och skickar in
     "opacity",
     "0",
   );
-  await card.getByRole("button", { name: "Utebelysning", exact: true }).click();
+  await card.locator('[data-light-hit="left-0"]').click();
   await toggle.click();
   await expect(toggle).toBeChecked();
   await expect(overlay).toHaveAttribute("data-power", "on");
@@ -50,7 +50,7 @@ test("av/på visar spotlights på samma foto, sparas per hushåll och skickar in
     page.getByRole("region", { name: "Utebelysning", exact: true }),
   ).toContainText("Plejd · Ej ansluten");
   await page.reload();
-  await card.getByRole("button", { name: "Utebelysning", exact: true }).click();
+  await card.locator('[data-light-hit="left-0"]').click();
   await expect(toggle).toBeChecked();
   await expect(photo).toBeVisible();
   await toggle.focus();
@@ -140,9 +140,7 @@ test("bilden saknar markeringar i vila och varje ljuspunkt öppnar ett gemensamt
   if (!isMobile) {
     await card.locator('[data-light-hit="left-0"]').hover();
   } else {
-    await card
-      .getByRole("button", { name: "Utebelysning", exact: true })
-      .click();
+    await card.locator('[data-light-hit="left-0"]').click();
   }
   await expect(card.locator(".house-lighting-popover")).toBeVisible();
   const toggle = card.getByRole("switch", {
