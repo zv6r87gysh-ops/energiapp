@@ -100,6 +100,7 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
     card.getByRole("link", { name: "Öppna Golvvärme →", exact: true }),
   ).toHaveAttribute("href", "/golvvarme");
   await expect(card.locator(".house-floor-coils")).toHaveCSS("opacity", "1");
+  await card.locator(".house-photo-visual").hover();
   const photoControls = card.locator(".house-smart-controls");
   await photoControls
     .getByRole("button", { name: "Aktivera smart styrning", exact: true })

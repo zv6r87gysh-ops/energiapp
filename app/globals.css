@@ -2517,3 +2517,108 @@ th {
     scroll-margin: 0;
   }
 }
+
+/* No selected category, labels or outlines until the user points, focuses or taps. */
+.house-photo-pin {
+  opacity: 0;
+}
+.house-photo-pin[aria-pressed="true"],
+.house-photo-pin:focus-visible {
+  opacity: 1;
+}
+.house-cost-tooltip[hidden] {
+  display: none;
+}
+.outdoor-lighting-photo-status {
+  opacity: 0;
+}
+.outdoor-lighting-photo-status.is-visible {
+  opacity: 1;
+}
+.outdoor-light-fixtures {
+  opacity: 0;
+}
+.outdoor-lighting-overlay.is-on .outdoor-light-fixtures {
+  opacity: 1;
+}
+.house-smart-controls {
+  opacity: 0;
+  visibility: hidden;
+}
+.house-photo-scene:hover .house-smart-controls,
+.house-photo-scene:focus-within .house-smart-controls {
+  opacity: 1;
+  visibility: visible;
+}
+.house-category-tabs {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.lighting-hit-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.lighting-hit-overlay circle {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 2;
+  pointer-events: all;
+  cursor: pointer;
+}
+.lighting-hit-overlay path {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 40;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+.lighting-hit-overlay.is-active circle {
+  stroke: #ffe3a099;
+}
+.lighting-hit-overlay g:focus-visible circle {
+  stroke: #ffe3a0;
+}
+.house-lighting-popover {
+  position: absolute;
+  width: 274px;
+  max-width: calc(100% - 16px);
+  transform: translateX(-50%);
+  z-index: 3;
+}
+.house-lighting-popover[hidden] {
+  display: none;
+}
+.house-lighting-popover .outdoor-lighting-control {
+  padding: 12px;
+  margin: 0;
+  background: var(--card);
+  box-shadow: 0 8px 28px #0004;
+  gap: 9px;
+}
+.house-lighting-popover .outdoor-lighting-icon {
+  display: none;
+}
+.house-lighting-popover .outdoor-lighting-copy {
+  min-width: 0;
+  flex-basis: 100%;
+}
+.house-lighting-popover .outdoor-lighting-switch {
+  width: 100%;
+  justify-content: center;
+}
+@media (max-width: 800px) {
+  .house-smart-controls {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+@media (max-width: 600px) {
+  .house-category-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .house-category-tabs > button:first-child {
+    grid-column: 1/-1;
+  }
+}

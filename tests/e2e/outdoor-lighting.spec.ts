@@ -29,6 +29,7 @@ test("av/på visar spotlights på samma foto, sparas per hushåll och skickar in
     "opacity",
     "0",
   );
+  await card.getByRole("button", { name: "Utebelysning", exact: true }).click();
   await toggle.click();
   await expect(toggle).toBeChecked();
   await expect(overlay).toHaveAttribute("data-power", "on");
@@ -43,6 +44,7 @@ test("av/på visar spotlights på samma foto, sparas per hushåll och skickar in
     page.getByRole("region", { name: "Utebelysning", exact: true }),
   ).toContainText("Plejd · Ej ansluten");
   await page.reload();
+  await card.getByRole("button", { name: "Utebelysning", exact: true }).click();
   await expect(toggle).toBeChecked();
   await expect(photo).toBeVisible();
   await toggle.focus();
@@ -108,4 +110,49 @@ test("Plejd-referenser kan förberedas utan falsk anslutning och hålls isär me
       exact: true,
     }),
   ).toBeChecked();
+});
+
+test("bilden saknar markeringar i vila och varje ljuspunkt öppnar ett gemensamt reglage", async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto("/");
+  const card = page.getByRole("region", {
+    name: "Ditt interaktiva hus",
+    exact: true,
+  });
+  await card
+    .getByLabel("Välj husfoto", { exact: true })
+    .setInputFiles(path.resolve("public/icon-512.png"));
+  await expect(
+    card.getByRole("img", { name: /Ditt hus med interaktiva/ }),
+  ).toBeVisible();
+  await expect(card.locator(".house-hit.is-active")).toHaveCount(0);
+  await expect(card.locator(".house-pin-house")).toHaveCSS("opacity", "0");
+  await expect(card.locator(".house-photo-hover-card")).toBeHidden();
+  await expect(card.locator(".house-lighting-popover")).toBeHidden();
+  if (!isMobile) {
+    await card.locator('[data-light-hit="left-0"]').hover();
+  } else {
+    await card
+      .getByRole("button", { name: "Utebelysning", exact: true })
+      .click();
+  }
+  await expect(card.locator(".house-lighting-popover")).toBeVisible();
+  const toggle = card.getByRole("switch", {
+    name: "Förhandsvisa utebelysning",
+    exact: true,
+  });
+  await expect(toggle).not.toBeChecked(); // Hovering itself never toggles power.
+  await toggle.click();
+  await expect(toggle).toBeChecked();
+  await expect(page.getByTestId("outdoor-lighting-overlay")).toHaveAttribute(
+    "data-power",
+    "on",
+  );
+  if (!isMobile) {
+    await page.mouse.move(1, 1);
+    await expect(card.locator(".house-lighting-popover")).toBeHidden();
+    await expect(card.locator(".house-hit.is-active")).toHaveCount(0);
+  }
 });

@@ -218,3 +218,61 @@ export function OutdoorLightingSettings({
     </section>
   );
 }
+
+export function OutdoorLightingHitAreas({
+  onSelect,
+  active,
+}: {
+  onSelect: (point?: readonly number[]) => void;
+  active: boolean;
+}) {
+  return (
+    <svg
+      viewBox="0 0 1596 1422"
+      preserveAspectRatio="none"
+      className={`lighting-hit-overlay ${active ? "is-active" : ""}`}
+      aria-label="Belysningsområden på huset"
+    >
+      <g
+        role="button"
+        tabIndex={0}
+        aria-label="Visa reglage för utebelysning"
+        onFocus={() => onSelect()}
+        onClick={() => onSelect()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect();
+          }
+        }}
+      >
+        {outdoorSpots.map((s) => (
+          <circle
+            key={s.id}
+            data-light-hit={s.id}
+            cx={s.x}
+            cy={s.y}
+            r={s.kind === "wall" ? 30 : 26}
+            onPointerEnter={(e) => {
+              if (e.pointerType === "mouse")
+                onSelect([s.x / 15.96, s.y / 14.22]);
+            }}
+          />
+        ))}
+        {[
+          "M291 932L354 866L417 800L480 740",
+          "M965 989L1322 613",
+          "M62 1227L472 1410",
+        ].map((d) => (
+          <path
+            key={d}
+            d={d}
+            onPointerEnter={(e) => {
+              if (e.pointerType === "mouse") onSelect();
+            }}
+          />
+        ))}
+      </g>
+    </svg>
+  );
+}

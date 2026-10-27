@@ -4,7 +4,7 @@
 
 Översikt har en tydligt märkt **förhandsvisning** med en av/på-knapp. Den tänder och släcker ett SVG-lager på det befintliga, lokalt lagrade husfotot. Originalfotot, dess IndexedDB-nycklar och övriga husmarkeringar ändras inte. Belysningen är schematisk och följer användarens röda markeringar: fyra downlights vid fasad/pergola, fyra markspots längs vänster gång/hedge, sex längs högra terrasskanten och sex längs den främre trädgårdskanten. Positionerna är normaliserade till det ursprungliga husfotots 1596 × 1422 koordinater, inte skärmbildens svarta marginaler eller macOS-verktygsfält.
 
-Tänd förhandsvisning ger varmt ljus med nedåtriktade ljuskäglor, mjuka ljusfläckar och en svag mörkare ton för kontrast i dagsfotot. Detta är en visuell illustration, inte en fysisk ljusberäkning eller information om solens aktuella läge. Släckt förhandsvisning tar bort ljuslagret och visar endast små schematiska armaturpunkter. `prefers-reduced-motion` respekteras.
+Tänd förhandsvisning ger varmt ljus med nedåtriktade ljuskäglor, mjuka ljusfläckar och en svag mörkare ton för kontrast i dagsfotot. Detta är en visuell illustration, inte en fysisk ljusberäkning eller information om solens aktuella läge. Släckt förhandsvisning tar bort ljuslagret. I viloläge visas fotot utan valda kategorier, markörknappar eller armaturpunkter. `prefers-reduced-motion` respekteras.
 
 `Household.outdoorLighting` sparas med hushållets övriga lokala inställningar. Befintliga hushåll börjar med släckt förhandsvisning. Statusen är alltid **Plejd · Ej ansluten**, även om anslutningsreferenser har förberetts. Förhandsvisningens tillstånd är inte lampornas verkliga tillstånd. Ingen förbrukning eller besparing för belysningen fabriceras eller läggs till i energimodellen.
 
@@ -29,3 +29,7 @@ Därefter kan UI:t få ett separat riktigt styrreglage och verifierad status. F�
 ## Verifiering
 
 Enhetstester kontrollerar kompatibilitet med äldre hushåll, validering och att den okonfigurerade adaptern inte utför hårdvaruanrop. Webbläsartester på dator och mobil kontrollerar synliga ljuslager, av/på, tangentbord, sparat foto, omladdning, hushållsseparering, sparade förberedelsereferenser och att inga Plejd-/lighting-kommandon skickas.
+
+### Hovring och reglage i bilden
+
+Hus-/poolkonturer, kategorietiketter och kostnader visas först vid hovring, tangentbordsfokus eller tryck och avmarkeras när pekaren lämnar. Hovring på någon av de 20 ljuspunkterna eller längs de markerade belysningsstråken öppnar ett gemensamt av/på-reglage inne i bildytan. Reglaget nås även via knappen Utebelysning under fotot på mobil och med tangentbord. Hovring öppnar endast reglaget; av/på kräver ett explicit klick/tryck. Den tända ljusförhandsvisningen förblir tänd även när reglaget stängs. Vänstersidans fyra markspots har flyttats 80 bildkoordinater in mot gången, till insidan av häcken. Originalfotot och sparade Plejd-referenser bevaras.
