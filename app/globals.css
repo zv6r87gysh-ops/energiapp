@@ -2356,3 +2356,164 @@ th {
   display: inline;
   color: var(--text);
 }
+
+.outdoor-lighting-control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.outdoor-lighting-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #fff2d1;
+  color: #a16f1b;
+}
+.outdoor-lighting-copy {
+  flex: 1;
+  min-width: 180px;
+}
+.outdoor-lighting-copy strong {
+  font-size: 13px;
+}
+.outdoor-lighting-copy small {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 400;
+}
+.outdoor-lighting-copy p {
+  margin: 5px 0;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.outdoor-lighting-copy a {
+  font-size: 10px;
+  color: var(--muted);
+  text-decoration: underline;
+}
+.outdoor-lighting-switch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lighting-switch-track {
+  display: flex;
+  align-items: center;
+  width: 36px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 20px;
+  background: #82928b;
+}
+.lighting-switch-track > span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+}
+.outdoor-lighting-switch.is-on {
+  border-color: #d9b75b;
+  background: #fff4d6;
+  color: #745319;
+}
+.outdoor-lighting-switch.is-on .lighting-switch-track {
+  background: #bd8d29;
+}
+.outdoor-lighting-switch.is-on .lighting-switch-track > span {
+  transform: translateX(14px);
+}
+.outdoor-lighting-switch:focus-visible {
+  outline: 3px solid #ddb454;
+  outline-offset: 3px;
+}
+.outdoor-lighting-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.outdoor-light-wash {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.outdoor-lighting-overlay.is-on .outdoor-light-wash {
+  opacity: 1;
+}
+.outdoor-lighting-photo-status {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 7px 10px;
+  border: 1px solid #ffffff60;
+  border-radius: 8px;
+  background: #17372ad9;
+  color: #fff6dc;
+  font-size: 10px;
+  pointer-events: none;
+}
+#outdoor-lighting-settings .form-grid > label {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .outdoor-lighting-control {
+    padding: 12px;
+  }
+  .outdoor-lighting-copy {
+    min-width: 150px;
+  }
+  .outdoor-lighting-copy small {
+    display: block;
+    margin: 4px 0 0;
+  }
+  .outdoor-lighting-switch {
+    width: 100%;
+    justify-content: center;
+  }
+  .outdoor-lighting-photo-status {
+    font-size: 8px;
+    top: 8px;
+    left: 8px;
+    padding: 5px 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .outdoor-light-wash,
+  .lighting-switch-track > span {
+    transition: none;
+  }
+}
+@media (max-width: 800px) {
+  html {
+    scroll-padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+  main :is(button, input, select, textarea, a) {
+    scroll-margin-block: calc(90px + env(safe-area-inset-bottom));
+  }
+}
+@media (max-width: 800px) {
+  .modal :is(button, input, select, textarea, a) {
+    scroll-margin: 0;
+  }
+}

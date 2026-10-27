@@ -4,6 +4,11 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Camera, Car, Flame, Home, Waves } from "lucide-react";
 import { readHousePhoto, saveHousePhoto } from "@/lib/house-photo";
 import type { HouseholdSimulation } from "@/lib/simulation/engine";
+import {
+  OutdoorLightingControl,
+  OutdoorLightingOverlay,
+} from "./outdoor-lighting";
+import type { OutdoorLighting } from "@/lib/lighting/contracts";
 import { money } from "@/lib/energy";
 const areas = [
   {
@@ -49,8 +54,12 @@ export function InteractiveHouse({
   householdId,
   simulation,
   controls,
+  lighting,
+  onLightingChange,
 }: {
   controls?: React.ReactNode;
+  lighting: OutdoorLighting;
+  onLightingChange: (lighting: OutdoorLighting) => void;
   householdId: string;
   simulation: HouseholdSimulation | null;
 }) {
@@ -165,6 +174,7 @@ export function InteractiveHouse({
           {photo ? "Byt husfoto" : "Välj ditt husfoto"}
         </button>
       </div>
+      <OutdoorLightingControl lighting={lighting} onChange={onLightingChange} />
       <input
         ref={file}
         className="house-file-input"
@@ -187,6 +197,11 @@ export function InteractiveHouse({
               width={1596}
               height={1422}
             />
+            <OutdoorLightingOverlay on={lighting.previewOn} />
+            <span className="outdoor-lighting-photo-status">
+              Förhandsvisning · utebelysning{" "}
+              {lighting.previewOn ? "tänd" : "släckt"}
+            </span>
             <svg
               viewBox="0 0 1596 1422"
               preserveAspectRatio="none"

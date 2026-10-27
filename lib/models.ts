@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { OutdoorLighting } from "./lighting/contracts";
 import type { ThermalSettings } from "./weather/contracts";
 import type { SmartControl } from "./smart-control";
 import type { DeviceKind } from "./devices";
@@ -144,6 +145,7 @@ export interface Household {
   smart: boolean;
   smartControl?: SmartControl;
   simulationSettings?: SimulationSettings;
+  outdoorLighting?: OutdoorLighting;
   postcode?: string;
   thermalSettings?: ThermalSettings;
 }

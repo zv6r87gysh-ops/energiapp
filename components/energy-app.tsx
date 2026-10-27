@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { PricePanel } from "./price-panel";
+import { readOutdoorLighting } from "@/lib/lighting/contracts";
+import { OutdoorLightingSettings } from "./outdoor-lighting";
 import { InteractiveHouse } from "./interactive-house";
 import { WeatherPanel, WeatherSettings } from "./weather-panel";
 import { useWeather } from "@/lib/weather/use-weather";
@@ -200,6 +202,7 @@ export default function EnergyApp({ section }: { section: string }) {
     setHomes((list) =>
       list.map((h) => (h.id === home.id ? { ...h, ...patch } : h)),
     );
+  const lighting = readOutdoorLighting(home);
   const smartControl = readSmartControl(home);
   const poolMode =
     home.pool.mode === "Smart" && !categoryActive(smartControl, "pool")
@@ -376,6 +379,10 @@ export default function EnergyApp({ section }: { section: string }) {
               key={`house-photo-${home.id}`}
               householdId={home.id}
               simulation={sim}
+              lighting={lighting}
+              onLightingChange={(outdoorLighting) =>
+                update({ outdoorLighting })
+              }
               controls={
                 <SmartControlPanel
                   key={home.id}
@@ -1042,6 +1049,13 @@ export default function EnergyApp({ section }: { section: string }) {
           )}
           {section === "installningar" && (
             <>
+              {loaded && (
+                <OutdoorLightingSettings
+                  key={`lighting-settings-${home.id}`}
+                  lighting={lighting}
+                  onSave={(outdoorLighting) => update({ outdoorLighting })}
+                />
+              )}
               {loaded && (
                 <WeatherSettings
                   key={`weather-settings-${home.id}-${JSON.stringify(home.thermalSettings)}`}
