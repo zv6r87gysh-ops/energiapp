@@ -24,6 +24,7 @@ export function useWeather(
   const [result, setResult] = useState<{
     key: string;
     data: Weather | null;
+    location?: { latitude: number; longitude: number };
     message: string;
   } | null>(null);
   useEffect(() => {
@@ -53,15 +54,22 @@ export function useWeather(
             "Prognosen gäller fel plats eller är inaktuell. Kontrollera även datum och klocka på din enhet.",
           );
         retryAfter = Date.parse(data.expiresAt);
-        if (mounted) setResult({ key, data, message: "" });
-      } catch (error) {
-        retryAfter = Date.now() + 60000;
         if (mounted)
           setResult({
             key,
-            data: null,
-            message: `${error instanceof Error ? error.message : "Väderprognosen kunde inte hämtas."} Inga demovärden används.`,
+            data,
+            location: { latitude: data.latitude, longitude: data.longitude },
+            message: "",
           });
+      } catch (error) {
+        retryAfter = Date.now() + 60000;
+        if (mounted)
+          setResult((previous) => ({
+            key,
+            data: null,
+            location: previous?.key === key ? previous.location : undefined,
+            message: `${error instanceof Error ? error.message : "Väderprognosen kunde inte hämtas."} Inga demovärden används.`,
+          }));
       } finally {
         busy = false;
       }
@@ -101,10 +109,19 @@ export function useWeather(
   );
   return {
     refresh: () => {
-      setResult(null);
+      setResult((previous) =>
+        previous?.key === key
+          ? {
+              ...previous,
+              data: null,
+              message: "Hämtar prognos från MET Norway…",
+            }
+          : null,
+      );
       setAttempt((n) => n + 1);
     },
     weather,
+    location: result?.key === key ? (result.location ?? null) : null,
     learning,
     plan,
     message: !code

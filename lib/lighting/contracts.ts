@@ -10,6 +10,7 @@ const reference = z
   );
 export const outdoorLightingSchema = z.object({
   previewOn: z.boolean(),
+  poolPreviewOn: z.boolean().optional(),
   provider: z.literal("plejd"),
   binding: z
     .object({ bridgeReference: reference, groupReference: reference })

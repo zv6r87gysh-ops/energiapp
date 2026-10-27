@@ -2678,3 +2678,148 @@ th {
     font-size: 0;
   }
 }
+
+.house-scene-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 0 0 14px;
+}
+.house-clock {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-variant-numeric: tabular-nums;
+}
+.house-clock time {
+  font-size: 17px;
+  font-weight: 600;
+}
+.house-clock small,
+.house-scene-info > span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.house-scene-info > small {
+  flex-basis: 100%;
+  font-size: 9px;
+  color: var(--muted);
+}
+.house-photo-visual > img {
+  transition: filter 2s linear;
+}
+.house-atmosphere {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.house-atmosphere > div,
+.house-precipitation {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.house-night-wash {
+  background: linear-gradient(150deg, #061a4e30, #07172b26);
+}
+.house-sun-wash {
+  background: radial-gradient(ellipse at 15% 0%, #fff1bb42, transparent 65%);
+  mix-blend-mode: soft-light;
+}
+.house-cloud-wash {
+  background: linear-gradient(135deg, #e2edf31c, #21374b26 50%, #e6eef414);
+}
+.scene-partly .house-cloud-wash {
+  opacity: 0.45;
+}
+.house-fog-wash {
+  background: linear-gradient(180deg, #d8e2e966, #dce5e92b);
+}
+.house-rain-field {
+  animation: house-rain-fall 0.8s linear infinite;
+}
+.house-snow-field {
+  animation: house-snow-fall 9s linear infinite;
+}
+@keyframes house-rain-fall {
+  from {
+    transform: translate(0, -60px);
+  }
+  to {
+    transform: translate(-18px, 50px);
+  }
+}
+@keyframes house-snow-fall {
+  from {
+    transform: translate(0, -60px);
+  }
+  to {
+    transform: translate(12px, 40px);
+  }
+}
+/* Light is texture-preserving local illumination, not beams or fixture icons. */
+.lighting-hit-overlay.is-active circle {
+  stroke: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .house-photo-visual > img {
+    transition: none;
+  }
+  .house-rain-field,
+  .house-snow-field {
+    animation: none;
+  }
+}
+.smart-category.smart-subcategory {
+  margin-left: 24px;
+  border-left: 3px solid #71b69b;
+}
+.house-category-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 600px) {
+  .house-category-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .house-category-tabs > button:first-child {
+    grid-column: auto;
+  }
+}
+.pool-lamp-hit:focus-visible {
+  stroke: #8be6ff;
+}
+.house-photo-heading h1 {
+  margin: 6px 0 0;
+  font-size: 18px;
+  line-height: 1.3;
+}
+.house-photo-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+  max-width: 100%;
+}
+.house-photo-actions select {
+  max-width: 210px;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .house-photo-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .house-photo-actions select {
+    flex: 1;
+    max-width: 100%;
+    width: 140px;
+  }
+  .house-photo-actions .button {
+    font-size: 11px;
+    padding: 10px;
+  }
+}

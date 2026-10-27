@@ -28,7 +28,7 @@ import {
 import { Button } from "./ui/button";
 import { PricePanel } from "./price-panel";
 import { readOutdoorLighting } from "@/lib/lighting/contracts";
-import { OutdoorLightingSettings } from "./outdoor-lighting";
+import { OutdoorLightingSettings, PoolLightingPanel } from "./outdoor-lighting";
 import { InteractiveHouse } from "./interactive-house";
 import { WeatherPanel, WeatherSettings } from "./weather-panel";
 import { useWeather } from "@/lib/weather/use-weather";
@@ -204,6 +204,23 @@ export default function EnergyApp({ section }: { section: string }) {
     );
   const lighting = readOutdoorLighting(home);
   const smartControl = readSmartControl(home);
+  function setManualLighting(group: "outdoor" | "pool", on: boolean) {
+    const category = group === "pool" ? "pool-lighting" : "outdoor-lighting";
+    const next = smartControl.categories.includes(category)
+      ? applySmartControl(
+          home,
+          changeSmartCategory(smartControl, category, false),
+        )
+      : home;
+    update({
+      ...next,
+      outdoorLighting: {
+        ...lighting,
+        ...(group === "pool" ? { poolPreviewOn: on } : { previewOn: on }),
+      },
+    });
+  }
+
   const poolMode =
     home.pool.mode === "Smart" && !categoryActive(smartControl, "pool")
       ? "Manuellt"
@@ -347,42 +364,56 @@ export default function EnergyApp({ section }: { section: string }) {
           </div>
         </header>
         <main>
-          <div className="page-heading">
-            <div>
-              <div className="eyebrow">DITT HEM, I BALANS</div>
-              <h1>
-                {section === "oversikt" ? "God dag, välkommen hem" : title}
-                <span className="heading-dot">.</span>
-              </h1>
-              <p>
-                {section === "oversikt"
-                  ? "Här är läget för din energi. Lite mer insikt, lite mindre kostnad."
-                  : section === "elpriser"
+          {section !== "oversikt" && (
+            <div className="page-heading">
+              <div>
+                <div className="eyebrow">DITT HEM, I BALANS</div>
+                <h1>
+                  {title}
+                  <span className="heading-dot">.</span>
+                </h1>
+                <p>
+                  {section === "elpriser"
                     ? "Publicerade spotpriser visas bara när källan är verifierad och tillgänglig."
                     : "Din energi, samlad på ett ställe. Hushållsvärdena är simulerade."}
-              </p>
+                </p>
+              </div>
+              <select
+                aria-label="Aktivt hushåll"
+                value={home.id}
+                onChange={(e) => setActive(e.target.value)}
+              >
+                {homes.map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {h.name}
+                  </option>
+                ))}
+              </select>
             </div>
-            <select
-              aria-label="Aktivt hushåll"
-              value={home.id}
-              onChange={(e) => setActive(e.target.value)}
-            >
-              {homes.map((h) => (
-                <option key={h.id} value={h.id}>
-                  {h.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          )}
           {section === "oversikt" && (
             <InteractiveHouse
               key={`house-photo-${home.id}`}
               householdId={home.id}
+              householdSelector={
+                <select
+                  aria-label="Aktivt hushåll"
+                  value={home.id}
+                  onChange={(e) => setActive(e.target.value)}
+                >
+                  {homes.map((h) => (
+                    <option key={h.id} value={h.id}>
+                      {h.name}
+                    </option>
+                  ))}
+                </select>
+              }
               simulation={sim}
               lighting={lighting}
-              onLightingChange={(outdoorLighting) =>
-                update({ outdoorLighting })
-              }
+              weather={outdoor.weather}
+              location={outdoor.location}
+              smartControl={smartControl}
+              onLightingManual={(group, on) => setManualLighting(group, on)}
               controls={
                 <SmartControlPanel
                   key={home.id}
@@ -601,6 +632,13 @@ export default function EnergyApp({ section }: { section: string }) {
           )}
           {section === "pool" && (
             <>
+              <PoolLightingPanel
+                lighting={lighting}
+                control={smartControl}
+                weather={outdoor.weather}
+                location={outdoor.location}
+                onManual={(on) => setManualLighting("pool", on)}
+              />
               <div className="metrics">
                 <Metric
                   label="Vattentemperatur"

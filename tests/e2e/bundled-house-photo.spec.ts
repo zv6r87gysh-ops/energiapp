@@ -23,7 +23,7 @@ test("originalfotot är inbyggt och rätt linjerat även i en tom ny session", a
   const viewBox = await card
     .locator(".house-photo-overlay")
     .getAttribute("viewBox");
-  await expect(card.locator(".outdoor-lighting-overlay")).toHaveAttribute(
+  await expect(card.getByTestId("outdoor-lighting-overlay")).toHaveAttribute(
     "viewBox",
     viewBox!,
   );
@@ -44,7 +44,7 @@ test("originalfotot är inbyggt och rätt linjerat även i en tom ny session", a
   await card
     .getByRole("switch", { name: "Förhandsvisa utebelysning", exact: true })
     .click();
-  await expect(card.locator(".outdoor-lighting-overlay")).toHaveAttribute(
+  await expect(card.getByTestId("outdoor-lighting-overlay")).toHaveAttribute(
     "data-power",
     "on",
   );

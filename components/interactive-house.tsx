@@ -12,9 +12,20 @@ import {
   OutdoorLightingControl,
   OutdoorLightingOverlay,
   OutdoorLightingHitAreas,
+  PoolLightingOverlay,
 } from "./outdoor-lighting";
+import { poolLamp } from "@/lib/lighting/spots";
+import { lightingPower } from "@/lib/lighting/automation";
+import type { SmartControl } from "@/lib/smart-control";
 import type { OutdoorLighting } from "@/lib/lighting/contracts";
 import { housePhotoLayout, photoPoint } from "@/lib/house-photo-layout";
+import {
+  HouseClock,
+  HouseWeatherEffects,
+  useHouseAtmosphere,
+} from "./house-atmosphere";
+import type { Weather } from "@/lib/weather/contracts";
+import type { SceneLocation } from "@/lib/scene/atmosphere";
 import { money } from "@/lib/energy";
 const areas = [
   {
@@ -58,23 +69,35 @@ const areas = [
 type AreaId = (typeof areas)[number]["id"];
 export function InteractiveHouse({
   householdId,
+  householdSelector,
   simulation,
   controls,
   lighting,
-  onLightingChange,
+  onLightingManual,
+  smartControl,
+  weather,
+  location,
 }: {
   controls?: React.ReactNode;
+  householdSelector?: React.ReactNode;
+  weather: Weather | null;
+  location: SceneLocation | null;
   lighting: OutdoorLighting;
-  onLightingChange: (lighting: OutdoorLighting) => void;
+  onLightingManual: (group: "outdoor" | "pool", on: boolean) => void;
+  smartControl: SmartControl;
   householdId: string;
   simulation: HouseholdSimulation | null;
 }) {
+  const atmosphere = useHouseAtmosphere(weather, location);
   const [photo, setPhoto] = useState<string | null>(null);
   const [layout, setLayout] = useState(() => housePhotoLayout(1596, 1422));
   const [active, setActive] = useState<AreaId>("house");
   const [error, setError] = useState("");
   const [preview, setPreview] = useState(false);
   const [lightingPreview, setLightingPreview] = useState(false);
+  const [lightingGroup, setLightingGroup] = useState<"outdoor" | "pool">(
+    "outdoor",
+  );
   const [lightingPoint, setLightingPoint] = useState<readonly number[]>([
     72, 52,
   ]);
@@ -103,7 +126,11 @@ export function InteractiveHouse({
     setActive(id);
     setPreview(true);
   }
-  function selectLighting(point: readonly number[] = [72, 52]) {
+  function selectLighting(
+    point: readonly number[] = [72, 52],
+    group: "outdoor" | "pool" = "outdoor",
+  ) {
+    setLightingGroup(group);
     cancelHide();
     setPreview(false);
     setLightingPoint(point);
@@ -201,6 +228,26 @@ export function InteractiveHouse({
         : houseCost;
   const area = areas.find((a) => a.id === active)!;
   const savings = simulation?.continuousComparison[active] ?? null;
+  const exteriorState = lightingPower(
+    lighting,
+    smartControl,
+    "outdoor",
+    atmosphere?.altitude ?? null,
+  );
+  const poolState = lightingPower(
+    lighting,
+    smartControl,
+    "pool",
+    atmosphere?.altitude ?? null,
+  );
+  const shownLighting = {
+    ...lighting,
+    previewOn: exteriorState.on,
+    poolPreviewOn: poolState.on,
+  };
+  function selectPoolLighting() {
+    selectLighting([poolLamp.x / 15.96, poolLamp.y / 14.22], "pool");
+  }
   const areaPoint = photoPoint(area.point, layout);
   const lightPoint = photoPoint(lightingPoint, layout);
   return (
@@ -214,20 +261,25 @@ export function InteractiveHouse({
       <div className="house-photo-heading">
         <div>
           <span className="eyebrow">DITT HEM</span>
-          <h2>Utforska ditt hus</h2>
+          <h1>Utforska ditt hus</h1>
         </div>
-        <button
-          className="button secondary"
-          onClick={() => file.current?.click()}
-        >
-          <Camera size={16} />
-          {photo ? "Byt husfoto" : "Välj ditt husfoto"}
-        </button>
+        <div className="house-photo-actions">
+          {householdSelector}
+          <button
+            className="button secondary"
+            onClick={() => file.current?.click()}
+          >
+            <Camera size={16} />
+            {photo ? "Byt husfoto" : "Välj ditt husfoto"}
+          </button>
+        </div>
       </div>
+      <HouseClock scene={atmosphere} />
       {!photo && (
         <OutdoorLightingControl
-          lighting={lighting}
-          onChange={onLightingChange}
+          lighting={shownLighting}
+          automationLabel={exteriorState.label}
+          onChange={(next) => onLightingManual("outdoor", next.previewOn)}
         />
       )}
       <input
@@ -253,7 +305,7 @@ export function InteractiveHouse({
               const target = e.target as Element;
               if (
                 target.closest(
-                  ".house-hit,.house-photo-pin,.lighting-hit-overlay g,.house-lighting-popover,.house-photo-hover-card",
+                  ".house-hit,.house-photo-pin,.lighting-hit-overlay g,.pool-lamp-hit,.house-lighting-popover,.house-photo-hover-card",
                 )
               )
                 cancelHide();
@@ -269,6 +321,12 @@ export function InteractiveHouse({
               alt="Ditt hus med interaktiva markeringar för huset, golvvärmen, poolen och billaddaren"
               width={1596}
               height={1422}
+              data-season={atmosphere?.season}
+              style={{
+                filter: atmosphere
+                  ? `brightness(${atmosphere.brightness}) saturate(${atmosphere.season === "winter" ? 0.72 : atmosphere.season === "summer" ? 1.08 : 0.94}) sepia(${atmosphere.season === "autumn" ? 0.12 : 0.02})`
+                  : undefined,
+              }}
               onLoad={(event) =>
                 setLayout(
                   housePhotoLayout(
@@ -278,15 +336,27 @@ export function InteractiveHouse({
                 )
               }
             />
+            <HouseWeatherEffects scene={atmosphere} />
             <OutdoorLightingOverlay
-              on={lighting.previewOn}
+              on={exteriorState.on}
               viewBox={layout.viewBox}
+              photo={photo}
+              brightness={atmosphere?.brightness ?? 1}
+            />
+            <PoolLightingOverlay
+              on={poolState.on}
+              photo={photo}
+              viewBox={layout.viewBox}
+              brightness={atmosphere?.brightness ?? 1}
             />
             <span
               className={`outdoor-lighting-photo-status ${lightingPreview ? "is-visible" : ""}`}
             >
-              Förhandsvisning · utebelysning{" "}
-              {lighting.previewOn ? "tänd" : "släckt"}
+              Förhandsvisning ·{" "}
+              {lightingGroup === "pool" ? "poolbelysning" : "utebelysning"}{" "}
+              {(lightingGroup === "pool" ? poolState.on : exteriorState.on)
+                ? "tänd"
+                : "släckt"}
             </span>
             <svg
               viewBox={layout.viewBox}
@@ -334,6 +404,7 @@ export function InteractiveHouse({
             <OutdoorLightingHitAreas
               active={lightingPreview}
               onSelect={selectLighting}
+              onPoolSelect={selectPoolLighting}
               viewBox={layout.viewBox}
             />
             <div
@@ -346,8 +417,21 @@ export function InteractiveHouse({
               onPointerEnter={cancelHide}
             >
               <OutdoorLightingControl
-                lighting={lighting}
-                onChange={onLightingChange}
+                lighting={shownLighting}
+                kind={lightingGroup}
+                automationLabel={
+                  lightingGroup === "pool"
+                    ? poolState.label
+                    : exteriorState.label
+                }
+                onChange={(next) =>
+                  onLightingManual(
+                    lightingGroup,
+                    lightingGroup === "pool"
+                      ? (next.poolPreviewOn ?? false)
+                      : next.previewOn,
+                  )
+                }
               />
             </div>
             {areas.map((a) => {
@@ -419,12 +503,21 @@ export function InteractiveHouse({
       <div className="house-category-tabs" aria-label="Välj område på huset">
         <button
           type="button"
-          aria-pressed={lightingPreview}
+          aria-pressed={lightingPreview && lightingGroup === "outdoor"}
           onClick={() => selectLighting()}
           onFocus={() => selectLighting()}
         >
           <Lightbulb size={17} />
           Utebelysning
+        </button>
+        <button
+          type="button"
+          aria-pressed={lightingPreview && lightingGroup === "pool"}
+          onClick={selectPoolLighting}
+          onFocus={selectPoolLighting}
+        >
+          <Lightbulb size={17} />
+          Poolbelysning
         </button>
         {areas.map((a) => {
           const Icon = a.icon;

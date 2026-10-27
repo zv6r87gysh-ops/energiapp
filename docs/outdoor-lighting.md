@@ -4,7 +4,7 @@
 
 Översikt har en tydligt märkt **förhandsvisning** med en av/på-knapp. Den tänder och släcker ett SVG-lager på det befintliga, lokalt lagrade husfotot. Originalfotot, dess IndexedDB-nycklar och övriga husmarkeringar ändras inte. Belysningen är schematisk och följer användarens röda markeringar: fyra downlights vid fasad/pergola, fyra markspots längs vänster gång/hedge, sex längs högra terrasskanten och sex längs den främre trädgårdskanten. Positionerna är normaliserade till det ursprungliga husfotots 1596 × 1422 koordinater, inte skärmbildens svarta marginaler eller macOS-verktygsfält.
 
-Tänd förhandsvisning ger varmt ljus med nedåtriktade ljuskäglor, mjuka ljusfläckar och en svag mörkare ton för kontrast i dagsfotot. Detta är en visuell illustration, inte en fysisk ljusberäkning eller information om solens aktuella läge. Släckt förhandsvisning tar bort ljuslagret. I viloläge visas fotot utan valda kategorier, markörknappar eller armaturpunkter. `prefers-reduced-motion` respekteras.
+Tänd förhandsvisning ger en varm, mjuk lokal uppljusning av fotots egen textur. Strålkäglor och armaturikoner är borttagna. Dagsljuset styrs separat av platsens solhöjd. Detta är en visuell illustration, inte en fysisk ljusberäkning eller information om solens aktuella läge. Släckt förhandsvisning tar bort ljuslagret. I viloläge visas fotot utan valda kategorier, markörknappar eller armaturpunkter. `prefers-reduced-motion` respekteras.
 
 `Household.outdoorLighting` sparas med hushållets övriga lokala inställningar. Befintliga hushåll börjar med släckt förhandsvisning. Statusen är alltid **Plejd · Ej ansluten**, även om anslutningsreferenser har förberetts. Förhandsvisningens tillstånd är inte lampornas verkliga tillstånd. Ingen förbrukning eller besparing för belysningen fabriceras eller läggs till i energimodellen.
 
@@ -45,3 +45,5 @@ Lokalt valt foto har företräde och dess lagring ändras inte. Saknas lokal bil
 Originalfilen är 1448 × 1086 och har ett bredare utsnitt än den första chattbilden (1596 × 1422). `lib/house-photo-layout.ts` anpassar därför SVG-vy, markörer och hovringsrutor för originalbilden. Samma kalibrering används för huskonturer, ljuseffekter och belysningens träffområden. Uppladdade äldre beskärningar behåller sitt tidigare koordinatsystem.
 
 Vänstersidans fyra ljuspunkter är nu placerade längs häckens mittlinje i originalfotot, bort från gångens poolkant. Förhandsvisningens träffområde följer samma fyra positioner. Placeringen har kontrollerats visuellt på den inbyggda originalbilden.
+
+Utebelysningen och den separata poollampan kan nu väljas för solstyrd förhandsvisning i smartdialogen. Klocka, väder och årstidsvisualisering samt manuella överstyrningar beskrivs i [house-atmosphere.md](house-atmosphere.md). Verklig hårdvarustyrning är fortfarande inte ansluten.

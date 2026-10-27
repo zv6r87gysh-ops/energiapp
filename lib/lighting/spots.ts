@@ -28,3 +28,6 @@ export const outdoorSpots = [
     [472, 1410],
   ].map(([x, y], i) => ({ id: `garden-${i}`, x, y, kind: "garden" })),
 ];
+
+// Underwater lamp just inside the long pool wall nearest the house.
+export const poolLamp = { x: 650, y: 973 };

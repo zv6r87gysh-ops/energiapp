@@ -49,8 +49,8 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
     card.getByText("Lägg till fotot på ditt hus", { exact: true }),
   ).toBeVisible();
   expect(
-    await card.evaluate((element) =>
-      element.previousElementSibling?.classList.contains("page-heading"),
+    await card.evaluate(
+      (element) => element.parentElement?.firstElementChild === element,
     ),
   ).toBe(true);
   await card

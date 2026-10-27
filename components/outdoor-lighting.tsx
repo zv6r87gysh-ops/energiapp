@@ -2,33 +2,50 @@
 import Link from "next/link";
 import { useId, useState } from "react";
 import { Lightbulb, LightbulbOff } from "lucide-react";
+import { useHouseAtmosphere } from "./house-atmosphere";
+import { lightingPower } from "@/lib/lighting/automation";
+import type { SmartControl } from "@/lib/smart-control";
+import type { Weather } from "@/lib/weather/contracts";
+import type { SceneLocation } from "@/lib/scene/atmosphere";
 import { Button } from "./ui/button";
 import {
   outdoorLightingSchema,
   type OutdoorLighting,
 } from "@/lib/lighting/contracts";
-import { outdoorSpots } from "@/lib/lighting/spots";
+import { poolLamp, outdoorSpots } from "@/lib/lighting/spots";
 export function OutdoorLightingControl({
   lighting,
   onChange,
+  kind = "outdoor",
+  automationLabel,
 }: {
+  kind?: "outdoor" | "pool";
+  automationLabel?: string;
   lighting: OutdoorLighting;
   onChange: (lighting: OutdoorLighting) => void;
 }) {
+  const on =
+    kind === "pool" ? (lighting.poolPreviewOn ?? false) : lighting.previewOn;
+  const title = kind === "pool" ? "Poolbelysning" : "Utebelysning";
   return (
-    <section className="outdoor-lighting-control" aria-label="Utebelysning">
+    <section className="outdoor-lighting-control" aria-label={title}>
       <div className="outdoor-lighting-icon">
-        {lighting.previewOn ? (
-          <Lightbulb size={22} />
-        ) : (
-          <LightbulbOff size={22} />
-        )}
+        {on ? <Lightbulb size={22} /> : <LightbulbOff size={22} />}
       </div>
       <div className="outdoor-lighting-copy">
         <strong>
-          Utebelysning <small>Plejd · Ej ansluten</small>
+          {title}{" "}
+          <small>
+            {kind === "pool" ? "Ej ansluten" : "Plejd · Ej ansluten"}
+          </small>
         </strong>
         <p>Förhandsvisning på bilden. Inga riktiga lampor styrs ännu.</p>
+        {automationLabel && (
+          <p>
+            {automationLabel} Manuellt val lämnar solstyrning för denna
+            ljusgrupp.
+          </p>
+        )}
         <Link href="/installningar#outdoor-lighting-settings">
           Förbered Plejd-anslutning →
         </Link>
@@ -36,17 +53,24 @@ export function OutdoorLightingControl({
       <button
         type="button"
         role="switch"
-        aria-label="Förhandsvisa utebelysning"
-        aria-checked={lighting.previewOn}
-        className={`outdoor-lighting-switch ${lighting.previewOn ? "is-on" : ""}`}
+        aria-label={
+          kind === "pool"
+            ? "Förhandsvisa poolbelysning"
+            : "Förhandsvisa utebelysning"
+        }
+        aria-checked={on}
+        className={`outdoor-lighting-switch ${on ? "is-on" : ""}`}
         onClick={() =>
-          onChange({ ...lighting, previewOn: !lighting.previewOn })
+          onChange({
+            ...lighting,
+            ...(kind === "pool" ? { poolPreviewOn: !on } : { previewOn: !on }),
+          })
         }
       >
         <span className="lighting-switch-track" aria-hidden="true">
           <span />
         </span>
-        {lighting.previewOn ? "Släck på bilden" : "Tänd på bilden"}
+        {on ? "Släck på bilden" : "Tänd på bilden"}
       </button>
     </section>
   );
@@ -54,11 +78,17 @@ export function OutdoorLightingControl({
 export function OutdoorLightingOverlay({
   on,
   viewBox = "0 0 1596 1422",
+  photo,
+  brightness = 1,
 }: {
   on: boolean;
   viewBox?: string;
+  photo: string;
+  brightness?: number;
 }) {
   const id = useId().replace(/:/g, "");
+  const [x, y, width, height] = viewBox.split(/\s+/).map(Number);
+  const lift = Math.min(1.16, Math.max(0.6, brightness + 0.18));
   return (
     <svg
       className={`outdoor-lighting-overlay ${on ? "is-on" : ""}`}
@@ -69,91 +99,69 @@ export function OutdoorLightingOverlay({
       aria-hidden="true"
     >
       <defs>
-        <radialGradient id={`${id}-pool`}>
-          <stop offset="0" stopColor="#fff5ca" stopOpacity=".95" />
-          <stop offset=".4" stopColor="#ffd77b" stopOpacity=".55" />
-          <stop offset="1" stopColor="#ffc56a" stopOpacity="0" />
+        <radialGradient id={`${id}-soft`}>
+          <stop offset="0" stopColor="white" stopOpacity=".96" />
+          <stop offset=".35" stopColor="white" stopOpacity=".7" />
+          <stop offset="1" stopColor="white" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id={`${id}-beam`} x1="0" x2="0" y1="0" y2="1">
-          <stop stopColor="#fff5cf" stopOpacity=".8" />
-          <stop offset=".55" stopColor="#ffde9c" stopOpacity=".35" />
-          <stop offset="1" stopColor="#ffd18a" stopOpacity="0" />
-        </linearGradient>
-        <filter
-          id={`${id}-glow`}
-          x="-150%"
-          y="-150%"
-          width="400%"
-          height="400%"
+        <mask
+          id={`${id}-areas`}
+          maskUnits="userSpaceOnUse"
+          x={x}
+          y={y}
+          width={width}
+          height={height}
         >
-          <feGaussianBlur stdDeviation="7" />
-        </filter>
-      </defs>
-      <g className="outdoor-light-wash">
-        <rect
-          x="-500"
-          y="-500"
-          width="3000"
-          height="3000"
-          fill="#071b24"
-          opacity=".13"
-        />
-        {outdoorSpots.map((s) => (
-          <g key={s.id} data-spot={s.id}>
-            {s.kind === "wall" ? (
-              <>
-                <path
-                  d={`M${s.x - 4} ${s.y} L${s.x - 43} ${s.y + 125} Q${s.x} ${s.y + 157} ${s.x + 43} ${s.y + 125} L${s.x + 4} ${s.y}Z`}
-                  fill={`url(#${id}-beam)`}
-                />
-                <ellipse
-                  cx={s.x}
-                  cy={s.y + 100}
-                  rx="54"
-                  ry="67"
-                  fill={`url(#${id}-pool)`}
-                />
-              </>
-            ) : (
+          <rect x={x} y={y} width={width} height={height} fill="black" />
+          {outdoorSpots.map((s) => (
+            <g key={s.id} data-spot={s.id}>
               <ellipse
                 cx={
-                  s.x + (s.kind === "right" ? 28 : s.kind === "left" ? -23 : 15)
+                  s.x +
+                  (s.kind === "right"
+                    ? 20
+                    : s.kind === "left"
+                      ? -12
+                      : s.kind === "garden"
+                        ? 10
+                        : 0)
                 }
-                cy={s.y + (s.kind === "garden" ? -28 : -6)}
-                rx={s.kind === "garden" ? 62 : 42}
-                ry={s.kind === "garden" ? 38 : 27}
-                transform={`rotate(${s.kind === "right" ? -45 : s.kind === "left" ? -48 : 25} ${s.x} ${s.y})`}
-                fill={`url(#${id}-pool)`}
+                cy={
+                  s.y + (s.kind === "wall" ? 60 : s.kind === "garden" ? -20 : 0)
+                }
+                rx={s.kind === "wall" ? 76 : s.kind === "garden" ? 78 : 65}
+                ry={s.kind === "wall" ? 112 : 48}
+                fill={`url(#${id}-soft)`}
               />
-            )}
-            <circle
-              cx={s.x}
-              cy={s.y}
-              r="15"
-              fill="#ffdf91"
-              filter={`url(#${id}-glow)`}
-            />
-            <circle
-              cx={s.x}
-              cy={s.y}
-              r={s.kind === "wall" ? 4 : 3}
-              fill="#fff8dc"
-            />
-          </g>
-        ))}
-      </g>
-      <g className="outdoor-light-fixtures">
-        {outdoorSpots.map((s) => (
-          <circle
-            key={s.id}
-            cx={s.x}
-            cy={s.y}
-            r={s.kind === "wall" ? 3 : 2}
-            fill={on ? "#fff8dc" : "#52605b"}
-            stroke={on ? "#ffe9af" : "#a6b1a6"}
-            strokeWidth="1"
-          />
-        ))}
+            </g>
+          ))}
+        </mask>
+        <filter id={`${id}-warm`}>
+          <feComponentTransfer>
+            <feFuncR type="linear" slope={lift * 1.1} />
+            <feFuncG type="linear" slope={lift * 1.02} />
+            <feFuncB type="linear" slope={lift * 0.84} />
+          </feComponentTransfer>
+        </filter>
+      </defs>
+      <g className="outdoor-light-wash" mask={`url(#${id}-areas)`}>
+        <image
+          href={photo}
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          preserveAspectRatio="none"
+          filter={`url(#${id}-warm)`}
+        />
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          fill="#ffd98b"
+          opacity=".13"
+        />
       </g>
     </svg>
   );
@@ -235,10 +243,12 @@ export function OutdoorLightingSettings({
 export function OutdoorLightingHitAreas({
   onSelect,
   active,
+  onPoolSelect,
   viewBox = "0 0 1596 1422",
 }: {
   onSelect: (point?: readonly number[]) => void;
   active: boolean;
+  onPoolSelect: () => void;
   viewBox?: string;
 }) {
   return (
@@ -288,6 +298,141 @@ export function OutdoorLightingHitAreas({
           />
         ))}
       </g>
+      <circle
+        className="pool-lamp-hit"
+        data-light-hit="pool-lamp"
+        cx={poolLamp.x}
+        cy={poolLamp.y}
+        r="28"
+        role="button"
+        tabIndex={0}
+        aria-label="Visa reglage för poolbelysning"
+        onPointerEnter={(e) => {
+          if (e.pointerType === "mouse") onPoolSelect();
+        }}
+        onFocus={onPoolSelect}
+        onClick={onPoolSelect}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onPoolSelect();
+          }
+        }}
+      />
     </svg>
+  );
+}
+
+export function PoolLightingOverlay({
+  on,
+  photo,
+  viewBox,
+  brightness,
+}: {
+  on: boolean;
+  photo: string;
+  viewBox: string;
+  brightness: number;
+}) {
+  const id = useId().replace(/:/g, "");
+  const [x, y, w, h] = viewBox.split(/\s+/).map(Number);
+  return (
+    <svg
+      className={`outdoor-lighting-overlay pool-lighting-overlay ${on ? "is-on" : ""}`}
+      data-testid="pool-lighting-overlay"
+      data-power={on ? "on" : "off"}
+      viewBox={viewBox}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id={`${id}-water`}>
+          <stop stopColor="white" stopOpacity=".95" />
+          <stop offset=".5" stopColor="white" stopOpacity=".6" />
+          <stop offset="1" stopColor="white" stopOpacity="0" />
+        </radialGradient>
+        <clipPath id={`${id}-pool`}>
+          <polygon points="438,856 869,1067 744,1187 305,971" />
+        </clipPath>
+        <mask
+          id={`${id}-glow`}
+          maskUnits="userSpaceOnUse"
+          x={x}
+          y={y}
+          width={w}
+          height={h}
+        >
+          <rect x={x} y={y} width={w} height={h} fill="black" />
+          <ellipse
+            cx={poolLamp.x}
+            cy={poolLamp.y + 35}
+            rx="220"
+            ry="145"
+            fill={`url(#${id}-water)`}
+          />
+        </mask>
+        <filter id={`${id}-bright`}>
+          <feComponentTransfer>
+            <feFuncR
+              type="linear"
+              slope={Math.max(0.5, brightness + 0.1) * 0.8}
+            />
+            <feFuncG
+              type="linear"
+              slope={Math.max(0.65, brightness + 0.15) * 1.05}
+            />
+            <feFuncB
+              type="linear"
+              slope={Math.max(0.8, brightness + 0.2) * 1.2}
+            />
+          </feComponentTransfer>
+        </filter>
+      </defs>
+      <g
+        className="outdoor-light-wash"
+        clipPath={`url(#${id}-pool)`}
+        mask={`url(#${id}-glow)`}
+      >
+        <image
+          href={photo}
+          x={x}
+          y={y}
+          width={w}
+          height={h}
+          preserveAspectRatio="none"
+          filter={`url(#${id}-bright)`}
+        />
+        <rect x={x} y={y} width={w} height={h} fill="#81ebff" opacity=".25" />
+      </g>
+    </svg>
+  );
+}
+export function PoolLightingPanel({
+  lighting,
+  control,
+  weather,
+  location,
+  onManual,
+}: {
+  lighting: OutdoorLighting;
+  control: SmartControl;
+  weather: Weather | null;
+  location: SceneLocation | null;
+  onManual: (on: boolean) => void;
+}) {
+  const scene = useHouseAtmosphere(weather, location);
+  const state = lightingPower(
+    lighting,
+    control,
+    "pool",
+    scene?.altitude ?? null,
+  );
+  return (
+    <OutdoorLightingControl
+      kind="pool"
+      lighting={{ ...lighting, poolPreviewOn: state.on }}
+      automationLabel={state.label}
+      onChange={(next) => onManual(next.poolPreviewOn ?? false)}
+    />
   );
 }
