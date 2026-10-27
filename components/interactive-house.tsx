@@ -11,10 +11,8 @@ import type { HouseholdSimulation } from "@/lib/simulation/engine";
 import {
   OutdoorLightingControl,
   OutdoorLightingOverlay,
-  OutdoorLightingHitAreas,
   PoolLightingOverlay,
 } from "./outdoor-lighting";
-import { poolLamp } from "@/lib/lighting/spots";
 import { lightingPower } from "@/lib/lighting/automation";
 import type { SmartControl } from "@/lib/smart-control";
 import type { OutdoorLighting } from "@/lib/lighting/contracts";
@@ -100,13 +98,6 @@ export function InteractiveHouse({
   const [active, setActive] = useState<AreaId>("house");
   const [error, setError] = useState("");
   const [preview, setPreview] = useState(false);
-  const [lightingPreview, setLightingPreview] = useState(false);
-  const [lightingGroup, setLightingGroup] = useState<"outdoor" | "pool">(
-    "outdoor",
-  );
-  const [lightingPoint, setLightingPoint] = useState<readonly number[]>([
-    72, 52,
-  ]);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   function cancelHide() {
     if (hoverTimer.current) clearTimeout(hoverTimer.current);
@@ -114,14 +105,13 @@ export function InteractiveHouse({
   function clearPreview() {
     cancelHide();
     setPreview(false);
-    setLightingPreview(false);
   }
   function scheduleHide() {
     cancelHide();
     hoverTimer.current = setTimeout(() => {
       if (
         document.activeElement?.matches(
-          ".house-hit:focus-visible,.house-photo-pin:focus-visible,.house-category-tabs button:focus-visible,.house-lighting-popover button:focus-visible",
+          ".house-hit:focus-visible,.house-photo-pin:focus-visible,.house-category-tabs button:focus-visible",
         )
       )
         return;
@@ -136,19 +126,8 @@ export function InteractiveHouse({
   );
   function selectArea(id: AreaId) {
     cancelHide();
-    setLightingPreview(false);
     setActive(id);
     setPreview(true);
-  }
-  function selectLighting(
-    point: readonly number[] = [72, 52],
-    group: "outdoor" | "pool" = "outdoor",
-  ) {
-    setLightingGroup(group);
-    cancelHide();
-    setPreview(false);
-    setLightingPoint(point);
-    setLightingPreview(true);
   }
   const file = useRef<HTMLInputElement>(null);
   const url = useRef<string | null>(null);
@@ -259,11 +238,7 @@ export function InteractiveHouse({
     previewOn: exteriorState.on,
     poolPreviewOn: poolState.on,
   };
-  function selectPoolLighting() {
-    selectLighting([poolLamp.x / 15.96, poolLamp.y / 14.22], "pool");
-  }
   const areaPoint = photoPoint(area.point, layout);
-  const lightPoint = photoPoint(lightingPoint, layout);
   return (
     <section
       className="card interactive-house"
@@ -324,7 +299,7 @@ export function InteractiveHouse({
             const target = e.target as Element;
             if (
               target.closest(
-                ".house-hit,.house-photo-pin,.lighting-hit-overlay g,.pool-lamp-hit,.house-lighting-popover,.house-photo-hover-card,.house-category-tabs",
+                ".house-hit,.house-photo-pin,.house-photo-hover-card,.house-category-tabs",
               )
             )
               cancelHide();
@@ -366,15 +341,6 @@ export function InteractiveHouse({
               viewBox={layout.viewBox}
               brightness={atmosphere?.brightness ?? 1}
             />
-            <span
-              className={`outdoor-lighting-photo-status ${lightingPreview ? "is-visible" : ""}`}
-            >
-              Förhandsvisning ·{" "}
-              {lightingGroup === "pool" ? "poolbelysning" : "utebelysning"}{" "}
-              {(lightingGroup === "pool" ? poolState.on : exteriorState.on)
-                ? "tänd"
-                : "släckt"}
-            </span>
             <svg
               viewBox={layout.viewBox}
               preserveAspectRatio="none"
@@ -418,39 +384,6 @@ export function InteractiveHouse({
                 </a>
               ))}
             </svg>
-            <OutdoorLightingHitAreas
-              active={lightingPreview}
-              onSelect={selectLighting}
-              onPoolSelect={selectPoolLighting}
-              viewBox={layout.viewBox}
-            />
-            <div
-              className="house-lighting-popover"
-              hidden={!lightingPreview}
-              style={{
-                left: `clamp(142px, ${lightPoint[0]}%, calc(100% - 142px))`,
-                top: `clamp(8px, calc(${lightPoint[1]}% - 25px), calc(100% - 170px))`,
-              }}
-              onPointerEnter={cancelHide}
-            >
-              <OutdoorLightingControl
-                lighting={shownLighting}
-                kind={lightingGroup}
-                automationLabel={
-                  lightingGroup === "pool"
-                    ? poolState.label
-                    : exteriorState.label
-                }
-                onChange={(next) =>
-                  onLightingManual(
-                    lightingGroup,
-                    lightingGroup === "pool"
-                      ? (next.poolPreviewOn ?? false)
-                      : next.previewOn,
-                  )
-                }
-              />
-            </div>
             {areas.map((a) => {
               const Icon = a.icon;
               return (

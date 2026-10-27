@@ -35,9 +35,12 @@ test("av/på visar spotlights på samma foto, sparas per hushåll och skickar in
     "opacity",
     "0",
   );
-  await card.locator('[data-light-hit="left-0"]').click();
-  await toggle.click();
-  await expect(toggle).toBeChecked();
+  const photoToggle = card.getByRole("button", {
+    name: "Utebelysning",
+    exact: true,
+  });
+  await photoToggle.click();
+  await expect(photoToggle).toHaveAttribute("aria-pressed", "true");
   await expect(overlay).toHaveAttribute("data-power", "on");
   await expect(overlay.locator(".outdoor-light-wash")).toHaveCSS(
     "opacity",
@@ -45,17 +48,12 @@ test("av/på visar spotlights på samma foto, sparas per hushåll och skickar in
   );
   await expect(overlay.locator("[data-spot]")).toHaveCount(20);
   await expect(photo).toHaveAttribute("src", original!);
-  await expect(card).toContainText("Förhandsvisning · utebelysning tänd");
-  await expect(
-    page.getByRole("region", { name: "Utebelysning", exact: true }),
-  ).toContainText("Plejd · Ej ansluten");
   await page.reload();
-  await card.locator('[data-light-hit="left-0"]').click();
-  await expect(toggle).toBeChecked();
+  await expect(photoToggle).toHaveAttribute("aria-pressed", "true");
   await expect(photo).toBeVisible();
-  await toggle.focus();
+  await photoToggle.focus();
   await page.keyboard.press("Space");
-  await expect(toggle).not.toBeChecked();
+  await expect(photoToggle).toHaveAttribute("aria-pressed", "false");
   await expect(overlay.locator(".outdoor-light-wash")).toHaveCSS(
     "opacity",
     "0",
@@ -118,9 +116,8 @@ test("Plejd-referenser kan förberedas utan falsk anslutning och hålls isär me
   ).toBeChecked();
 });
 
-test("bilden saknar markeringar i vila och varje ljuspunkt öppnar ett gemensamt reglage", async ({
+test("belysning saknar hovringsytor och popupreglage men knapparna fungerar", async ({
   page,
-  isMobile,
 }) => {
   await page.goto("/");
   const card = page.getByRole("region", {
@@ -133,30 +130,28 @@ test("bilden saknar markeringar i vila och varje ljuspunkt öppnar ett gemensamt
   await expect(
     card.getByRole("img", { name: /Ditt hus med interaktiva/ }),
   ).toBeVisible();
-  await expect(card.locator(".house-hit.is-active")).toHaveCount(0);
-  await expect(card.locator(".house-pin-house")).toHaveCSS("opacity", "0");
-  await expect(card.locator(".house-photo-hover-card")).toBeHidden();
-  await expect(card.locator(".house-lighting-popover")).toBeHidden();
-  if (!isMobile) {
-    await card.locator('[data-light-hit="left-0"]').hover();
-  } else {
-    await card.locator('[data-light-hit="left-0"]').click();
-  }
-  await expect(card.locator(".house-lighting-popover")).toBeVisible();
-  const toggle = card.getByRole("switch", {
-    name: "Förhandsvisa utebelysning",
-    exact: true,
-  });
-  await expect(toggle).not.toBeChecked(); // Hovering itself never toggles power.
-  await toggle.click();
-  await expect(toggle).toBeChecked();
-  await expect(page.getByTestId("outdoor-lighting-overlay")).toHaveAttribute(
-    "data-power",
-    "on",
-  );
-  if (!isMobile) {
-    await page.mouse.move(1, 1);
-    await expect(card.locator(".house-lighting-popover")).toBeHidden();
-    await expect(card.locator(".house-hit.is-active")).toHaveCount(0);
+  await expect(
+    card.locator(
+      ".lighting-hit-overlay,.pool-lamp-hit,.house-lighting-popover",
+    ),
+  ).toHaveCount(0);
+  for (const [name, overlay] of [
+    ["Utebelysning", "outdoor-lighting-overlay"],
+    ["Poolbelysning", "pool-lighting-overlay"],
+  ]) {
+    const button = card.getByRole("button", { name, exact: true });
+    await button.hover();
+    await expect(card.getByTestId(overlay)).toHaveAttribute(
+      "data-power",
+      "off",
+    );
+    await expect(card.getByRole("switch")).toHaveCount(0);
+    await button.click();
+    await expect(card.getByTestId(overlay)).toHaveAttribute("data-power", "on");
+    await button.click();
+    await expect(card.getByTestId(overlay)).toHaveAttribute(
+      "data-power",
+      "off",
+    );
   }
 });

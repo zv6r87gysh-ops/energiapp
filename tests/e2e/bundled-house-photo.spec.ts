@@ -27,10 +27,7 @@ test("originalfotot är inbyggt och rätt linjerat även i en tom ny session", a
     "viewBox",
     viewBox!,
   );
-  await expect(card.locator(".lighting-hit-overlay")).toHaveAttribute(
-    "viewBox",
-    viewBox!,
-  );
+  await expect(card.locator(".lighting-hit-overlay")).toHaveCount(0);
   await card.locator(".house-photo-visual").hover();
   const smart = card.locator(".house-smart-controls");
   await expect(
