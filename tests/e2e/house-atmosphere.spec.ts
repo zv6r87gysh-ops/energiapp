@@ -171,7 +171,7 @@ test("bildknapparna ligger i fotot, grönt följer lampornas läge och dagens v�
     exact: true,
   });
   const buttons = house.locator(".house-photo-scene > .house-category-tabs");
-  await expect(buttons.getByRole("button")).toHaveCount(6);
+  await expect(buttons.getByRole("button")).toHaveCount(7);
   const outdoor = buttons.getByRole("button", {
     name: "Utebelysning",
     exact: true,

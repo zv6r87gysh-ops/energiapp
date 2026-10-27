@@ -7,6 +7,7 @@ export const sections = [
   { id: "pool", name: "Pool", icon: "waves" },
   { id: "laddning", name: "Elbilsladdning", icon: "car" },
   { id: "golvvarme", name: "Golvvärme", icon: "heat" },
+  { id: "belysning", name: "Belysning", icon: "lightbulb" },
   { id: "statistik", name: "Statistik", icon: "bars" },
   { id: "besparing", name: "Besparing", icon: "leaf" },
   {

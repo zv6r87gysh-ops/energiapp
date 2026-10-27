@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { priceTime } from "@/lib/prices/time";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Activity,
   ArrowDownRight,
@@ -14,6 +14,7 @@ import {
   Flame,
   Home,
   Leaf,
+  Lightbulb,
   Menu,
   Plus,
   Settings,
@@ -29,6 +30,7 @@ import { Button } from "./ui/button";
 import { PricePanel } from "./price-panel";
 import { readOutdoorLighting } from "@/lib/lighting/contracts";
 import { OutdoorLightingSettings, PoolLightingPanel } from "./outdoor-lighting";
+import { LightingPage } from "./lighting-page";
 import { InteractiveHouse } from "./interactive-house";
 import { WeatherPanel, WeatherSettings } from "./weather-panel";
 import { useWeather } from "@/lib/weather/use-weather";
@@ -60,6 +62,7 @@ const icons = [
   Waves,
   Car,
   Flame,
+  Lightbulb,
   ChartColumn,
   Leaf,
   Settings,
@@ -288,37 +291,63 @@ export default function EnergyApp({ section }: { section: string }) {
           {sections.map((s, i) => {
             const Icon = icons[i];
             return (
-              <Link
-                key={s.id}
-                href={s.id === "oversikt" ? "/" : `/${s.id}`}
-                onClick={() => setMenu(false)}
-                className={section === s.id ? "selected" : ""}
-              >
-                <Icon size={19} />
-                <span className="nav-category-label">
-                  {s.name}
-                  {(s.id === "pool" || s.id === "laddning") && sim && (
-                    <small
-                      className={`nav-control-state state-${sim.devices[s.id === "pool" ? "pool" : "charging"].decision.status}`}
-                      data-testid={`nav-state-${s.id}`}
+              <Fragment key={s.id}>
+                <Link
+                  key={s.id}
+                  href={s.id === "oversikt" ? "/" : `/${s.id}`}
+                  onClick={() => setMenu(false)}
+                  className={section === s.id ? "selected" : ""}
+                >
+                  <Icon size={19} />
+                  <span className="nav-category-label">
+                    {s.name}
+                    {(s.id === "pool" || s.id === "laddning") && sim && (
+                      <small
+                        className={`nav-control-state state-${sim.devices[s.id === "pool" ? "pool" : "charging"].decision.status}`}
+                        data-testid={`nav-state-${s.id}`}
+                      >
+                        {sim.devices[s.id === "pool" ? "pool" : "charging"]
+                          .smart
+                          ? "Smart på · "
+                          : "Smart av · "}
+                        {
+                          sim.devices[s.id === "pool" ? "pool" : "charging"]
+                            .decision.label
+                        }
+                      </small>
+                    )}
+                    {s.id === "golvvarme" && (
+                      <small className="nav-control-state">
+                        Smart ej tillgänglig · Ej ansluten
+                      </small>
+                    )}
+                  </span>
+                  {section === s.id && <span className="nav-dot" />}
+                </Link>
+                {s.id === "belysning" && section === "belysning" && (
+                  <div className="lighting-sidebar-children">
+                    <Link
+                      href="/belysning#inomhus"
+                      onClick={() => setMenu(false)}
                     >
-                      {sim.devices[s.id === "pool" ? "pool" : "charging"].smart
-                        ? "Smart på · "
-                        : "Smart av · "}
-                      {
-                        sim.devices[s.id === "pool" ? "pool" : "charging"]
-                          .decision.label
-                      }
-                    </small>
-                  )}
-                  {s.id === "golvvarme" && (
-                    <small className="nav-control-state">
-                      Smart ej tillgänglig · Ej ansluten
-                    </small>
-                  )}
-                </span>
-                {section === s.id && <span className="nav-dot" />}
-              </Link>
+                      Inomhus
+                    </Link>
+                    <Link
+                      href="/belysning#utomhus"
+                      onClick={() => setMenu(false)}
+                    >
+                      Utomhus
+                    </Link>
+                    <Link
+                      className="lighting-sidebar-pool"
+                      href="/belysning#poolbelysning"
+                      onClick={() => setMenu(false)}
+                    >
+                      Poolbelysning
+                    </Link>
+                  </div>
+                )}
+              </Fragment>
             );
           })}
         </nav>
@@ -391,6 +420,17 @@ export default function EnergyApp({ section }: { section: string }) {
               </select>
             </div>
           )}
+          {section === "belysning" && (
+            <LightingPage
+              key={home.id}
+              lighting={lighting}
+              control={smartControl}
+              weather={outdoor.weather}
+              location={outdoor.location}
+              onSave={(next) => update({ outdoorLighting: next })}
+              onManual={setManualLighting}
+            />
+          )}
           {section === "oversikt" && (
             <InteractiveHouse
               key={`house-photo-${home.id}`}
@@ -410,6 +450,9 @@ export default function EnergyApp({ section }: { section: string }) {
               }
               simulation={sim}
               lighting={lighting}
+              onIndoorChange={(indoorPreview) =>
+                update({ outdoorLighting: { ...lighting, indoorPreview } })
+              }
               weatherMessage={outdoor.message}
               postcode={home.postcode ?? ""}
               onPostcode={(postcode) => {

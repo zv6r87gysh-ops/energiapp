@@ -13,6 +13,8 @@ import {
   OutdoorLightingOverlay,
   PoolLightingOverlay,
 } from "./outdoor-lighting";
+import { IndoorLightingOverlay } from "./indoor-lighting";
+import { indoorGroups } from "@/lib/lighting/indoor";
 import { lightingPower } from "@/lib/lighting/automation";
 import type { SmartControl } from "@/lib/smart-control";
 import type { OutdoorLighting } from "@/lib/lighting/contracts";
@@ -72,6 +74,7 @@ export function InteractiveHouse({
   controls,
   lighting,
   onLightingManual,
+  onIndoorChange,
   smartControl,
   weather,
   location,
@@ -88,6 +91,9 @@ export function InteractiveHouse({
   location: SceneLocation | null;
   lighting: OutdoorLighting;
   onLightingManual: (group: "outdoor" | "pool", on: boolean) => void;
+  onIndoorChange: (
+    preview: NonNullable<OutdoorLighting["indoorPreview"]>,
+  ) => void;
   smartControl: SmartControl;
   householdId: string;
   simulation: HouseholdSimulation | null;
@@ -335,6 +341,11 @@ export function InteractiveHouse({
               photo={photo}
               brightness={atmosphere?.brightness ?? 1}
             />
+            <IndoorLightingOverlay
+              photo={photo}
+              viewBox={layout.viewBox}
+              preview={lighting.indoorPreview ?? {}}
+            />
             <PoolLightingOverlay
               on={poolState.on}
               photo={photo}
@@ -473,6 +484,37 @@ export function InteractiveHouse({
             >
               <Lightbulb size={17} />
               Poolbelysning <small>{poolState.on ? "Tänd" : "Släckt"}</small>
+            </button>
+            <button
+              type="button"
+              aria-label="Inomhusbelysning"
+              className={
+                indoorGroups.every((g) => lighting.indoorPreview?.[g.id])
+                  ? "lighting-is-on"
+                  : ""
+              }
+              aria-pressed={indoorGroups.every(
+                (g) => lighting.indoorPreview?.[g.id],
+              )}
+              onClick={() => {
+                clearPreview();
+                const on = !indoorGroups.every(
+                  (g) => lighting.indoorPreview?.[g.id],
+                );
+                onIndoorChange(
+                  Object.fromEntries(indoorGroups.map((g) => [g.id, on])),
+                );
+              }}
+            >
+              <Lightbulb size={17} />
+              Inomhus{" "}
+              <small>
+                {indoorGroups.every((g) => lighting.indoorPreview?.[g.id])
+                  ? "Tänd"
+                  : indoorGroups.some((g) => lighting.indoorPreview?.[g.id])
+                    ? "Delvis"
+                    : "Släckt"}
+              </small>
             </button>
             {areas.map((a) => {
               const Icon = a.icon;

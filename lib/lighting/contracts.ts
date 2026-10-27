@@ -8,9 +8,29 @@ const reference = z
     /^[\p{L}\p{N} ._:/-]+$/u,
     "Använd namn eller enhetsreferens, inte hemligheter.",
   );
+export const indoorGroupSchema = z.enum([
+  "large-left",
+  "large-right",
+  "above-table",
+  "behind-table",
+]);
+export type IndoorGroup = z.infer<typeof indoorGroupSchema>;
 export const outdoorLightingSchema = z.object({
   previewOn: z.boolean(),
   poolPreviewOn: z.boolean().optional(),
+  indoorPreview: z.partialRecord(indoorGroupSchema, z.boolean()).optional(),
+  indoorBinding: z
+    .object({
+      bridgeType: z.enum([
+        "unknown",
+        "bluetooth",
+        "home-assistant",
+        "plejd-gateway",
+        "other",
+      ]),
+      groups: z.partialRecord(indoorGroupSchema, reference),
+    })
+    .optional(),
   provider: z.literal("plejd"),
   binding: z
     .object({ bridgeReference: reference, groupReference: reference })

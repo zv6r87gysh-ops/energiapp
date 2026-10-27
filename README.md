@@ -93,3 +93,7 @@ Väderfliken hämtar riktig prognos för angivet svenskt postnummer från MET No
 Husets originalfoto ingår nu som fast standardbild i bygget och visas även i nya Vercel-förhandsversioner utan uppladdning. Ett tidigare lokalt valt foto behålls och har företräde. Konturer och ljuseffekter anpassas till originalbildens bredare utsnitt.
 
 Husbilden har svensk klocka, kalenderårstid och prognosstyrda vädereffekter samt beräknat dagsljus för postnumrets plats. Ute- och poolbelysning kan förhandsvisas manuellt eller väljas separat i smartstyrningen för solnedgång/soluppgång. Ingen riktig belysning styrs ännu. Se [husets väder och ljusstyrning](docs/house-atmosphere.md).
+
+### Inomhusbelysning
+
+Belysning i vänstermenyn samlar Inomhus och Utomhus, med poolbelysning under Utomhus. Fyra fönstergrupper med totalt tio spottar visas på husfotot och kan förhandsvisas individuellt eller gemensamt. Befintlig Plejd via Bluetooth behöver en identifierad lokal brygga innan verkliga kommandon kan skickas. Se [inomhusbelysning och anslutning](docs/indoor-lighting.md).

@@ -2978,3 +2978,117 @@ th {
 .house-photo-scene .house-smart-controls {
   z-index: 7;
 }
+
+.indoor-lighting-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.indoor-lighting-overlay > g {
+  transition: opacity 0.35s;
+}
+.lighting-page {
+  display: grid;
+  gap: 18px;
+}
+.lighting-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.lighting-subnav a {
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+.lighting-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.indoor-lighting-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.indoor-group-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--bg);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.indoor-group-button span {
+  flex: 1;
+}
+.indoor-group-button small {
+  display: block;
+  font-size: 11px;
+  margin-top: 5px;
+}
+.indoor-group-button b {
+  font-size: 12px;
+}
+.indoor-group-button.lighting-is-on {
+  background: #14734c;
+  color: white;
+  border-color: #7de3a6;
+}
+.lighting-connection {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.lighting-connection form {
+  display: grid;
+  gap: 16px;
+}
+.pool-lighting-subcategory {
+  border-left: 3px solid #71b69b;
+  padding-left: 12px;
+}
+.pool-lighting-subcategory h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+@media (max-width: 600px) {
+  .indoor-lighting-groups {
+    grid-template-columns: 1fr;
+  }
+  .house-photo-scene > .house-category-tabs {
+    gap: 3px;
+  }
+  .house-photo-scene > .house-category-tabs button {
+    min-height: 26px;
+    padding: 4px 5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .indoor-lighting-overlay > g {
+    transition: none;
+  }
+}
+.lighting-sidebar-children {
+  padding-left: 24px;
+  font-size: 12px;
+}
+.sidebar .lighting-sidebar-children a {
+  padding: 7px 12px;
+  min-height: 32px;
+}
+.sidebar .lighting-sidebar-children .lighting-sidebar-pool {
+  padding-left: 28px;
+  font-size: 11px;
+}
