@@ -1,12 +1,16 @@
 "use client";
-import { useEffect, useId, useState } from "react";
-import { Clock3 } from "lucide-react";
+import { useEffect, useId, useMemo, useState } from "react";
+import { Clock3, Sunrise, Sunset } from "lucide-react";
 import {
   houseAtmosphere,
   type HouseAtmosphere,
   type SceneLocation,
 } from "@/lib/scene/atmosphere";
 import type { Weather } from "@/lib/weather/contracts";
+import { sunTimes } from "@/lib/scene/sun-times";
+import { priceTime } from "@/lib/prices/time";
+import { postcodeSchema } from "@/lib/weather/contracts";
+import { WeatherTimeline } from "./weather-timeline";
 import { number } from "@/lib/energy";
 export function useHouseAtmosphere(
   weather: Weather | null,
@@ -27,7 +31,33 @@ export function useHouseAtmosphere(
   }, []);
   return now === null ? null : houseAtmosphere(now, weather, location);
 }
-export function HouseClock({ scene }: { scene: HouseAtmosphere | null }) {
+export function HouseClock({
+  scene,
+  location,
+  weather,
+  message,
+  postcode,
+  onPostcode,
+}: {
+  scene: HouseAtmosphere | null;
+  location: SceneLocation | null;
+  weather: Weather | null;
+  message: string;
+  postcode: string;
+  onPostcode: (code: string) => void;
+}) {
+  const [code, setCode] = useState(postcode);
+  const [error, setError] = useState("");
+  const date = scene?.date;
+  const latitude = location?.latitude,
+    longitude = location?.longitude;
+  const sun = useMemo(
+    () =>
+      date && latitude !== undefined && longitude !== undefined
+        ? sunTimes(date, { latitude, longitude })
+        : null,
+    [date, latitude, longitude],
+  );
   return (
     <div className="house-scene-info">
       <div className="house-clock">
@@ -48,11 +78,84 @@ export function HouseClock({ scene }: { scene: HouseAtmosphere | null }) {
         </time>
         <small>Svensk tid</small>
       </div>
+      <div className="house-sun-times" aria-label="Soltider idag">
+        <span>
+          <Sunrise size={18} /> Soluppgång{" "}
+          <b>
+            {sun?.sunrise != null
+              ? priceTime(new Date(sun.sunrise).toISOString())
+              : "—"}
+          </b>
+        </span>
+        <span>
+          <Sunset size={18} /> Solnedgång{" "}
+          <b>
+            {sun?.sunset != null
+              ? priceTime(new Date(sun.sunset).toISOString())
+              : "—"}
+          </b>
+        </span>
+        {sun && sun.sunrise === null && sun.sunset === null && (
+          <small>{sun.polarDay ? "Midnattssol" : "Polarnatt"}</small>
+        )}
+        {!sun && <small>Ange postnummer för soltider</small>}
+      </div>
       <span>
         {scene
           ? `${scene.seasonLabel} · ${scene.phaseLabel} · ${scene.conditionLabel}${scene.temperature === null ? "" : ` · ${number(scene.temperature, 1)} °C`}`
           : "Förbereder bildvisualisering…"}
       </span>
+      <div className="house-day-forecast">
+        <div className="house-forecast-heading">
+          <strong>Vädret idag{weather ? ` · ${weather.place}` : ""}</strong>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const parsed = postcodeSchema.safeParse(code);
+              if (!parsed.success) {
+                setError("Ange ett svenskt postnummer med fem siffror.");
+                return;
+              }
+              setError("");
+              onPostcode(parsed.data);
+            }}
+          >
+            <input
+              aria-label="Postnummer för husbildens väder"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              placeholder="Postnummer"
+              maxLength={6}
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+            <button type="submit" className="button secondary">
+              {weather ? "Uppdatera väder" : "Hämta väder"}
+            </button>
+          </form>
+        </div>
+        {error && <p role="alert">{error}</p>}
+        {weather && scene ? (
+          <>
+            <WeatherTimeline
+              weather={weather}
+              date={scene.date}
+              label="Dagens väder vid huset, var tredje timme"
+              overview
+            />
+            <small>
+              Yr / MET Norway · CC BY 4.0 · uppdaterad{" "}
+              {priceTime(weather.issuedAt)}
+              {weather.locationPrecision === "district"
+                ? ` · områdesprognos ${weather.locationArea}`
+                : ""}
+            </small>
+          </>
+        ) : (
+          <p role="status">{message}</p>
+        )}
+      </div>
       <small>
         Bildvisualisering · pool i väster · höger fasad i söder · väder enligt
         MET-prognos · dagsljus beräknat för platsen

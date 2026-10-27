@@ -77,7 +77,13 @@ export function InteractiveHouse({
   smartControl,
   weather,
   location,
+  weatherMessage,
+  postcode,
+  onPostcode,
 }: {
+  weatherMessage: string;
+  postcode: string;
+  onPostcode: (postcode: string) => void;
   controls?: React.ReactNode;
   householdSelector?: React.ReactNode;
   weather: Weather | null;
@@ -112,7 +118,15 @@ export function InteractiveHouse({
   }
   function scheduleHide() {
     cancelHide();
-    hoverTimer.current = setTimeout(clearPreview, 180);
+    hoverTimer.current = setTimeout(() => {
+      if (
+        document.activeElement?.matches(
+          ".house-hit:focus-visible,.house-photo-pin:focus-visible,.house-category-tabs button:focus-visible,.house-lighting-popover button:focus-visible",
+        )
+      )
+        return;
+      clearPreview();
+    }, 180);
   }
   useEffect(
     () => () => {
@@ -274,7 +288,15 @@ export function InteractiveHouse({
           </button>
         </div>
       </div>
-      <HouseClock scene={atmosphere} />
+      <HouseClock
+        key={postcode}
+        scene={atmosphere}
+        location={location}
+        weather={weather}
+        message={weatherMessage}
+        postcode={postcode}
+        onPostcode={onPostcode}
+      />
       {!photo && (
         <OutdoorLightingControl
           lighting={shownLighting}
@@ -297,24 +319,19 @@ export function InteractiveHouse({
       {photo ? (
         <div
           className={`house-photo-scene house-active-${preview ? active : "none"}`}
-        >
-          <div
-            className="house-photo-visual"
-            onPointerMove={(e) => {
-              if (e.pointerType !== "mouse") return;
-              const target = e.target as Element;
-              if (
-                target.closest(
-                  ".house-hit,.house-photo-pin,.lighting-hit-overlay g,.pool-lamp-hit,.house-lighting-popover,.house-photo-hover-card",
-                )
+          onPointerMove={(e) => {
+            if (e.pointerType !== "mouse") return;
+            const target = e.target as Element;
+            if (
+              target.closest(
+                ".house-hit,.house-photo-pin,.lighting-hit-overlay g,.pool-lamp-hit,.house-lighting-popover,.house-photo-hover-card,.house-category-tabs",
               )
-                cancelHide();
-              else scheduleHide();
-            }}
-            onPointerLeave={(e) => {
-              if (e.pointerType === "mouse") scheduleHide();
-            }}
-          >
+            )
+              cancelHide();
+            else scheduleHide();
+          }}
+        >
+          <div className="house-photo-visual">
             {/* eslint-disable-next-line @next/next/no-img-element -- Local user-selected Blob URL, no remote image service. */}
             <img
               src={photo}
@@ -482,6 +499,50 @@ export function InteractiveHouse({
               </small>
             </div>
           </div>
+          <div
+            className="house-category-tabs"
+            aria-label="Välj område på huset"
+          >
+            <button
+              type="button"
+              aria-label="Utebelysning"
+              className={exteriorState.on ? "lighting-is-on" : ""}
+              data-power={exteriorState.on ? "on" : "off"}
+              aria-pressed={lightingPreview && lightingGroup === "outdoor"}
+              onClick={() => selectLighting()}
+              onFocus={() => selectLighting()}
+            >
+              <Lightbulb size={17} />
+              Utebelysning <small>{exteriorState.on ? "Tänd" : "Släckt"}</small>
+            </button>
+            <button
+              type="button"
+              aria-label="Poolbelysning"
+              className={poolState.on ? "lighting-is-on" : ""}
+              data-power={poolState.on ? "on" : "off"}
+              aria-pressed={lightingPreview && lightingGroup === "pool"}
+              onClick={selectPoolLighting}
+              onFocus={selectPoolLighting}
+            >
+              <Lightbulb size={17} />
+              Poolbelysning <small>{poolState.on ? "Tänd" : "Släckt"}</small>
+            </button>
+            {areas.map((a) => {
+              const Icon = a.icon;
+              return (
+                <button
+                  key={a.id}
+                  aria-pressed={preview && active === a.id}
+                  onClick={() => selectArea(a.id)}
+                  onMouseEnter={() => selectArea(a.id)}
+                  onFocus={() => selectArea(a.id)}
+                >
+                  <Icon size={17} />
+                  {a.name}
+                </button>
+              );
+            })}
+          </div>
           {controls && <div className="house-smart-controls">{controls}</div>}
         </div>
       ) : (
@@ -500,41 +561,6 @@ export function InteractiveHouse({
           {controls && <div className="house-smart-fallback">{controls}</div>}
         </div>
       )}
-      <div className="house-category-tabs" aria-label="Välj område på huset">
-        <button
-          type="button"
-          aria-pressed={lightingPreview && lightingGroup === "outdoor"}
-          onClick={() => selectLighting()}
-          onFocus={() => selectLighting()}
-        >
-          <Lightbulb size={17} />
-          Utebelysning
-        </button>
-        <button
-          type="button"
-          aria-pressed={lightingPreview && lightingGroup === "pool"}
-          onClick={selectPoolLighting}
-          onFocus={selectPoolLighting}
-        >
-          <Lightbulb size={17} />
-          Poolbelysning
-        </button>
-        {areas.map((a) => {
-          const Icon = a.icon;
-          return (
-            <button
-              key={a.id}
-              aria-pressed={preview && active === a.id}
-              onClick={() => selectArea(a.id)}
-              onMouseEnter={() => selectArea(a.id)}
-              onFocus={() => selectArea(a.id)}
-            >
-              <Icon size={17} />
-              {a.name}
-            </button>
-          );
-        })}
-      </div>
       <div
         className="house-cost-tooltip"
         hidden={!preview}

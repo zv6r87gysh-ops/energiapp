@@ -86,7 +86,9 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
     .getByRole("button", { name: "Visa kostnad för Pool", exact: true })
     .click();
   await expect(card.locator(".house-hit-pool")).toHaveClass(/is-active/);
-  await expect(card.getByRole("status")).toContainText("Kostnad hittills idag");
+  await expect(card.locator(".house-cost-tooltip")).toContainText(
+    "Kostnad hittills idag",
+  );
   await expect(card.locator(".house-cost-tooltip b")).toHaveText(/18\s+kr/);
   await expect(card.locator(".house-photo-hover-card")).toContainText(
     "Modellerad kostnad",
@@ -99,7 +101,7 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
     card.getByRole("link", { name: "Öppna Pool →", exact: true }),
   ).toHaveAttribute("href", "/pool");
   await card.getByRole("button", { name: "Golvvärme", exact: true }).click();
-  await expect(card.getByRole("status")).toContainText(
+  await expect(card.locator(".house-cost-tooltip")).toContainText(
     "Separat kostnad saknas",
   );
   await expect(
@@ -128,9 +130,7 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
   await expect(
     card.getByRole("img", { name: /Ditt hus med interaktiva/ }),
   ).toBeVisible();
-  await card
-    .getByRole("button", { name: "Visa kostnad för Billaddare", exact: true })
-    .click();
+  await card.getByRole("button", { name: "Billaddare", exact: true }).click();
   await card
     .getByRole("link", { name: "Öppna Billaddare →", exact: true })
     .click();
@@ -194,9 +194,9 @@ test("muspekare och tangentbordsfokus väljer markering utan att navigera", asyn
   await pool.hover();
   await expect(card.locator(".house-hit-pool")).toHaveClass(/is-active/);
   await expect(page).toHaveURL(/\/$/);
-  await card
-    .getByRole("button", { name: "Visa kostnad för Billaddare", exact: true })
-    .focus();
+  await page.mouse.move(0, 0);
+  await page.keyboard.press("Tab");
+  await card.getByRole("button", { name: "Billaddare", exact: true }).focus();
   await expect(card.locator(".house-hit-charging")).toHaveClass(/is-active/);
   await expect(
     card.getByRole("link", { name: "Öppna Billaddare →", exact: true }),

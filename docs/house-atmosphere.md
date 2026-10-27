@@ -33,3 +33,9 @@ Enhetstester täcker solhöjd över årstider, polarnatt/midnattssol, saknad/ina
 Poolen i referensfotot ligger enligt användaren i rakt västerläge (270°). Solvisualiseringens riktning använder därför beräknad solazimut: väster/kväll projiceras mot poolens sida i bildens nedre vänstra förgrund, öster/morgon mot husets baksida. Detta ändrar inte upp-/nedgångstid och inför ingen påhittad solvärmeenergi i poolmodellen.
 
 Höger fasad ligger enligt användaren i söderläge (180°). Söder/middagsljus projiceras följaktligen mot bildens högra sida, i samma kompasskalibrering som poolens västerläge.
+
+## Översiktens dygnsvy
+
+Kategoriknapparna ligger inuti fotots vänsterkant. Ljusgruppernas gröna färg och texten Tänd följer faktiskt beräknat förhandsläge, oberoende av vilken kategori som hovras. Soluppgång och solnedgång beräknas för svensk kalenderdag och samma horisontgräns −0,833° som solstyrningen; vid polardag/natt uppfinns inga klockslag. Klockan får dagens prognos i åtta tretimmarsrutor (två rader på mobil). MET levererar framtida prognostimmar; passerade timmar som saknas ersätts inte med påhittad historik.
+
+Postnummer och återhämtning av prognos finns direkt vid klockan, med samma hushållsinställning som väderpanelen. Sparade postnummer är fortfarande lokala per webbursprung; en ny Vercel-adress kan kräva postnumret igen. Ett misslyckat anrop visas här och kan göras om med samma postnummer. Klientens anrop avbryts efter 25 sekunder om nätverket hänger sig. Live-kontroll av produktions-API för 13250 samt MET/geokodning lyckades 2026-10-27; inga testvärden används i appen.

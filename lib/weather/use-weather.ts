@@ -40,7 +40,10 @@ export function useWeather(
       try {
         const r = await fetch(`/api/weather?postcode=${code}`, {
           cache: "no-store",
-          signal: controller.signal,
+          signal: AbortSignal.any([
+            controller.signal,
+            AbortSignal.timeout(25000),
+          ]),
         });
         const raw = await r.json();
         if (!r.ok || raw.status !== "available")

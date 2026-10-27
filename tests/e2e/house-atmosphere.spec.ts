@@ -167,3 +167,63 @@ test("båda ljusgrupper kan väljas i smartdialogen utan att aktivera poolvärme
     "on",
   );
 });
+
+test("bildknapparna ligger i fotot, grönt följer lampornas läge och dagens väder kan hämtas igen", async ({
+  page,
+}) => {
+  await prepare(page, "cloudy", "2026-10-21T18:00:00Z", true);
+  const house = page.getByRole("region", {
+    name: "Ditt interaktiva hus",
+    exact: true,
+  });
+  const buttons = house.locator(".house-photo-scene > .house-category-tabs");
+  await expect(buttons.getByRole("button")).toHaveCount(6);
+  const outdoor = buttons.getByRole("button", {
+    name: "Utebelysning",
+    exact: true,
+  });
+  const pool = buttons.getByRole("button", {
+    name: "Poolbelysning",
+    exact: true,
+  });
+  await expect(outdoor).toHaveClass(/lighting-is-on/);
+  await expect(pool).toHaveClass(/lighting-is-on/);
+  await expect(house.getByLabel("Soltider idag")).toContainText(
+    /Soluppgång\s*\d{2}:\d{2}/,
+  );
+  await expect(house.getByLabel("Soltider idag")).toContainText(
+    /Solnedgång\s*\d{2}:\d{2}/,
+  );
+  const timeline = house.getByRole("region", {
+    name: "Dagens väder vid huset, var tredje timme",
+    exact: true,
+  });
+  await expect(timeline.getByRole("listitem")).toHaveCount(8);
+  const photo = await house.locator(".house-photo-scene").boundingBox();
+  const nav = await buttons.boundingBox();
+  expect(nav!.x).toBeGreaterThan(photo!.x);
+  expect(nav!.y + nav!.height).toBeLessThan(photo!.y + photo!.height);
+  await pool.click();
+  await house
+    .getByRole("switch", { name: "Förhandsvisa poolbelysning", exact: true })
+    .click();
+  await expect(pool).not.toHaveClass(/lighting-is-on/);
+  await expect(outdoor).toHaveClass(/lighting-is-on/);
+  await page.route("**/api/weather?*", (route) =>
+    route.fulfill({
+      status: 502,
+      json: { status: "unavailable", code: "forecast-unavailable" },
+    }),
+  );
+  await house
+    .getByRole("button", { name: "Uppdatera väder", exact: true })
+    .click();
+  await expect(house).toContainText("MET Norway kunde inte nås");
+  await expect(timeline).toHaveCount(0);
+  await page.route("**/api/weather?*", (route) => {
+    const w = weatherFixture(7, Date.parse("2026-10-21T18:00:00Z"));
+    return route.fulfill({ json: { status: "available", data: w } });
+  });
+  await house.getByRole("button", { name: "Hämta väder", exact: true }).click();
+  await expect(timeline).toBeVisible();
+});

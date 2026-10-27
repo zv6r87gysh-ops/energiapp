@@ -410,6 +410,12 @@ export default function EnergyApp({ section }: { section: string }) {
               }
               simulation={sim}
               lighting={lighting}
+              weatherMessage={outdoor.message}
+              postcode={home.postcode ?? ""}
+              onPostcode={(postcode) => {
+                if (home.postcode === postcode) outdoor.refresh();
+                else update({ postcode });
+              }}
               weather={outdoor.weather}
               location={outdoor.location}
               smartControl={smartControl}

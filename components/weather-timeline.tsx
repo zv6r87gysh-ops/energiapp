@@ -16,9 +16,13 @@ import { number } from "@/lib/energy";
 export function WeatherTimeline({
   weather,
   date,
+  label,
+  overview = false,
 }: {
   weather: Weather;
   date: string;
+  label?: string;
+  overview?: boolean;
 }) {
   const slots = threeHourlyWeather(weather, date);
   return (
@@ -26,7 +30,7 @@ export function WeatherTimeline({
       <div
         className="weather-timeline"
         role="region"
-        aria-label={`Väder var tredje timme ${date}`}
+        aria-label={label ?? `Väder var tredje timme ${date}`}
         tabIndex={0}
       >
         <ol>
@@ -85,8 +89,8 @@ export function WeatherTimeline({
       </div>
       <p className="weather-timeline-note">
         00–21 i tretimmarssteg · svensk tid · prognos vid respektive klockslag.
-        Passerade eller saknade prognostimmar fylls inte i. Svep för att se hela
-        dygnet.
+        Passerade eller saknade prognostimmar fylls inte i.{" "}
+        {overview ? "Hela dygnet visas ovan." : "Svep för att se hela dygnet."}
       </p>
     </>
   );
