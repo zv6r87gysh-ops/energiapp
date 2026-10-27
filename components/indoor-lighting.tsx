@@ -24,13 +24,47 @@ export function IndoorLightingOverlay({
     >
       <defs>
         <radialGradient id={`${id}-glow`}>
-          <stop offset="0" stopColor="#ffe5ab" stopOpacity=".8" />
+          <stop offset="0" stopColor="white" stopOpacity=".85" />
+          <stop offset=".35" stopColor="white" stopOpacity=".42" />
+          <stop offset="1" stopColor="white" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={`${id}-halo`}>
+          <stop offset="0" stopColor="#fff3ce" stopOpacity=".95" />
+          <stop offset=".3" stopColor="#ffe3a0" stopOpacity=".55" />
           <stop offset="1" stopColor="#ffd58a" stopOpacity="0" />
         </radialGradient>
+        <filter id={`${id}-warm`}>
+          <feColorMatrix
+            type="matrix"
+            values="1 0 0 0 .06  0 .9 0 0 .03  0 0 .65 0 0  0 0 0 1 0"
+          />
+        </filter>
         {indoorGroups.map((g) => (
           <clipPath key={g.id} id={`${id}-${g.id}`}>
             <polygon points={g.window} />
           </clipPath>
+        ))}
+        {indoorGroups.map((g) => (
+          <mask
+            key={g.id}
+            id={`${id}-${g.id}-wash`}
+            maskUnits="userSpaceOnUse"
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+          >
+            {g.spots.map(([sx, sy], i) => (
+              <ellipse
+                key={i}
+                cx={sx}
+                cy={sy + 30}
+                rx={g.count === 3 ? 27 : 30}
+                ry="62"
+                fill={`url(#${id}-glow)`}
+              />
+            ))}
+          </mask>
         ))}
       </defs>
       {indoorGroups.map((g) => (
@@ -41,25 +75,36 @@ export function IndoorLightingOverlay({
           opacity={preview[g.id] ? 1 : 0}
           clipPath={`url(#${id}-${g.id})`}
         >
-          <image
-            href={photo}
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-          <polygon points={g.window} fill="#ffd385" opacity=".22" />
-          {g.spots.map(([sx, sy], i) => (
-            <ellipse
-              key={i}
-              data-indoor-spot={`${g.id}-${i}`}
-              cx={sx}
-              cy={sy + 38}
-              rx="42"
-              ry="80"
-              fill={`url(#${id}-glow)`}
+          <g mask={`url(#${id}-${g.id}-wash)`}>
+            <image
+              href={photo}
+              x={x}
+              y={y}
+              width={width}
+              height={height}
+              preserveAspectRatio="none"
+              filter={`url(#${id}-warm)`}
             />
+            <rect
+              x={x}
+              y={y}
+              width={width}
+              height={height}
+              fill="#ffcf7b"
+              opacity=".15"
+            />
+          </g>
+          {g.spots.map(([sx, sy], i) => (
+            <g key={i} data-indoor-spot={`${g.id}-${i}`}>
+              <ellipse
+                cx={sx}
+                cy={sy}
+                rx="12"
+                ry="8"
+                fill={`url(#${id}-halo)`}
+              />
+              <ellipse cx={sx} cy={sy} rx="3.4" ry="2" fill="#fff6da" />
+            </g>
           ))}
         </g>
       ))}

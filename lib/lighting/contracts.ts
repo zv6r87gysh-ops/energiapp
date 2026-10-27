@@ -13,6 +13,7 @@ export const indoorGroupSchema = z.enum([
   "large-right",
   "above-table",
   "behind-table",
+  "table-pergola",
 ]);
 export type IndoorGroup = z.infer<typeof indoorGroupSchema>;
 export const outdoorLightingSchema = z.object({

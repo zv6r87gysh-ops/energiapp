@@ -61,7 +61,7 @@ export function LightingPage({
   return (
     <div className="lighting-page">
       <nav className="lighting-subnav" aria-label="Belysningskategorier">
-        <a href="#inomhus">Inomhus · 10 spottar</a>
+        <a href="#inomhus">Inomhus · 12 spottar</a>
         <a href="#utomhus">Utomhus · inklusive poolbelysning</a>
       </nav>
       <p className="muted">
@@ -87,8 +87,8 @@ export function LightingPage({
           </button>
         </div>
         <p>
-          Två stora fönster med tre spottar vardera samt två spottar i vardera
-          fönstret ovanför och bakom bordet.
+          Två stora fönster med tre spottar vardera, två i fönstret ovanför
+          bordet, två bakom bordet och två vid matplatsen under pergolan.
         </p>
         <IndoorLightingControls
           preview={lighting.indoorPreview ?? {}}

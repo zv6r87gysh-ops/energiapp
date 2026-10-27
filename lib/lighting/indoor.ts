@@ -1,5 +1,6 @@
 import type { IndoorGroup } from "./contracts";
-// Window regions calibrated against the retained house photo, in reference coordinates.
+// Reference coordinates shared with the original house photo layout.
+// Revised against the user's yellow/red/blue annotation: no upper-left window light.
 export const indoorGroups: {
   id: IndoorGroup;
   name: string;
@@ -9,24 +10,24 @@ export const indoorGroups: {
 }[] = [
   {
     id: "large-left",
-    name: "Stort fönster vänster",
+    name: "Stort fönster nedervåning",
     count: 3,
-    window: "316,403 417,438 417,594 319,561",
+    window: "532,668 665,712 665,840 532,791",
     spots: [
-      [337, 431],
-      [367, 442],
-      [398, 453],
+      [551, 694],
+      [593, 708],
+      [636, 722],
     ],
   },
   {
     id: "large-right",
-    name: "Stort fönster höger",
+    name: "Stort fönster övervåning",
     count: 3,
     window: "531,480 665,526 665,674 532,624",
     spots: [
-      [554, 507],
-      [592, 521],
-      [634, 537],
+      [550, 503],
+      [593, 518],
+      [638, 534],
     ],
   },
   {
@@ -35,18 +36,30 @@ export const indoorGroups: {
     count: 2,
     window: "872,488 962,516 962,641 872,602",
     spots: [
-      [891, 520],
-      [935, 534],
+      [891, 513],
+      [939, 529],
     ],
   },
   {
     id: "behind-table",
     name: "Fönster bakom bordet",
     count: 2,
-    window: "1048,660 1116,616 1116,780 1048,826",
+    // Visible glass below the diagonal pergola beam: the slats and fascia stay dark.
+    window: "1048,748 1116,686 1116,780 1048,826",
     spots: [
-      [1065, 677],
-      [1099, 654],
+      [1064, 756],
+      [1099, 724],
+    ],
+  },
+  {
+    id: "table-pergola",
+    name: "Matplats under pergolan",
+    count: 2,
+    // Underside/back wall beneath the slats in the second red annotation.
+    window: "805,750 955,801 955,851 805,800",
+    spots: [
+      [834, 775],
+      [916, 803],
     ],
   },
 ];

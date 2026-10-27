@@ -96,4 +96,4 @@ Husbilden har svensk klocka, kalenderårstid och prognosstyrda vädereffekter sa
 
 ### Inomhusbelysning
 
-Belysning i vänstermenyn samlar Inomhus och Utomhus, med poolbelysning under Utomhus. Fyra fönstergrupper med totalt tio spottar visas på husfotot och kan förhandsvisas individuellt eller gemensamt. Befintlig Plejd via Bluetooth behöver en identifierad lokal brygga innan verkliga kommandon kan skickas. Se [inomhusbelysning och anslutning](docs/indoor-lighting.md).
+Belysning i vänstermenyn samlar Inomhus och Utomhus, med poolbelysning under Utomhus. Fem grupper med totalt tolv spottar visas på husfotot och kan förhandsvisas individuellt eller gemensamt. Befintlig Plejd via Bluetooth behöver en identifierad lokal brygga innan verkliga kommandon kan skickas. Se [inomhusbelysning och anslutning](docs/indoor-lighting.md).

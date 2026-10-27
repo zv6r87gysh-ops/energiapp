@@ -11,12 +11,14 @@ test("inomhusgrupper och alla utelampor samlas under Belysning; foto och val spa
     page.getByRole("heading", { level: 1, name: "Belysning" }),
   ).toBeVisible();
   const indoor = page.locator("#inomhus");
-  const first = indoor.getByRole("button", { name: /Stort fönster vänster/ });
+  const first = indoor.getByRole("button", {
+    name: /Stort fönster nedervåning/,
+  });
   await expect(first).toHaveAttribute("aria-pressed", "false");
   await first.click();
   await expect(first).toHaveAttribute("aria-pressed", "true");
   await expect(
-    indoor.getByRole("button", { name: /Stort fönster höger/ }),
+    indoor.getByRole("button", { name: /Stort fönster övervåning/ }),
   ).toHaveAttribute("aria-pressed", "false");
   await expect(
     page
@@ -28,7 +30,7 @@ test("inomhusgrupper och alla utelampor samlas under Belysning; foto och val spa
     "bluetooth",
   );
   await indoor
-    .getByLabel("Stort fönster vänster · ljusgruppens referens")
+    .getByLabel("Stort fönster nedervåning · ljusgruppens referens")
     .fill("Vardagsrum fönster 1");
   await indoor
     .getByRole("button", { name: "Spara inomhusbelysningens Plejd-uppgifter" })
@@ -38,25 +40,25 @@ test("inomhusgrupper och alla utelampor samlas under Belysning; foto och val spa
   );
   await page.goto("/");
   const overlay = page.getByTestId("indoor-lighting-overlay");
-  await expect(overlay.locator("[data-indoor-spot]")).toHaveCount(10);
+  await expect(overlay.locator("[data-indoor-spot]")).toHaveCount(12);
   await expect(
     overlay.locator('[data-indoor-group="large-left"]'),
   ).toHaveAttribute("data-power", "on");
-  await expect(overlay.locator('[data-power="off"]')).toHaveCount(3);
+  await expect(overlay.locator('[data-power="off"]')).toHaveCount(4);
   const all = page.getByRole("button", {
     name: "Inomhusbelysning",
     exact: true,
   });
   await all.click();
-  await expect(overlay.locator('[data-power="on"]')).toHaveCount(4);
+  await expect(overlay.locator('[data-power="on"]')).toHaveCount(5);
   await all.click();
-  await expect(overlay.locator('[data-power="off"]')).toHaveCount(4);
+  await expect(overlay.locator('[data-power="off"]')).toHaveCount(5);
   await page.reload();
   await expect(all).toHaveAttribute("aria-pressed", "false");
   await page.goto("/belysning");
   await page.locator("#inomhus summary").click();
   await expect(
-    page.getByLabel("Stort fönster vänster · ljusgruppens referens"),
+    page.getByLabel("Stort fönster nedervåning · ljusgruppens referens"),
   ).toHaveValue("Vardagsrum fönster 1");
   expect(commands).toBe(0);
   expect(
