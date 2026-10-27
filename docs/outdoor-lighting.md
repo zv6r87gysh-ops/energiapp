@@ -33,3 +33,11 @@ Enhetstester kontrollerar kompatibilitet med äldre hushåll, validering och att
 ### Hovring och reglage i bilden
 
 Hus-/poolkonturer, kategorietiketter och kostnader visas först vid hovring, tangentbordsfokus eller tryck och avmarkeras när pekaren lämnar. Hovring på någon av de 20 ljuspunkterna eller längs de markerade belysningsstråken öppnar ett gemensamt av/på-reglage inne i bildytan. Reglaget nås även via knappen Utebelysning under fotot på mobil och med tangentbord. Hovring öppnar endast reglaget; av/på kräver ett explicit klick/tryck. Den tända ljusförhandsvisningen förblir tänd även när reglaget stängs. Vänstersidans fyra markspots har flyttats 80 bildkoordinater in mot gången, till insidan av häcken. Originalfotot och sparade Plejd-referenser bevaras.
+
+### Liten smartstyrningsruta och bild mellan förhandsversioner
+
+Smartstyrningen är nu en liten ruta i bildens övre högra hörn, även på mobil. Vänstersidans markspots är ytterligare flyttade mot gången (45 bildkoordinater åt höger), och träffområdet följer samma placering.
+
+IndexedDB är bundet till webbplatsens ursprung: en ny Vercel-förhandsadress kan inte läsa fotot från en annan adress. För att kunna leverera samma standardfoto i alla nya byggen finns nu `public/house-photo.json`. När originalfilen kan läggas i `public/`, ange dess sökväg i manifestets `url`. `householdId` begränsar vilket hushåll standardbilden gäller. URL är ännu `null` eftersom bilden från chatten inte finns som fil i arbetsytan. Ingen ersättningsbild har hittats på och permanent bild mellan domäner är därför **inte aktiverad ännu**.
+
+Lokalt valt foto har företräde och dess lagring ändras inte. Saknas lokal bild används den inbyggda bilden om manifestet innehåller en giltig rot-relativ JPG/PNG/WebP-sökväg för valt hushåll. Utländska URL:er och andra hushåll avvisas. Tester täcker både lokalt sparad bild och en inbyggd bild i en ny webbläsarsession utan tidigare lagring.

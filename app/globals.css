@@ -2622,3 +2622,59 @@ th {
     grid-column: 1/-1;
   }
 }
+
+/* Small smart-control box pinned to the photo's upper-right corner. */
+.house-photo-scene .house-smart-controls {
+  position: absolute;
+  inset: 12px 12px auto auto;
+  width: 208px;
+  max-width: calc(100% - 24px);
+  padding: 0;
+  background: transparent;
+}
+.house-smart-controls .smart-home.smart-home-compact {
+  display: block;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #ffffff70;
+  border-radius: 10px;
+  background: #103932ed;
+  box-shadow: 0 4px 14px #0003;
+}
+.house-smart-controls .smart-home-icon,
+.house-smart-controls .smart-home-copy {
+  display: none;
+}
+.house-smart-controls .smart-home-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  width: 100%;
+}
+.house-smart-controls .smart-home-active .smart-home-actions {
+  grid-template-columns: 32px minmax(0, 1fr);
+}
+.house-smart-controls .smart-home-actions .button {
+  min-height: 34px;
+  padding: 7px 8px;
+  font-size: 10px;
+  justify-content: center;
+}
+.house-smart-controls .smart-home-actions .secondary {
+  padding: 7px;
+  font-size: 0;
+}
+@media (max-width: 600px) {
+  .house-photo-scene .house-smart-controls {
+    width: 52%;
+    max-width: 190px;
+    inset: 8px 8px auto auto;
+  }
+  .house-smart-controls .smart-home-actions .button {
+    font-size: 9px;
+    padding: 6px;
+  }
+  .house-smart-controls .smart-home-actions .secondary {
+    font-size: 0;
+  }
+}

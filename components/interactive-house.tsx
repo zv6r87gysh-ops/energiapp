@@ -2,7 +2,11 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { Camera, Car, Flame, Home, Lightbulb, Waves } from "lucide-react";
-import { readHousePhoto, saveHousePhoto } from "@/lib/house-photo";
+import {
+  readHousePhoto,
+  saveHousePhoto,
+  readBundledHousePhoto,
+} from "@/lib/house-photo";
 import type { HouseholdSimulation } from "@/lib/simulation/engine";
 import {
   OutdoorLightingControl,
@@ -112,19 +116,26 @@ export function InteractiveHouse({
     let mounted = true;
     const counter = generation.current;
     const current = ++counter.value;
-    void readHousePhoto(householdId)
-      .then((blob) => {
-        if (!mounted || generation.current.value !== current || !blob) return;
+    void (async () => {
+      let blob: Blob | null = null;
+      let storageFailed = false;
+      try {
+        blob = await readHousePhoto(householdId);
+      } catch {
+        storageFailed = true;
+      }
+      const bundled = blob ? null : await readBundledHousePhoto(householdId);
+      if (!mounted || generation.current.value !== current) return;
+      if (blob) {
         const next = URL.createObjectURL(blob);
         url.current = next;
         setPhoto(next);
-      })
-      .catch(() => {
-        if (mounted)
-          setError(
-            "Bildlagring är inte tillgänglig. Du kan ändå välja ett foto för detta besök.",
-          );
-      });
+      } else if (bundled) setPhoto(bundled);
+      else if (storageFailed)
+        setError(
+          "Bildlagring är inte tillgänglig. Du kan ändå välja ett foto för detta besök.",
+        );
+    })();
     return () => {
       mounted = false;
       counter.value++;

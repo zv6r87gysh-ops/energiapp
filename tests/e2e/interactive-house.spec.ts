@@ -196,3 +196,35 @@ test("muspekare och tangentbordsfokus väljer markering utan att navigera", asyn
     card.getByRole("link", { name: "Öppna Billaddare →", exact: true }),
   ).toHaveAttribute("href", "/laddning");
 });
+test("en inbyggd standardbild visas utan ny uppladdning i en ny webbläsarsession", async ({
+  page,
+  browser,
+}) => {
+  async function prepare(p: import("@playwright/test").Page) {
+    await p.route("**/house-photo.json", (route) =>
+      route.fulfill({
+        json: { householdId: "demo-home", url: "/icon-512.png" },
+      }),
+    );
+    await p.goto("/");
+  }
+  await prepare(page);
+  const photo = page.getByRole("img", { name: /Ditt hus med interaktiva/ });
+  await expect(photo).toBeVisible();
+  await expect(photo).toHaveAttribute("src", "/icon-512.png");
+  const ctx = await browser.newContext();
+  try {
+    const fresh = await ctx.newPage();
+    await fresh.route("**/house-photo.json", (route) =>
+      route.fulfill({
+        json: { householdId: "demo-home", url: "/icon-512.png" },
+      }),
+    );
+    await fresh.goto("http://127.0.0.1:3000/");
+    await expect(
+      fresh.getByRole("img", { name: /Ditt hus med interaktiva/ }),
+    ).toBeVisible();
+  } finally {
+    await ctx.close();
+  }
+});

@@ -260,7 +260,7 @@ export function OutdoorLightingHitAreas({
           />
         ))}
         {[
-          "M291 932L354 866L417 800L480 740",
+          "M336 932L399 866L462 800L525 740",
           "M965 989L1322 613",
           "M62 1227L472 1410",
         ].map((d) => (
