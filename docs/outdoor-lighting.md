@@ -43,3 +43,5 @@ IndexedDB är bundet till webbplatsens ursprung: en ny Vercel-förhandsadress ka
 Lokalt valt foto har företräde och dess lagring ändras inte. Saknas lokal bild används den inbyggda bilden om manifestet innehåller en giltig rot-relativ JPG/PNG/WebP-sökväg för valt hushåll. Utländska URL:er och andra hushåll avvisas. Tester täcker både lokalt sparad bild och en inbyggd bild i en ny webbläsarsession utan tidigare lagring.
 
 Originalfilen är 1448 × 1086 och har ett bredare utsnitt än den första chattbilden (1596 × 1422). `lib/house-photo-layout.ts` anpassar därför SVG-vy, markörer och hovringsrutor för originalbilden. Samma kalibrering används för huskonturer, ljuseffekter och belysningens träffområden. Uppladdade äldre beskärningar behåller sitt tidigare koordinatsystem.
+
+Vänstersidans fyra ljuspunkter är nu placerade längs häckens mittlinje i originalfotot, bort från gångens poolkant. Förhandsvisningens träffområde följer samma fyra positioner. Placeringen har kontrollerats visuellt på den inbyggda originalbilden.
