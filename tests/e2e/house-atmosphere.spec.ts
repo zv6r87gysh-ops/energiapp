@@ -189,10 +189,21 @@ test("bildknapparna ligger i fotot, grönt följer lampornas läge och dagens v�
     /Solnedgång\s*\d{2}:\d{2}/,
   );
   const timeline = house.getByRole("region", {
-    name: "Dagens väder vid huset, var tredje timme",
+    name: "Väder vid huset kommande 24 timmar",
     exact: true,
   });
   await expect(timeline.getByRole("listitem")).toHaveCount(8);
+  await expect(timeline.getByText("Saknas", { exact: true })).toHaveCount(0);
+  const times = await timeline
+    .locator("time")
+    .evaluateAll((elements) =>
+      elements.map((el) => Date.parse(el.getAttribute("datetime")!)),
+    );
+  const instant = Date.parse("2026-10-21T18:00:00Z");
+  expect(times.every((t) => t >= instant && t < instant + 86400000)).toBe(true);
+  await expect(
+    timeline.getByText("Imorgon", { exact: true }).first(),
+  ).toBeVisible();
   const photo = await house.locator(".house-photo-scene").boundingBox();
   const nav = await buttons.boundingBox();
   expect(nav!.x).toBeGreaterThan(photo!.x);

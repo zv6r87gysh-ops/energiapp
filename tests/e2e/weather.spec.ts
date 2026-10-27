@@ -171,11 +171,11 @@ test("vädersymboler och temperaturer visas i tretimmarssteg hela dygnet", async
   });
   await page.goto("/");
   const today = page.getByRole("region", {
-    name: "Väder var tredje timme 2026-10-21",
+    name: "Väder kommande 24 timmar",
     exact: true,
   });
   await expect(today.getByRole("listitem")).toHaveCount(8);
-  await expect(today.getByText("Saknas", { exact: true })).toHaveCount(4);
+  await expect(today.getByText("Saknas", { exact: true })).toHaveCount(0);
   await page.getByRole("tab", { name: "Imorgon", exact: true }).click();
   const tomorrow = page.getByRole("region", {
     name: "Väder var tredje timme 2026-10-22",

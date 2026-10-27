@@ -35,8 +35,26 @@ export function WeatherPanel({
   const [day, setDay] = useState(0);
   const current = weather && now !== null ? weatherHour(weather, now) : null;
   const date = now === null ? "" : addDate(swedishDate(new Date(now)), day);
+  const upcoming =
+    weather && now !== null
+      ? weather.hours.filter(
+          (h) =>
+            Date.parse(h.time) >= now && Date.parse(h.time) < now + 86400000,
+        )
+      : [];
   const summary =
-    weather && now !== null ? summarizeWeather(weather, date, now) : null;
+    day === 0
+      ? upcoming.length
+        ? {
+            low: Math.min(...upcoming.map((h) => h.temperature)),
+            high: Math.max(...upcoming.map((h) => h.temperature)),
+            wind: Math.max(...upcoming.map((h) => h.wind)),
+            hours: upcoming.length,
+          }
+        : null
+      : weather && now !== null
+        ? summarizeWeather(weather, date, now)
+        : null;
   return (
     <details className="card weather-widget" open>
       <summary>
@@ -86,7 +104,7 @@ export function WeatherPanel({
       {weather && (
         <>
           <div className="weather-tabs" role="tablist" aria-label="Prognosdag">
-            {["Idag", "Imorgon"].map((label, i) => (
+            {["Kommande 24 timmar", "Imorgon"].map((label, i) => (
               <button
                 key={label}
                 role="tab"
@@ -125,7 +143,12 @@ export function WeatherPanel({
             ) : (
               <p>Prognos för denna dag saknas. Inga värden fylls i.</p>
             )}
-            <WeatherTimeline weather={weather} date={date} />
+            <WeatherTimeline
+              weather={weather}
+              date={date}
+              now={day === 0 && now !== null ? now : undefined}
+              label={day === 0 ? "Väder kommande 24 timmar" : undefined}
+            />
             {weather.locationPrecision === "district" && (
               <p className="muted" role="status">
                 Områdesprognos för {weather.place} ({weather.locationArea}).
@@ -134,7 +157,7 @@ export function WeatherPanel({
             )}
             <p className="muted">
               {day === 0
-                ? "Temperaturspann för återstående prognostimmar idag."
+                ? "Temperaturspann för prognostimmar under kommande 24 timmar."
                 : "Temperaturspann för tillgängliga prognostimmar imorgon."}{" "}
               {summary ? `${summary.hours} timvärden.` : ""} Prognostemperatur
               är inte en avläsning från en utomhusgivare.

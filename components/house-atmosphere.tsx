@@ -107,7 +107,9 @@ export function HouseClock({
       </span>
       <div className="house-day-forecast">
         <div className="house-forecast-heading">
-          <strong>Vädret idag{weather ? ` · ${weather.place}` : ""}</strong>
+          <strong>
+            Väder kommande 24 timmar{weather ? ` · ${weather.place}` : ""}
+          </strong>
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -141,7 +143,8 @@ export function HouseClock({
             <WeatherTimeline
               weather={weather}
               date={scene.date}
-              label="Dagens väder vid huset, var tredje timme"
+              label="Väder vid huset kommande 24 timmar"
+              now={scene.now}
               overview
             />
             <small>
