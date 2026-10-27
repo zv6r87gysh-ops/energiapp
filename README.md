@@ -89,3 +89,5 @@ Väderfliken hämtar riktig prognos för angivet svenskt postnummer från MET No
 ### Utebelysning och Plejd
 
 Översikt har en av/på-förhandsvisning för spotlights på det egna husfotot, med sparat läge per hushåll. Plejd är ännu inte anslutet och inga riktiga lampor styrs. I Inställningar kan brygg- och gruppreferenser förberedas utan hemligheter. Adapterkontrakt och nästa anslutningssteg beskrivs i [utebelysning och Plejd](docs/outdoor-lighting.md).
+
+Husets originalfoto ingår nu som fast standardbild i bygget och visas även i nya Vercel-förhandsversioner utan uppladdning. Ett tidigare lokalt valt foto behålls och har företräde. Konturer och ljuseffekter anpassas till originalbildens bredare utsnitt.

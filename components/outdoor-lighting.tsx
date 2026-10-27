@@ -51,14 +51,20 @@ export function OutdoorLightingControl({
     </section>
   );
 }
-export function OutdoorLightingOverlay({ on }: { on: boolean }) {
+export function OutdoorLightingOverlay({
+  on,
+  viewBox = "0 0 1596 1422",
+}: {
+  on: boolean;
+  viewBox?: string;
+}) {
   const id = useId().replace(/:/g, "");
   return (
     <svg
       className={`outdoor-lighting-overlay ${on ? "is-on" : ""}`}
       data-testid="outdoor-lighting-overlay"
       data-power={on ? "on" : "off"}
-      viewBox="0 0 1596 1422"
+      viewBox={viewBox}
       preserveAspectRatio="none"
       aria-hidden="true"
     >
@@ -84,7 +90,14 @@ export function OutdoorLightingOverlay({ on }: { on: boolean }) {
         </filter>
       </defs>
       <g className="outdoor-light-wash">
-        <rect width="1596" height="1422" fill="#071b24" opacity=".13" />
+        <rect
+          x="-500"
+          y="-500"
+          width="3000"
+          height="3000"
+          fill="#071b24"
+          opacity=".13"
+        />
         {outdoorSpots.map((s) => (
           <g key={s.id} data-spot={s.id}>
             {s.kind === "wall" ? (
@@ -222,13 +235,15 @@ export function OutdoorLightingSettings({
 export function OutdoorLightingHitAreas({
   onSelect,
   active,
+  viewBox = "0 0 1596 1422",
 }: {
   onSelect: (point?: readonly number[]) => void;
   active: boolean;
+  viewBox?: string;
 }) {
   return (
     <svg
-      viewBox="0 0 1596 1422"
+      viewBox={viewBox}
       preserveAspectRatio="none"
       className={`lighting-hit-overlay ${active ? "is-active" : ""}`}
       aria-label="Belysningsområden på huset"

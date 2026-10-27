@@ -14,6 +14,7 @@ import {
   OutdoorLightingHitAreas,
 } from "./outdoor-lighting";
 import type { OutdoorLighting } from "@/lib/lighting/contracts";
+import { housePhotoLayout, photoPoint } from "@/lib/house-photo-layout";
 import { money } from "@/lib/energy";
 const areas = [
   {
@@ -69,6 +70,7 @@ export function InteractiveHouse({
   simulation: HouseholdSimulation | null;
 }) {
   const [photo, setPhoto] = useState<string | null>(null);
+  const [layout, setLayout] = useState(() => housePhotoLayout(1596, 1422));
   const [active, setActive] = useState<AreaId>("house");
   const [error, setError] = useState("");
   const [preview, setPreview] = useState(false);
@@ -166,6 +168,7 @@ export function InteractiveHouse({
       }
       if (url.current) URL.revokeObjectURL(url.current);
       url.current = next;
+      setLayout(housePhotoLayout(image.naturalWidth, image.naturalHeight));
       setPhoto(next);
       setError("");
       try {
@@ -198,6 +201,8 @@ export function InteractiveHouse({
         : houseCost;
   const area = areas.find((a) => a.id === active)!;
   const savings = simulation?.continuousComparison[active] ?? null;
+  const areaPoint = photoPoint(area.point, layout);
+  const lightPoint = photoPoint(lightingPoint, layout);
   return (
     <section
       className="card interactive-house"
@@ -264,8 +269,19 @@ export function InteractiveHouse({
               alt="Ditt hus med interaktiva markeringar för huset, golvvärmen, poolen och billaddaren"
               width={1596}
               height={1422}
+              onLoad={(event) =>
+                setLayout(
+                  housePhotoLayout(
+                    event.currentTarget.naturalWidth,
+                    event.currentTarget.naturalHeight,
+                  ),
+                )
+              }
             />
-            <OutdoorLightingOverlay on={lighting.previewOn} />
+            <OutdoorLightingOverlay
+              on={lighting.previewOn}
+              viewBox={layout.viewBox}
+            />
             <span
               className={`outdoor-lighting-photo-status ${lightingPreview ? "is-visible" : ""}`}
             >
@@ -273,7 +289,7 @@ export function InteractiveHouse({
               {lighting.previewOn ? "tänd" : "släckt"}
             </span>
             <svg
-              viewBox="0 0 1596 1422"
+              viewBox={layout.viewBox}
               preserveAspectRatio="none"
               className="house-photo-overlay"
               aria-label="Kategorier på husfotot"
@@ -318,13 +334,14 @@ export function InteractiveHouse({
             <OutdoorLightingHitAreas
               active={lightingPreview}
               onSelect={selectLighting}
+              viewBox={layout.viewBox}
             />
             <div
               className="house-lighting-popover"
               hidden={!lightingPreview}
               style={{
-                left: `clamp(142px, ${lightingPoint[0]}%, calc(100% - 142px))`,
-                top: `clamp(8px, calc(${lightingPoint[1]}% - 25px), calc(100% - 170px))`,
+                left: `clamp(142px, ${lightPoint[0]}%, calc(100% - 142px))`,
+                top: `clamp(8px, calc(${lightPoint[1]}% - 25px), calc(100% - 170px))`,
               }}
               onPointerEnter={cancelHide}
             >
@@ -339,7 +356,10 @@ export function InteractiveHouse({
                 <button
                   key={a.id}
                   className={`house-photo-pin house-pin-${a.id}`}
-                  style={{ left: `${a.point[0]}%`, top: `${a.point[1]}%` }}
+                  style={{
+                    left: `${photoPoint(a.point, layout)[0]}%`,
+                    top: `${photoPoint(a.point, layout)[1]}%`,
+                  }}
                   aria-label={`Visa kostnad för ${a.name}`}
                   aria-pressed={preview && active === a.id}
                   aria-describedby={tooltip}
@@ -356,8 +376,8 @@ export function InteractiveHouse({
               className={`house-photo-hover-card ${preview ? "is-visible" : ""}`}
               aria-hidden="true"
               style={{
-                left: `clamp(118px, ${area.point[0]}%, calc(100% - 118px))`,
-                top: `clamp(8px, calc(${area.point[1]}% ${active === "pool" || active === "floor" ? "- 176px" : "+ 28px"}), calc(100% - 170px))`,
+                left: `clamp(118px, ${areaPoint[0]}%, calc(100% - 118px))`,
+                top: `clamp(8px, calc(${areaPoint[1]}% ${active === "pool" || active === "floor" ? "- 176px" : "+ 28px"}), calc(100% - 170px))`,
               }}
             >
               <strong>{area.name}</strong>

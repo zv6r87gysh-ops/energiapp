@@ -48,7 +48,7 @@ Felmeddelanden skiljer nu på okänt postnummer, otillgänglig postnummertjänst
 
 ### Interaktivt husfoto på Översikt
 
-Fotot väljs med `Välj ditt husfoto` (JPG, PNG eller WebP, högst 15 MB). Bildfilen från chatten är inte monterad i arbetsytan, så den kan inte byggas in som en publicerad standardbild. Användaren väljer samma foto i appen. Originalfilen ändras inte och skickas inte till någon bildtjänst; Blob lagras i IndexedDB per hushåll i denna webbläsare. Vid lagringsfel kan bilden visas för det pågående besöket med tydligt besked om att den inte sparats.
+Fotot väljs med `Välj ditt husfoto` (JPG, PNG eller WebP, högst 15 MB). Originalfotot från användarens ZIP-fil levereras även som fast standardbild via `public/house-photo.json`, så en ny Vercel-adress inte kräver ny uppladdning. Ett eget lokalt valt foto har företräde. Originalfilen ändras inte och skickas inte till någon bildtjänst; Blob lagras i IndexedDB per hushåll i denna webbläsare. Vid lagringsfel kan bilden visas för det pågående besöket med tydligt besked om att den inte sparats.
 
 Konturerna är anpassade till det bifogade perspektivfotot: pool, hus, schematiska golvslingor och billaddare vid uppfarten. Huset öppnar Aktuell förbrukning, övriga punkter respektive kategorivy. Hovring/fokus visar glöd och kostnadsinformation utan att navigera; klick på konturen eller Öppna navigerar. Mobilens markörknappar väljer information före separat navigering. Kategoriknappar finns också under fotot för tangentbord och små skärmar.
 

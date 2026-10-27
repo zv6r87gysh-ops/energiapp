@@ -1,4 +1,10 @@
 import { test, expect } from "@playwright/test";
+// These cases exercise the local-upload/no-default scenario; bundled asset has its own tests.
+test.beforeEach(async ({ page }) => {
+  await page.route("**/house-photo.json", (route) =>
+    route.fulfill({ json: { householdId: "demo-home", url: null } }),
+  );
+});
 import { initialHousehold } from "../../lib/demo";
 test("väljer kategorier, sparar och synkar med pool och laddare", async ({
   page,

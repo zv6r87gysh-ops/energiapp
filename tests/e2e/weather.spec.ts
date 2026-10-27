@@ -1,4 +1,10 @@
 import { test, expect } from "@playwright/test";
+// These cases exercise the local-upload/no-default scenario; bundled asset has its own tests.
+test.beforeEach(async ({ page }) => {
+  await page.route("**/house-photo.json", (route) =>
+    route.fulfill({ json: { householdId: "demo-home", url: null } }),
+  );
+});
 import { weatherFixture, thermalHome, weatherNow } from "../fixtures/weather";
 async function prepare(page: import("@playwright/test").Page) {
   await page.clock.install({ time: new Date(weatherNow) });
