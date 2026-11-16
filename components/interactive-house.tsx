@@ -13,6 +13,8 @@ import {
   OutdoorLightingOverlay,
   PoolLightingOverlay,
 } from "./outdoor-lighting";
+import { IndoorLightingOverlay } from "./indoor-lighting";
+import { indoorGroups } from "@/lib/lighting/indoor";
 import { lightingPower } from "@/lib/lighting/automation";
 import type { SmartControl } from "@/lib/smart-control";
 import type { OutdoorLighting } from "@/lib/lighting/contracts";
@@ -72,13 +74,16 @@ export function InteractiveHouse({
   controls,
   lighting,
   onLightingManual,
+  onIndoorChange,
   smartControl,
   weather,
   location,
   weatherMessage,
   postcode,
   onPostcode,
+  priceArea,
 }: {
+  priceArea: string;
   weatherMessage: string;
   postcode: string;
   onPostcode: (postcode: string) => void;
@@ -88,6 +93,9 @@ export function InteractiveHouse({
   location: SceneLocation | null;
   lighting: OutdoorLighting;
   onLightingManual: (group: "outdoor" | "pool", on: boolean) => void;
+  onIndoorChange: (
+    preview: NonNullable<OutdoorLighting["indoorPreview"]>,
+  ) => void;
   smartControl: SmartControl;
   householdId: string;
   simulation: HouseholdSimulation | null;
@@ -266,6 +274,8 @@ export function InteractiveHouse({
       <HouseClock
         key={postcode}
         scene={atmosphere}
+        price={simulation?.currentPrice ?? null}
+        priceArea={priceArea}
         location={location}
         weather={weather}
         message={weatherMessage}
@@ -294,6 +304,11 @@ export function InteractiveHouse({
       {photo ? (
         <div
           className={`house-photo-scene house-active-${preview ? active : "none"}`}
+          style={
+            {
+              "--photo-aspect": layout.width / layout.height,
+            } as React.CSSProperties
+          }
           onPointerMove={(e) => {
             if (e.pointerType !== "mouse") return;
             const target = e.target as Element;
@@ -334,6 +349,12 @@ export function InteractiveHouse({
               viewBox={layout.viewBox}
               photo={photo}
               brightness={atmosphere?.brightness ?? 1}
+            />
+            <IndoorLightingOverlay
+              photo={photo}
+              viewBox={layout.viewBox}
+              preview={lighting.indoorPreview ?? {}}
+              levels={lighting.indoorBrightness}
             />
             <PoolLightingOverlay
               on={poolState.on}
@@ -473,6 +494,37 @@ export function InteractiveHouse({
             >
               <Lightbulb size={17} />
               Poolbelysning <small>{poolState.on ? "Tänd" : "Släckt"}</small>
+            </button>
+            <button
+              type="button"
+              aria-label="Inomhusbelysning"
+              className={
+                indoorGroups.every((g) => lighting.indoorPreview?.[g.id])
+                  ? "lighting-is-on"
+                  : ""
+              }
+              aria-pressed={indoorGroups.every(
+                (g) => lighting.indoorPreview?.[g.id],
+              )}
+              onClick={() => {
+                clearPreview();
+                const on = !indoorGroups.every(
+                  (g) => lighting.indoorPreview?.[g.id],
+                );
+                onIndoorChange(
+                  Object.fromEntries(indoorGroups.map((g) => [g.id, on])),
+                );
+              }}
+            >
+              <Lightbulb size={17} />
+              Inomhus{" "}
+              <small>
+                {indoorGroups.every((g) => lighting.indoorPreview?.[g.id])
+                  ? "Tänd"
+                  : indoorGroups.some((g) => lighting.indoorPreview?.[g.id])
+                    ? "Delvis"
+                    : "Släckt"}
+              </small>
             </button>
             {areas.map((a) => {
               const Icon = a.icon;

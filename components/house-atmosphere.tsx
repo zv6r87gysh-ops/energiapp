@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useId, useMemo, useState } from "react";
 import { Clock3, Sunrise, Sunset } from "lucide-react";
 import {
@@ -38,7 +39,11 @@ export function HouseClock({
   message,
   postcode,
   onPostcode,
+  price,
+  priceArea,
 }: {
+  price: number | null;
+  priceArea: string;
   scene: HouseAtmosphere | null;
   location: SceneLocation | null;
   weather: Weather | null;
@@ -100,6 +105,16 @@ export function HouseClock({
         )}
         {!sun && <small>Ange postnummer för soltider</small>}
       </div>
+      <Link
+        href="/elpriser"
+        className="house-spot-price"
+        aria-label={`Aktuellt spotpris ${priceArea}`}
+        title="Elprisetjustnu.se · exklusive moms, skatter och avgifter"
+      >
+        <small>Spotpris nu · {priceArea}</small>
+        <b>{price === null ? "Pris saknas" : `${number(price, 1)} öre/kWh`}</b>
+        <small>Exkl. moms och avgifter</small>
+      </Link>
       <span>
         {scene
           ? `${scene.seasonLabel} · ${scene.phaseLabel} · ${scene.conditionLabel}${scene.temperature === null ? "" : ` · ${number(scene.temperature, 1)} °C`}`

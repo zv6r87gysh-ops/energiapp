@@ -1,3 +1,4 @@
+import type { MoodSettings } from "./moods/contracts";
 import { z } from "zod";
 import type { OutdoorLighting } from "./lighting/contracts";
 import type { ThermalSettings } from "./weather/contracts";
@@ -146,6 +147,7 @@ export interface Household {
   smartControl?: SmartControl;
   simulationSettings?: SimulationSettings;
   outdoorLighting?: OutdoorLighting;
+  moodSettings?: MoodSettings;
   postcode?: string;
   thermalSettings?: ThermalSettings;
 }
