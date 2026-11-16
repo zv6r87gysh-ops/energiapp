@@ -1,7 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { Music2, Pause, Sparkles, Smile, Waves } from "lucide-react";
+import {
+  Music2,
+  Pause,
+  SkipForward,
+  Sparkles,
+  Smile,
+  Waves,
+} from "lucide-react";
 import {
   moodIds,
   moodLabels,
@@ -70,7 +77,7 @@ export function MusicMoods({
       onPreview(style);
       setLast(mood);
       setPlaylist(response.playlist);
-      setResult(`${response.music.message} ${response.lights.message}`);
+      setResult("");
     }
   }
   return (
@@ -130,6 +137,17 @@ export function MusicMoods({
             : "Musikförhandsvisning"}
       </div>
       {cloud.busy && <p role="status">Kontaktar musiktjänsten…</p>}
+      {cloud.status?.sonos.connected && settings.room && (
+        <button
+          type="button"
+          className="button secondary mood-next-track"
+          disabled={cloud.busy}
+          onClick={() => void cloud.pause(settings.room!, "next")}
+        >
+          <SkipForward size={18} />
+          Nästa låt
+        </button>
+      )}
       {result && (
         <p className="mood-result" role="status">
           {result}

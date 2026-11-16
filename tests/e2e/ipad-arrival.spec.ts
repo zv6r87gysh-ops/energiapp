@@ -181,10 +181,10 @@ test("ansluten musik skickar sökord, visar spellistan och skiljer ljud från lj
   expect(payload).not.toHaveProperty("playlistId");
   await expect(
     page.getByRole("region", { name: "Musik och stämningar", exact: true }),
-  ).toContainText("Spotify rapporterar uppspelning");
+  ).not.toContainText("Spotify rapporterar uppspelning");
   await expect(
     page.getByRole("region", { name: "Musik och stämningar", exact: true }),
-  ).toContainText("Plejd är inte anslutet");
+  ).toContainText("tills Plejd är anslutet");
   await expect(
     page.getByRole("link", { name: /Slumpvald chill/ }),
   ).toHaveAttribute("href", "https://open.spotify.com/playlist/test");
@@ -428,6 +428,15 @@ test("Sonos direkt startar med ett tryck utan Spotify eller telefon", async ({
     style: { sonosItems: [{ id: "chill", kind: "favorite" }] },
   });
   expect(payload).not.toHaveProperty("device");
+  await expect(
+    page.getByText("Sonos tog emot startbegäran.", { exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Nästa låt", exact: true }).click();
+  expect(payload).toMatchObject({
+    householdId: home.id,
+    room: "room1",
+    action: "next",
+  });
 });
 test("husbilden fyller kortet och kontroller visas först efter tryck", async ({
   page,

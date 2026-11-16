@@ -1,5 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { activateSonosMood, sonosCatalog } from "../lib/moods/sonos-direct";
+import { pauseMusic } from "../lib/moods/cloud";
 import { defaultMoods } from "../lib/moods/contracts";
 import type { Session } from "../lib/moods/oauth";
 const session: Session = {
@@ -84,6 +85,27 @@ it("rejects an unrelated room before reading its music catalog", async () => {
     code: "invalid-room",
   });
   expect(fetcher.mock.calls.some(([url]) => url.endsWith("/favorites"))).toBe(
+    false,
+  );
+});
+
+it("next track targets only the selected authorized Sonos group", async () => {
+  const fetcher = mock();
+  await pauseMusic("room", session, "skipToNextTrack");
+  expect(
+    fetcher.mock.calls
+      .filter(([, init]) => init?.method === "POST")
+      .map(([url]) => url),
+  ).toEqual([
+    "https://api.ws.sonos.com/control/api/v1/groups/room/playback/skipToNextTrack",
+  ]);
+});
+it("next track rejects an unrelated group without sending commands", async () => {
+  const fetcher = mock();
+  await expect(
+    pauseMusic("other", session, "skipToNextTrack"),
+  ).rejects.toMatchObject({ code: "invalid-room" });
+  expect(fetcher.mock.calls.some(([, init]) => init?.method === "POST")).toBe(
     false,
   );
 });

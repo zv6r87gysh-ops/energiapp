@@ -136,14 +136,24 @@ export async function PATCH(request: Request) {
   if (!sameOrigin(request)) return new Response(null, { status: 403, headers });
   try {
     const input = z
-      .object({ householdId: homeSchema, room: z.string().min(1).max(200) })
+      .object({
+        householdId: homeSchema,
+        room: z.string().min(1).max(200),
+        action: z.enum(["pause", "next"]).default("pause"),
+      })
       .parse(await request.json());
     await pauseMusic(
       input.room,
       await authorizedSession(request, "sonos", input.householdId, headers),
+      input.action === "next" ? "skipToNextTrack" : "pause",
     );
     return Response.json(
-      { message: "Paus begärd på valt Sonos-rum." },
+      {
+        message:
+          input.action === "next"
+            ? "Nästa låt begärd."
+            : "Paus begärd på valt Sonos-rum.",
+      },
       { headers },
     );
   } catch (error) {

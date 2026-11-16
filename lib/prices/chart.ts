@@ -21,3 +21,17 @@ export function classifyPrice(
   if (!bands || bands.equal) return "middle";
   return price <= bands.low ? "low" : price > bands.high ? "high" : "middle";
 }
+
+export function rollingPrices(
+  intervals: { start: string; end: string; ore: number }[],
+  now: number,
+) {
+  const quarter = 900000;
+  const start = Math.floor(now / quarter) * quarter - 12 * 3600000;
+  const byStart = new Map(intervals.map((p) => [Date.parse(p.start), p.ore]));
+  return Array.from({ length: 96 }, (_, i) => ({
+    start: new Date(start + i * quarter).toISOString(),
+    end: new Date(start + (i + 1) * quarter).toISOString(),
+    ore: byStart.get(start + i * quarter) ?? null,
+  }));
+}

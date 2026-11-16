@@ -92,3 +92,16 @@ it("är aktiv utan Vercel-miljövariabler", async () => {
   );
   expect((await (await get()).json()).status).toBe("available");
 });
+it("hämtar gårdagens datum för prisgrafens historik", async () => {
+  const { start, end } = dayBounds("2026-10-20");
+  const values = Array.from({ length: (end - start) / 900000 }, (_, i) => ({
+    SEK_per_kWh: 0.5,
+    time_start: new Date(start + i * 900000).toISOString(),
+    time_end: new Date(start + (i + 1) * 900000).toISOString(),
+  }));
+  const fetcher = vi.fn().mockResolvedValue(Response.json(values));
+  vi.stubGlobal("fetch", fetcher);
+  const response = await get("area=SE3&day=yesterday");
+  expect((await response.json()).data.date).toBe("2026-10-20");
+  expect(fetcher.mock.calls[0][0]).toContain("2026/10-20_SE3.json");
+});

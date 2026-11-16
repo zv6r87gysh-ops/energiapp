@@ -14,10 +14,16 @@ import {
 } from "recharts";
 import { Button } from "./ui/button";
 import { number } from "@/lib/energy";
-import { priceBands, classifyPrice, priceBandLabels } from "@/lib/prices/chart";
+import {
+  rollingPrices,
+  priceBands,
+  classifyPrice,
+  priceBandLabels,
+} from "@/lib/prices/chart";
 import {
   priceDaySchema,
   type PriceArea,
+  type PriceDay,
   type PricesResponse,
 } from "@/lib/prices/contracts";
 import { addDate, swedishDate, intervalAt, priceTime } from "@/lib/prices/time";
@@ -113,6 +119,52 @@ export function PricePanel({
       window.removeEventListener("focus", online);
     };
   }, [area, day, date, key, retry]);
+  const [neighbors, setNeighbors] = useState<{
+    key: string;
+    days: PriceDay[];
+  } | null>(null);
+  const rollingKey = `${area}/${date}`;
+  useEffect(() => {
+    if (!arrival) return;
+    const abort = new AbortController();
+    async function load() {
+      const days = await Promise.all(
+        [-1, 1].map(async (offset) => {
+          try {
+            const r = await fetch(
+              `/api/electricity-prices?area=${area}&day=${offset < 0 ? "yesterday" : "tomorrow"}`,
+              { cache: "no-store", signal: abort.signal },
+            );
+            const raw = await r.json();
+            if (
+              !r.ok ||
+              raw.status !== "available" ||
+              raw.area !== area ||
+              raw.date !== addDate(date, offset)
+            )
+              return null;
+            const day = priceDaySchema.parse(raw.data);
+            if (day.area !== area || day.date !== addDate(date, offset))
+              return null;
+            return day;
+          } catch {
+            return null;
+          }
+        }),
+      );
+      if (!abort.signal.aborted)
+        setNeighbors({
+          key: rollingKey,
+          days: days.filter((d): d is PriceDay => d !== null),
+        });
+    }
+    void load();
+    const timer = setInterval(() => void load(), 300000);
+    return () => {
+      abort.abort();
+      clearInterval(timer);
+    };
+  }, [arrival, area, date, rollingKey, retry]);
   const payload = result?.key === key ? result.payload : null;
   const stale = payload?.data
     ? clock - Date.parse(payload.data.fetchedAt) > 600000
@@ -122,17 +174,32 @@ export function PricePanel({
   const next = data
     ? intervalAt(data.intervals, Math.floor(clock / 900000) * 900000 + 900000)
     : null;
-  const bands = priceBands(data?.intervals.map((p) => p.ore) ?? []);
+  const intervals = arrival
+    ? rollingPrices(
+        [
+          ...(data?.intervals ?? []),
+          ...(neighbors?.key === rollingKey
+            ? neighbors.days
+                .filter((d) => clock - Date.parse(d.fetchedAt) <= 600000)
+                .flatMap((d) => d.intervals)
+            : []),
+        ],
+        clock,
+      )
+    : (data?.intervals ?? []);
+  const bands = priceBands(
+    intervals.flatMap((p) => (p.ore === null ? [] : [p.ore])),
+  );
   const points =
-    data?.intervals.map((p) => ({
+    intervals.map((p) => ({
       time: priceTime(p.start),
       price: p.ore,
       start: p.start,
-      band: classifyPrice(p.ore, bands),
+      band: classifyPrice(p.ore ?? 0, bands),
       state:
         Date.parse(p.end) <= clock
           ? "past"
-          : p === current
+          : p.start === current?.start
             ? "current"
             : "future",
     })) ?? [];
@@ -192,7 +259,12 @@ export function PricePanel({
       >
         <div className="toolbar">
           <h2 style={{ margin: 0 }}>
-            {chartOnly ? "Dagens kvartspriser" : "Spotpriser"} · {area}
+            {arrival
+              ? "Elpris · −12 / +12 timmar"
+              : chartOnly
+                ? "Dagens kvartspriser"
+                : "Spotpriser"}{" "}
+            · {area}
           </h2>
           <span className="badge neutral">
             {data ? "Publicerade priser" : "Inga verifierade priser"}
@@ -295,6 +367,7 @@ export function PricePanel({
                     activeBar={false}
                     shape={({ index, x, y, width, height }: BarShapeProps) => {
                       const point = points[index];
+                      if (point.price === null) return <g />;
                       return (
                         <Rectangle
                           x={x}
@@ -338,6 +411,11 @@ export function PricePanel({
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            {arrival && intervals.some((p) => p.ore === null) && (
+              <div className="muted" style={{ fontSize: 9 }}>
+                Luckor: priser saknas eller är ännu inte publicerade.
+              </div>
+            )}
             <div className="price-legend" aria-label="Grafens färger">
               <span>
                 <i className="price-swatch price-swatch-past" />
@@ -363,7 +441,7 @@ export function PricePanel({
               </span>
             </div>
             <p className="muted price-color-explanation">
-              Färgerna jämför priser inom det valda dygnet.{" "}
+              Färgerna jämför priser inom den visade perioden.{" "}
               {bands?.equal
                 ? "Alla kvartar har samma pris."
                 : bands

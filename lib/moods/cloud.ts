@@ -265,11 +265,15 @@ export async function activateMood(
     },
   };
 }
-export async function pauseMusic(room: string, sonos: Session) {
+export async function pauseMusic(
+  room: string,
+  sonos: Session,
+  action: "pause" | "skipToNextTrack" = "pause",
+) {
   if (!(await sonosRooms(sonos)).some((r) => r.id === room))
     throw new MusicError("invalid-room", 400);
   await cloudFetch(
-    `${sonosBase}/groups/${encodeURIComponent(room)}/playback/pause`,
+    `${sonosBase}/groups/${encodeURIComponent(room)}/playback/${action}`,
     sonos,
     "POST",
     {},

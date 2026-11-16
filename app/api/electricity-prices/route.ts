@@ -11,12 +11,15 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const area = areaSchema.safeParse(url.searchParams.get("area") ?? "SE3");
   const day = url.searchParams.get("day") ?? "today";
-  if (!area.success || !["today", "tomorrow"].includes(day))
+  if (!area.success || !["yesterday", "today", "tomorrow"].includes(day))
     return Response.json(
-      { message: "Välj SE1–SE4 och idag eller imorgon." },
+      { message: "Välj SE1–SE4 och igår, idag eller imorgon." },
       { status: 400 },
     );
-  const date = addDate(swedishDate(), day === "tomorrow" ? 1 : 0);
+  const date = addDate(
+    swedishDate(),
+    day === "tomorrow" ? 1 : day === "yesterday" ? -1 : 0,
+  );
   const result = (
     status: PricesResponse["status"],
     data: PriceDay | null,
