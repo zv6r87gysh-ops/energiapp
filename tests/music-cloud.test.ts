@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { activateMood, findPlaylist } from "../lib/moods/cloud";
+import {
+  activateMood,
+  findPlaylist,
+  spotifyDeviceSnapshot,
+} from "../lib/moods/cloud";
 import { defaultMoods, readMoods } from "../lib/moods/contracts";
 import {
   cookieName,
@@ -197,7 +201,14 @@ function mockCloud(device = true, playlists = true, readback = true) {
     if (url.endsWith("/devices"))
       return Response.json({
         devices: device
-          ? [{ id: "device1", name: "Vardagsrum", is_restricted: false }]
+          ? [
+              {
+                id: "device1",
+                name: "Vardagsrum",
+                is_restricted: false,
+                type: "Speaker",
+              },
+            ]
           : [],
       });
     if (url.includes("/search?"))
@@ -291,17 +302,15 @@ it("reports that Sonos volume already changed when Spotify rejects the following
 });
 
 it("returns a safe specific callback reason for rejected Spotify app credentials", async () => {
-  const f = vi
-    .fn()
-    .mockResolvedValue(
-      Response.json(
-        {
-          error: "invalid_client",
-          error_description: "DO-NOT-ECHO-test-secret",
-        },
-        { status: 400 },
-      ),
-    );
+  const f = vi.fn().mockResolvedValue(
+    Response.json(
+      {
+        error: "invalid_client",
+        error_description: "DO-NOT-ECHO-test-secret",
+      },
+      { status: 400 },
+    ),
+  );
   vi.stubGlobal("fetch", f);
   const state = seal(
     {
@@ -380,3 +389,142 @@ it("marks an actually rejected Spotify token unconnected while preserving Sonos"
   expect(result.sonos.connected).toBe(true);
   expect(result.spotify.connected).toBe(false);
 });
+
+it("includes the active Sonos device even if Spotify omits it from the available-device list", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) =>
+      url.endsWith("/devices")
+        ? Response.json({
+            devices: [
+              {
+                id: "phone",
+                name: "iPhone",
+                is_restricted: false,
+                type: "Smartphone",
+              },
+            ],
+          })
+        : Response.json({
+            is_playing: true,
+            device: {
+              id: "sonos-live",
+              name: "Allrum",
+              is_restricted: false,
+              type: "Speaker",
+            },
+          }),
+    ),
+  );
+  const snapshot = await spotifyDeviceSnapshot(session);
+  expect(snapshot.devices).toContainEqual({
+    id: "sonos-live",
+    name: "Allrum",
+    restricted: false,
+    kind: "Speaker",
+  });
+  expect(snapshot.message).toContain("aktiv uppspelningsenhet: Allrum");
+});
+it("does not invent a controllable Sonos ID or silently upgrade a restricted player", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) =>
+      url.endsWith("/devices")
+        ? Response.json({
+            devices: [
+              {
+                id: "phone",
+                name: "iPhone",
+                is_restricted: false,
+                type: "Smartphone",
+              },
+            ],
+          })
+        : Response.json({
+            is_playing: true,
+            device: {
+              id: null,
+              name: "Allrum",
+              is_restricted: true,
+              type: "Speaker",
+            },
+          }),
+    ),
+  );
+  const snapshot = await spotifyDeviceSnapshot(session);
+  expect(snapshot.devices).toHaveLength(1);
+  expect(snapshot.message).toContain("utan styrbart enhets-ID");
+});
+it("preserves listed devices if supplementary playback status is unavailable", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) =>
+      url.endsWith("/devices")
+        ? Response.json({
+            devices: [
+              {
+                id: "d1",
+                name: "Allrum",
+                is_restricted: false,
+                type: "Speaker",
+              },
+            ],
+          })
+        : new Response(null, { status: 503 }),
+    ),
+  );
+  expect((await spotifyDeviceSnapshot(session)).devices).toEqual([
+    { id: "d1", name: "Allrum", restricted: false, kind: "Speaker" },
+  ]);
+});
+it("shows when Spotify still reports a phone, without claiming audio is playing directly on Sonos", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) =>
+      url.endsWith("/devices")
+        ? Response.json({ devices: [] })
+        : Response.json({
+            is_playing: true,
+            device: {
+              id: "p1",
+              name: "iPhone",
+              is_restricted: false,
+              type: "Smartphone",
+            },
+          }),
+    ),
+  );
+  const snapshot = await spotifyDeviceSnapshot(session);
+  expect(snapshot.message).toContain("AirPlay");
+  expect(snapshot.devices[0].name).toBe("iPhone");
+});
+
+it.each(["Smartphone", "Computer", undefined])(
+  "never sends volume or playback commands to a non-speaker %s",
+  async (type) => {
+    const f = mockCloud();
+    const impl = f.getMockImplementation()!;
+    f.mockImplementation((url, options) =>
+      url.endsWith("/devices")
+        ? Promise.resolve(
+            Response.json({
+              devices: [
+                {
+                  id: "device1",
+                  name: "iPhone or computer",
+                  is_restricted: false,
+                  type,
+                },
+              ],
+            }),
+          )
+        : impl(url, options),
+    );
+    await expect(activateMood(input(), session, session)).rejects.toMatchObject(
+      { code: "device-not-speaker" },
+    );
+    expect(
+      f.mock.calls.every(([, o]) => !o?.method || o.method === "GET"),
+    ).toBe(true);
+  },
+);

@@ -64,6 +64,6 @@ export type CloudStatus = {
   sonos: { configured: boolean; connected: boolean; message?: string };
   spotify: { configured: boolean; connected: boolean; message?: string };
   rooms: { id: string; name: string }[];
-  devices: { id: string; name: string; restricted: boolean }[];
+  devices: { id: string; name: string; restricted: boolean; kind: string }[];
   message?: string;
 };

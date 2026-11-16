@@ -9,6 +9,7 @@ export async function cloudFetch(
   session: Session,
   method = "GET",
   body?: unknown,
+  timeout = 10000,
 ) {
   let r: Response;
   try {
@@ -16,7 +17,7 @@ export async function cloudFetch(
       method,
       cache: "no-store",
       redirect: "error",
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(timeout),
       headers: {
         Authorization: `Bearer ${session.access}`,
         ...(body === undefined ? {} : { "Content-Type": "application/json" }),
@@ -64,24 +65,89 @@ export async function sonosRooms(session: Session) {
   }
   return rooms;
 }
-export async function spotifyDevices(session: Session) {
+const spotifyDeviceSchema = z.object({
+  id: z.string().nullable(),
+  name: z.string().min(1).max(200),
+  is_restricted: z.boolean(),
+  type: z.string().optional(),
+});
+export async function spotifyDeviceSnapshot(session: Session) {
   const data = z
-    .object({
-      devices: z
-        .array(
-          z.object({
-            id: z.string().nullable(),
-            name: z.string(),
-            is_restricted: z.boolean(),
-          }),
-        )
-        .max(100),
-    })
+    .object({ devices: z.array(spotifyDeviceSchema).max(100) })
     .safeParse(await cloudFetch(`${spotifyBase}/me/player/devices`, session));
   if (!data.success) throw new MusicError("invalid-provider-response");
-  return data.data.devices.flatMap((d) =>
-    d.id ? [{ id: d.id, name: d.name, restricted: d.is_restricted }] : [],
+  const devices = data.data.devices.flatMap((d) =>
+    d.id
+      ? [
+          {
+            id: d.id,
+            name: d.name,
+            restricted: d.is_restricted,
+            kind: d.type ?? "Unknown",
+          },
+        ]
+      : [],
   );
+  const unnamedIds = data.data.devices
+    .filter((d) => !d.id)
+    .slice(0, 3)
+    .map((d) => d.name);
+  let message: string | undefined = unnamedIds.length
+    ? `Spotify visar ${unnamedIds.join(", ")} utan styrbart enhets-ID.`
+    : undefined;
+  try {
+    const raw = await cloudFetch(
+      `${spotifyBase}/me/player`,
+      session,
+      "GET",
+      undefined,
+      4000,
+    );
+    const playback = z
+      .object({ device: spotifyDeviceSchema, is_playing: z.boolean() })
+      .safeParse(raw);
+    if (raw === null)
+      message ??=
+        "Spotify rapporterar ingen aktiv uppspelning för detta konto.";
+    if (playback.success) {
+      const current = playback.data.device;
+      if (!current.id)
+        message = `Spotify rapporterar ${current.name} utan styrbart enhets-ID. Den går inte att välja via Spotify API.`;
+      else {
+        const existing = devices.find((d) => d.id === current.id);
+        if (!existing)
+          devices.push({
+            id: current.id,
+            name: current.name,
+            restricted: current.is_restricted,
+            kind: current.type ?? "Unknown",
+          });
+        else {
+          existing.restricted ||= current.is_restricted;
+          if (existing.kind === "Unknown" && current.type)
+            existing.kind = current.type;
+        }
+        message = `Spotify rapporterar ${playback.data.is_playing ? "aktiv" : "senaste"} uppspelningsenhet: ${current.name}.`;
+        if (current.is_restricted)
+          message += " Spotify tillåter inte API-styrning av denna enhet.";
+        else if (current.type === "Smartphone")
+          message +=
+            " Om ljudet går till Sonos via AirPlay är telefonen fortfarande Spotify-enheten. För direktstyrning av Sonos behöver högtalaren visas som en egen Spotify Connect-enhet.";
+      }
+    } else
+      message ??=
+        "Spotify kunde inte verifiera vilken uppspelningsenhet som är aktiv.";
+  } catch (error) {
+    // A supplementary state lookup must not erase a usable device list.
+    // An actually revoked token is still an authentication failure.
+    if (error instanceof MusicError && error.status === 401) throw error;
+    message ??=
+      "Spotify-listan hämtades, men den aktiva uppspelningsenheten kunde inte läsas.";
+  }
+  return { devices, message };
+}
+export async function spotifyDevices(session: Session) {
+  return (await spotifyDeviceSnapshot(session)).devices;
 }
 const playlistSchema = z
   .object({
@@ -126,8 +192,11 @@ export async function activateMood(
     devices = await spotifyDevices(spotify);
   if (!rooms.some((r) => r.id === input.room))
     throw new MusicError("invalid-room", 400);
-  if (!devices.some((d) => d.id === input.device && !d.restricted))
+  const selected = devices.find((d) => d.id === input.device);
+  if (!selected || selected.restricted)
     throw new MusicError("device-unavailable", 409);
+  if (selected.kind !== "Speaker")
+    throw new MusicError("device-not-speaker", 400);
   const key = `${input.householdId}/${input.room}/${input.mood}/${input.style.query}`;
   const playlist = await findPlaylist(
     spotify,

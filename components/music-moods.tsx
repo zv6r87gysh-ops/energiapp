@@ -32,11 +32,14 @@ export function MusicMoods({
   } | null>(null);
   const connected =
     !!cloud.status?.sonos.connected && !!cloud.status?.spotify.connected;
+  const hasSpeaker = cloud.status?.devices.some(
+    (d) => d.kind === "Speaker" && !d.restricted,
+  );
   const ready =
     connected &&
     cloud.status!.rooms.some((r) => r.id === settings.room) &&
     cloud.status!.devices.some(
-      (d) => d.id === settings.device && !d.restricted,
+      (d) => d.id === settings.device && !d.restricted && d.kind === "Speaker",
     );
   async function choose(mood: MoodId) {
     const style = settings.styles[mood];
@@ -75,7 +78,11 @@ export function MusicMoods({
       <p className="muted">
         {ready
           ? "Tryck för en slumpvald spellista i din musikstil."
-          : "Prova ljuset nu. Anslut musiken i inställningarna."}
+          : connected
+            ? hasSpeaker
+              ? "Välj Sonos-rum och tillhörande högtalare i inställningarna."
+              : "Spotify visar ännu ingen styrbar högtalare. Se anslutningsstatus i inställningarna."
+            : "Prova ljuset nu. Anslut musiken i inställningarna."}
       </p>
       <div className="mood-buttons">
         {moodIds.map((id) => {
@@ -249,6 +256,18 @@ export function MoodSettingsForm({
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          const selected = cloud.status?.devices.find(
+            (d) => d.id === values.device,
+          );
+          if (
+            selected &&
+            (selected.restricted || selected.kind !== "Speaker")
+          ) {
+            setMessage(
+              "Den valda enheten kan inte användas som Sonos-högtalare. Rensa enhetsvalet eller välj en tillgänglig högtalare.",
+            );
+            return;
+          }
           const r = moodSettingsSchema.safeParse(values);
           if (!r.success) {
             setMessage("Kontrollera sökord, volym och ljusnivåer.");
@@ -281,9 +300,17 @@ export function MoodSettingsForm({
             >
               <option value="">Välj din Sonos-högtalare</option>
               {cloud.status?.devices.map((d) => (
-                <option key={d.id} value={d.id} disabled={d.restricted}>
+                <option
+                  key={d.id}
+                  value={d.id}
+                  disabled={d.restricted || d.kind !== "Speaker"}
+                >
                   {d.name}
-                  {d.restricted ? " · uppspelning begränsad" : ""}
+                  {d.restricted
+                    ? " · uppspelning begränsad"
+                    : d.kind !== "Speaker"
+                      ? " · inte en högtalare"
+                      : ""}
                 </option>
               ))}
             </select>

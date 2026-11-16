@@ -17,7 +17,7 @@ import {
   activateMood,
   pauseMusic,
   sonosRooms,
-  spotifyDevices,
+  spotifyDeviceSnapshot,
 } from "../../../lib/moods/cloud";
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -65,7 +65,11 @@ export async function GET(request: Request) {
       );
       status[provider].connected = true;
       if (provider === "sonos") status.rooms = await sonosRooms(session);
-      else status.devices = await spotifyDevices(session);
+      else {
+        const snapshot = await spotifyDeviceSnapshot(session);
+        status.devices = snapshot.devices;
+        status.spotify.message = snapshot.message;
+      }
     } catch (error) {
       const code =
         error instanceof MusicError ? error.code : "invalid-provider-response";

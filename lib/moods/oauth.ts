@@ -239,6 +239,8 @@ export function musicMessage(code: string) {
     "invalid-provider-response": "Musiktjänstens svar kunde inte verifieras.",
     "no-playlists":
       "Inga spellistor hittades för musikstilen. Prova andra sökord.",
+    "device-not-speaker":
+      "Vald Spotify-enhet är en telefon, dator eller en okänd enhet. Sonos-läget startar inte musik där. Välj en tillgänglig högtalare.",
     "device-unavailable":
       "Den valda Spotify Connect-enheten är inte tillgänglig. Välj Sonos i Spotify och uppdatera enheterna.",
     "invalid-room":

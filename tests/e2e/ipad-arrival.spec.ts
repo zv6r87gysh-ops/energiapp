@@ -11,7 +11,9 @@ const connected = {
   sonos: { configured: true, connected: true },
   spotify: { configured: true, connected: true },
   rooms: [{ id: "room1", name: "Vardagsrum" }],
-  devices: [{ id: "device1", name: "Vardagsrum", restricted: false }],
+  devices: [
+    { id: "device1", name: "Vardagsrum", restricted: false, kind: "Speaker" },
+  ],
 };
 for (const viewport of [
   { width: 1024, height: 768 },
@@ -315,4 +317,50 @@ test("Spotify-retur visar en tydlig orsak även utan ny inloggning eller högtal
       .locator(".music-account-links > div")
       .filter({ has: page.getByText("Sonos", { exact: true }) }),
   ).toContainText("Anslutet");
+});
+
+test("ett tidigare sparat iPhone-val kan inte starta musik från Sonos-knapparna", async ({
+  page,
+}) => {
+  const home = {
+    ...structuredClone(initialHousehold),
+    moodSettings: {
+      ...structuredClone(defaultMoods),
+      room: "room1",
+      device: "phone1",
+    },
+  };
+  await page.addInitScript(
+    (h) =>
+      localStorage.setItem(
+        "energihem-demo-v1",
+        JSON.stringify({ homes: [h], active: h.id }),
+      ),
+    home,
+  );
+  const state = {
+    ...connected,
+    devices: [
+      { id: "phone1", name: "iPhone", restricted: false, kind: "Smartphone" },
+    ],
+  };
+  let commands = 0;
+  await page.route("**/api/music?*", (r) => r.fulfill({ json: state }));
+  await page.route("**/api/music", (r) => {
+    commands++;
+    return r.fulfill({ status: 400, json: { message: "Inte en högtalare" } });
+  });
+  await page.goto("/");
+  await page
+    .getByRole("button", { name: "Förhandsvisa Lounge/chill", exact: true })
+    .click();
+  await expect(
+    page.getByRole("region", { name: "Musik och stämningar", exact: true }),
+  ).toContainText("Ingen musik startades");
+  expect(commands).toBe(0);
+  await page.goto("/installningar#music-settings");
+  await expect(page.locator('select option[value="phone1"]')).toHaveJSProperty(
+    "disabled",
+    true,
+  );
 });
