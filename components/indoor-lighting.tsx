@@ -7,7 +7,9 @@ export function IndoorLightingOverlay({
   photo,
   viewBox,
   preview,
+  levels = {},
 }: {
+  levels?: Partial<Record<IndoorGroup, number>>;
   photo: string;
   viewBox: string;
   preview: Partial<Record<IndoorGroup, boolean>>;
@@ -72,7 +74,7 @@ export function IndoorLightingOverlay({
           key={g.id}
           data-indoor-group={g.id}
           data-power={preview[g.id] ? "on" : "off"}
-          opacity={preview[g.id] ? 1 : 0}
+          opacity={preview[g.id] ? (levels[g.id] ?? 100) / 100 : 0}
           clipPath={`url(#${id}-${g.id})`}
         >
           <g mask={`url(#${id}-${g.id}-wash)`}>

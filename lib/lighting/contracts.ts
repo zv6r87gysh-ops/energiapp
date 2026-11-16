@@ -20,6 +20,9 @@ export const outdoorLightingSchema = z.object({
   previewOn: z.boolean(),
   poolPreviewOn: z.boolean().optional(),
   indoorPreview: z.partialRecord(indoorGroupSchema, z.boolean()).optional(),
+  indoorBrightness: z
+    .partialRecord(indoorGroupSchema, z.number().min(0).max(100))
+    .optional(),
   indoorBinding: z
     .object({
       bridgeType: z.enum([

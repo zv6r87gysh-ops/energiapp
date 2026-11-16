@@ -6,6 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Ditt hem, i balans. Lokal energidemo.",
     start_url: "/",
     display: "standalone",
+    orientation: "landscape",
     background_color: "#f6f8f7",
     theme_color: "#147e66",
     lang: "sv",

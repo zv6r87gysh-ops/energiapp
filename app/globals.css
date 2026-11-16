@@ -3092,3 +3092,493 @@ th {
   padding-left: 28px;
   font-size: 11px;
 }
+
+/* Arrival view: the house and music stay together on a landscape tablet. */
+.home-arrival {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.home-arrival .interactive-house {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-bottom: 0;
+  padding: 18px;
+}
+.home-arrival .house-photo-heading {
+  order: 0;
+}
+.home-arrival .house-photo-scene,
+.home-arrival .house-photo-placeholder {
+  order: 1;
+  flex-shrink: 0;
+}
+.home-arrival .house-scene-info {
+  order: 2;
+  margin-top: 14px;
+}
+.home-arrival .house-cost-tooltip {
+  order: 3;
+}
+.home-arrival .house-photo-help {
+  order: 4;
+}
+.home-arrival .house-photo-heading .eyebrow {
+  display: none;
+}
+.home-arrival .house-photo-heading h1 {
+  font-size: 19px;
+}
+.home-arrival .house-photo-actions {
+  gap: 6px;
+}
+.home-arrival .house-photo-actions select {
+  max-width: 155px;
+}
+.home-arrival .house-photo-actions .button {
+  min-height: 44px;
+}
+.music-moods {
+  padding: 22px;
+  min-width: 0;
+}
+.music-moods-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #5f7b70;
+}
+.music-moods h2 {
+  margin: 12px 0 8px;
+  font-size: 22px;
+}
+.music-moods > p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.mood-buttons {
+  display: grid;
+  gap: 14px;
+  margin: 22px 0;
+}
+.mood-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  min-height: 94px;
+  width: 100%;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 15px #00000012;
+  touch-action: manipulation;
+}
+.mood-button > span {
+  flex: 1;
+  min-width: 0;
+}
+.mood-button b {
+  display: block;
+  font-size: 18px;
+  font-weight: 650;
+}
+.mood-button small {
+  display: block;
+  opacity: 0.9;
+  font-size: 11px;
+  line-height: 1.4;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.mood-children {
+  --mood-color: #197445;
+}
+.mood-lounge {
+  --mood-color: #245caa;
+}
+.mood-ambience {
+  --mood-color: #a63348;
+}
+.mood-button {
+  background: var(--mood-color);
+}
+.mood-button[data-selected="true"] {
+  border-color: white;
+  outline: 3px solid var(--mood-color);
+  outline-offset: 2px;
+}
+.mood-button:focus-visible {
+  outline: 3px solid #c99b31;
+  outline-offset: 3px;
+}
+.mood-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.music-connection-status {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+.status-dot.is-preview {
+  background: #a6a49b;
+}
+.music-mood-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+}
+.music-mood-actions .button {
+  min-height: 44px;
+}
+.mood-light-note {
+  display: block;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 16px;
+}
+.music-moods .mood-result {
+  font-size: 11px;
+  background: var(--bg);
+  padding: 10px;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+.mood-settings {
+  margin-bottom: 22px;
+  scroll-margin-top: 16px;
+}
+.music-account-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
+}
+.music-account-links > div {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.music-account-links .button {
+  min-height: 44px;
+  width: fit-content;
+}
+.mood-style-settings {
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--mood-color);
+  border-radius: 12px;
+  min-width: 0;
+}
+.mood-style-settings legend {
+  padding: 0 8px;
+  font-weight: 600;
+  color: var(--mood-color);
+}
+.mood-light-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.mood-light-selection label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+.mood-light-selection input {
+  width: 20px;
+  height: 20px;
+}
+.mood-settings input,
+.mood-settings select {
+  min-height: 44px;
+}
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .app-overview .sidebar {
+    transform: translateX(-100%);
+    width: 254px;
+    transition: transform 0.2s;
+    box-shadow: 12px 0 30px #0002;
+    padding-top: 20px;
+    overflow-y: auto;
+  }
+  .app-overview .sidebar.open {
+    transform: translateX(0);
+  }
+  .app-overview .workspace {
+    margin-left: 0;
+  }
+  .app-overview .mobile-menu {
+    display: grid;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .app-overview .topbar {
+    height: 58px;
+    padding: 0 20px;
+  }
+  .app-overview main {
+    padding: 18px 20px;
+  }
+  .app-overview .home-arrival {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 16px;
+  }
+  .app-overview .music-moods {
+    padding: 20px;
+  }
+  .app-overview .house-photo-scene .house-category-tabs {
+    width: 148px;
+    gap: 5px;
+  }
+  .app-overview .house-photo-scene .house-category-tabs button {
+    min-height: 38px;
+    padding: 7px;
+    font-size: 11px;
+  }
+  .app-overview .house-smart-controls {
+    opacity: 1;
+    visibility: visible;
+  }
+  .app-overview .house-photo-scene .house-smart-controls {
+    width: 190px;
+  }
+}
+@media (max-width: 899px) {
+  .home-arrival {
+    grid-template-columns: 1fr;
+  }
+  .home-arrival .interactive-house {
+    padding: 18px;
+  }
+  .mood-buttons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .mood-button {
+    flex-direction: column;
+    text-align: center;
+    padding: 15px 8px;
+    min-height: 126px;
+  }
+  .mood-button > svg:last-child {
+    display: none;
+  }
+  .mood-button b {
+    font-size: 15px;
+  }
+  .music-account-links {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-overview .sidebar {
+    transition: none;
+  }
+}
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .app-overview .sidebar {
+    visibility: hidden;
+  }
+  .app-overview .sidebar.open {
+    visibility: visible;
+  }
+  .app-overview .house-photo-scene .house-category-tabs button {
+    min-height: 44px;
+  }
+  .app-overview .house-smart-controls .button {
+    min-height: 44px;
+  }
+}
+.house-spot-price {
+  display: grid;
+  gap: 2px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  font-variant-numeric: tabular-nums;
+}
+.house-spot-price small {
+  font-size: 9px;
+  color: var(--muted);
+}
+.house-spot-price b {
+  font-size: 14px;
+}
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .home-arrival .interactive-house {
+    padding: 14px;
+  }
+  .home-arrival .house-photo-heading {
+    margin-bottom: 8px;
+  }
+  .home-arrival .house-scene-info {
+    order: 1;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 5px 10px;
+    margin-top: 0;
+    padding-bottom: 8px;
+  }
+  .home-arrival .house-clock {
+    font-size: 12px;
+    gap: 5px;
+  }
+  .home-arrival .house-clock time {
+    font-size: 15px;
+  }
+  .home-arrival .house-clock small {
+    display: none;
+  }
+  .home-arrival .house-sun-times {
+    gap: 5px 10px;
+    font-size: 9px;
+    justify-content: center;
+  }
+  .home-arrival .house-sun-times span {
+    gap: 4px;
+  }
+  .home-arrival .house-sun-times svg {
+    width: 14px;
+    height: 14px;
+  }
+  .home-arrival .house-sun-times > small {
+    display: none;
+  }
+  .home-arrival .house-spot-price {
+    padding: 5px 8px;
+  }
+  .home-arrival .house-spot-price b {
+    font-size: 13px;
+  }
+  .home-arrival .house-spot-price small {
+    font-size: 8px;
+  }
+  .home-arrival .house-scene-info > span {
+    grid-column: 1/-1;
+    font-size: 9px;
+  }
+  .home-arrival .house-scene-info > small {
+    display: none;
+  }
+  .home-arrival .house-day-forecast {
+    grid-column: 1/-1;
+    padding-top: 5px;
+  }
+  .home-arrival .house-forecast-heading {
+    gap: 6px;
+    font-size: 10px;
+  }
+  .home-arrival .house-forecast-heading input {
+    width: 70px;
+    min-height: 32px;
+    font-size: 10px;
+    padding: 5px;
+  }
+  .home-arrival .house-forecast-heading .button {
+    padding: 6px;
+    min-height: 32px;
+    font-size: 9px;
+  }
+  .home-arrival .house-day-forecast .weather-timeline {
+    margin-top: 5px;
+    border-radius: 10px;
+  }
+  .home-arrival .house-day-forecast .weather-timeline ol {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    padding: 6px 3px;
+    gap: 2px;
+  }
+  .home-arrival .house-day-forecast .weather-timeline li {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    justify-content: center;
+    column-gap: 3px;
+    row-gap: 2px;
+  }
+  .home-arrival .weather-timeline time {
+    font-size: 10px;
+  }
+  .home-arrival .weather-timeline li > small {
+    font-size: 7px;
+  }
+  .home-arrival .weather-timeline li > svg,
+  .home-arrival .weather-timeline .forecast-missing-icon {
+    grid-column: 1/-1;
+    justify-self: center;
+    width: 21px;
+    height: 21px;
+  }
+  .home-arrival .weather-timeline strong {
+    grid-column: 1/-1;
+    font-size: 13px;
+  }
+  .home-arrival .weather-timeline .forecast-condition {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .home-arrival .weather-timeline-note {
+    display: none;
+  }
+  .home-arrival .house-day-forecast > small {
+    display: block;
+    margin-top: 3px;
+    font-size: 8px;
+  }
+  .home-arrival .house-photo-scene {
+    order: 2;
+    width: min(100%, calc((100svh - 370px) * var(--photo-aspect, 1.3333)));
+    align-self: center;
+  }
+  .home-arrival .house-photo-help {
+    margin: 8px 0 0;
+    font-size: 9px;
+    line-height: 1.4;
+  }
+  .home-arrival .house-photo-placeholder {
+    order: 2;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .home-arrival .house-spot-price {
+    grid-template-columns: auto auto;
+    column-gap: 6px;
+    row-gap: 2px;
+  }
+  .home-arrival .house-spot-price small:first-child {
+    grid-column: 1/-1;
+  }
+  .home-arrival .house-spot-price b {
+    line-height: 1.2;
+  }
+  .home-arrival .house-spot-price small:last-child {
+    max-width: 62px;
+    line-height: 1.1;
+  }
+}

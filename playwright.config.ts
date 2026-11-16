@@ -13,10 +13,23 @@ export default defineConfig({
     },
   },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"] } },
+    {
+      name: "desktop",
+      testIgnore: "**/ipad-arrival.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
     {
       name: "mobile",
+      testIgnore: "**/ipad-arrival.spec.ts",
       use: { ...devices["iPhone 13"], defaultBrowserType: "chromium" },
+    },
+    {
+      name: "ipad-landscape",
+      testMatch: "**/ipad-arrival.spec.ts",
+      use: {
+        ...devices["iPad (gen 6) landscape"],
+        defaultBrowserType: "chromium",
+      },
     },
   ],
   webServer: {

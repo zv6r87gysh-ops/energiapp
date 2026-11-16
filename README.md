@@ -97,3 +97,7 @@ Husbilden har svensk klocka, kalenderårstid och prognosstyrda vädereffekter sa
 ### Inomhusbelysning
 
 Belysning i vänstermenyn samlar Inomhus och Utomhus, med poolbelysning under Utomhus. Fem grupper med totalt tolv spottar visas på husfotot och kan förhandsvisas individuellt eller gemensamt. Befintlig Plejd via Bluetooth behöver en identifierad lokal brygga innan verkliga kommandon kan skickas. Se [inomhusbelysning och anslutning](docs/indoor-lighting.md).
+
+### Musik och liggande iPad
+
+Översikten har husbild och stora gröna Barn-, blå Lounge/chill- och röda Stämning-knappar i en liggande iPad-layout. Musikstil/sökord, volym, ljusnivå och ljusgrupper kan sparas per hushåll. Molnvägen använder Sonos OAuth och Spotify OAuth/Connect med slumpval bland aktuella sökträffar, utan Home Assistant eller Raspberry Pi. Registrerade appnycklar och inloggade konton krävs; utan dessa fungerar ljusförhandsvisning. Plejd styrs ännu inte fysiskt. Se [anslutning, krav och tester](docs/sonos-moods.md).

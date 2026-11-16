@@ -26,6 +26,9 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
+import { MusicMoods, MoodSettingsForm } from "./music-moods";
+import { useMusic } from "@/lib/moods/use-music";
+import { readMoods, type MoodStyle } from "@/lib/moods/contracts";
 import { Button } from "./ui/button";
 import { PricePanel } from "./price-panel";
 import { readOutdoorLighting } from "@/lib/lighting/contracts";
@@ -207,6 +210,31 @@ export default function EnergyApp({ section }: { section: string }) {
     );
   const lighting = readOutdoorLighting(home);
   const smartControl = readSmartControl(home);
+  const moodSettings = readMoods(home.moodSettings);
+  const music = useMusic(
+    home.id,
+    loaded && (section === "oversikt" || section === "installningar"),
+  );
+  function previewMood(style: MoodStyle) {
+    update({
+      outdoorLighting: {
+        ...lighting,
+        indoorPreview: {
+          ...lighting.indoorPreview,
+          ...Object.fromEntries(
+            style.lights.map((id) => [id, style.brightness > 0]),
+          ),
+        },
+        indoorBrightness: {
+          ...lighting.indoorBrightness,
+          ...Object.fromEntries(
+            style.lights.map((id) => [id, style.brightness || 100]),
+          ),
+        },
+      },
+    });
+  }
+
   function setManualLighting(group: "outdoor" | "pool", on: boolean) {
     const category = group === "pool" ? "pool-lighting" : "outdoor-lighting";
     const next = smartControl.categories.includes(category)
@@ -278,7 +306,9 @@ export default function EnergyApp({ section }: { section: string }) {
     setNotice("Fordonet har sparats lokalt i demohushållet.");
   }
   return (
-    <div className={`app ${dark ? "dark" : ""}`}>
+    <div
+      className={`app ${section === "oversikt" ? "app-overview" : ""} ${dark ? "dark" : ""}`}
+    >
       <aside className={`sidebar ${menu ? "open" : ""}`}>
         <Link className="brand" href="/">
           <span className="logo">
@@ -357,7 +387,7 @@ export default function EnergyApp({ section }: { section: string }) {
           </div>
           <b>Små val. Stor skillnad.</b>
           <p>Lite smartare energi, varje dag.</p>
-          <span className="badge">Demo · inga enheter styrs</span>
+          <span className="badge">Energimodell · musik kan anslutas</span>
         </div>
         <div className="profile">
           <span className="avatar">EH</span>
@@ -432,46 +462,56 @@ export default function EnergyApp({ section }: { section: string }) {
             />
           )}
           {section === "oversikt" && (
-            <InteractiveHouse
-              key={`house-photo-${home.id}`}
-              householdId={home.id}
-              householdSelector={
-                <select
-                  aria-label="Aktivt hushåll"
-                  value={home.id}
-                  onChange={(e) => setActive(e.target.value)}
-                >
-                  {homes.map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {h.name}
-                    </option>
-                  ))}
-                </select>
-              }
-              simulation={sim}
-              lighting={lighting}
-              onIndoorChange={(indoorPreview) =>
-                update({ outdoorLighting: { ...lighting, indoorPreview } })
-              }
-              weatherMessage={outdoor.message}
-              postcode={home.postcode ?? ""}
-              onPostcode={(postcode) => {
-                if (home.postcode === postcode) outdoor.refresh();
-                else update({ postcode });
-              }}
-              weather={outdoor.weather}
-              location={outdoor.location}
-              smartControl={smartControl}
-              onLightingManual={(group, on) => setManualLighting(group, on)}
-              controls={
-                <SmartControlPanel
-                  key={home.id}
-                  compact
-                  control={smartControl}
-                  onChange={(next) => update(applySmartControl(home, next))}
-                />
-              }
-            />
+            <div className="home-arrival">
+              <InteractiveHouse
+                key={`house-photo-${home.id}`}
+                householdId={home.id}
+                householdSelector={
+                  <select
+                    aria-label="Aktivt hushåll"
+                    value={home.id}
+                    onChange={(e) => setActive(e.target.value)}
+                  >
+                    {homes.map((h) => (
+                      <option key={h.id} value={h.id}>
+                        {h.name}
+                      </option>
+                    ))}
+                  </select>
+                }
+                simulation={sim}
+                lighting={lighting}
+                onIndoorChange={(indoorPreview) =>
+                  update({ outdoorLighting: { ...lighting, indoorPreview } })
+                }
+                priceArea={home.region}
+                weatherMessage={outdoor.message}
+                postcode={home.postcode ?? ""}
+                onPostcode={(postcode) => {
+                  if (home.postcode === postcode) outdoor.refresh();
+                  else update({ postcode });
+                }}
+                weather={outdoor.weather}
+                location={outdoor.location}
+                smartControl={smartControl}
+                onLightingManual={(group, on) => setManualLighting(group, on)}
+                controls={
+                  <SmartControlPanel
+                    key={home.id}
+                    compact
+                    control={smartControl}
+                    onChange={(next) => update(applySmartControl(home, next))}
+                  />
+                }
+              />
+              <MusicMoods
+                key={home.id}
+                home={home.id}
+                settings={moodSettings}
+                cloud={music}
+                onPreview={previewMood}
+              />
+            </div>
           )}
           <div className="demo-banner">
             <span>
@@ -1136,6 +1176,15 @@ export default function EnergyApp({ section }: { section: string }) {
           )}
           {section === "installningar" && (
             <>
+              {loaded && (
+                <MoodSettingsForm
+                  key={home.id}
+                  home={home.id}
+                  settings={moodSettings}
+                  cloud={music}
+                  onSave={(moodSettings) => update({ moodSettings })}
+                />
+              )}
               {loaded && (
                 <OutdoorLightingSettings
                   key={`lighting-settings-${home.id}`}

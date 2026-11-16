@@ -81,7 +81,9 @@ export function InteractiveHouse({
   weatherMessage,
   postcode,
   onPostcode,
+  priceArea,
 }: {
+  priceArea: string;
   weatherMessage: string;
   postcode: string;
   onPostcode: (postcode: string) => void;
@@ -272,6 +274,8 @@ export function InteractiveHouse({
       <HouseClock
         key={postcode}
         scene={atmosphere}
+        price={simulation?.currentPrice ?? null}
+        priceArea={priceArea}
         location={location}
         weather={weather}
         message={weatherMessage}
@@ -300,6 +304,11 @@ export function InteractiveHouse({
       {photo ? (
         <div
           className={`house-photo-scene house-active-${preview ? active : "none"}`}
+          style={
+            {
+              "--photo-aspect": layout.width / layout.height,
+            } as React.CSSProperties
+          }
           onPointerMove={(e) => {
             if (e.pointerType !== "mouse") return;
             const target = e.target as Element;
@@ -345,6 +354,7 @@ export function InteractiveHouse({
               photo={photo}
               viewBox={layout.viewBox}
               preview={lighting.indoorPreview ?? {}}
+              levels={lighting.indoorBrightness}
             />
             <PoolLightingOverlay
               on={poolState.on}

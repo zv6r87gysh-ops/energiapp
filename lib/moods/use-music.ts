@@ -1,0 +1,110 @@
+"use client";
+import { useCallback, useEffect, useState } from "react";
+import type { Activation, CloudStatus, MoodResult } from "./contracts";
+export function useMusic(householdId: string, enabled: boolean) {
+  const [connection, setConnection] = useState<{
+    home: string;
+    data: CloudStatus;
+  } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const refresh = useCallback(async () => {
+    if (!enabled) return;
+    try {
+      const r = await fetch(
+        `/api/music?householdId=${encodeURIComponent(householdId)}`,
+        { cache: "no-store", signal: AbortSignal.timeout(15000) },
+      );
+      if (!r.ok) throw Error("Musikanslutningen kunde inte kontrolleras.");
+      const data = await r.json();
+      if (
+        !data.sonos ||
+        !data.spotify ||
+        !Array.isArray(data.rooms) ||
+        !Array.isArray(data.devices)
+      )
+        throw Error("Musikanslutningen kunde inte verifieras.");
+      setConnection({ home: householdId, data });
+      setMessage(data.message ?? "");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Musikanslutningen kunde inte kontrolleras.",
+      );
+    }
+  }, [householdId, enabled]);
+  useEffect(() => {
+    queueMicrotask(() => void refresh());
+  }, [refresh]);
+  async function activate(input: Activation): Promise<MoodResult | null> {
+    setBusy(true);
+    setMessage("");
+    try {
+      const r = await fetch("/api/music", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+        signal: AbortSignal.timeout(60000),
+      });
+      const data = await r.json();
+      if (!r.ok) throw Error(data.message ?? "Musiken kunde inte startas.");
+      if (
+        !data.playlist?.name ||
+        !data.playlist?.url ||
+        !["playing", "requested"].includes(data.music?.status)
+      )
+        throw Error("Svaret kunde inte verifieras. Kontrollera spelaren.");
+      return data;
+    } catch (error) {
+      setMessage(
+        error instanceof Error &&
+          error.name !== "TimeoutError" &&
+          error.name !== "AbortError"
+          ? error.message
+          : "Starten kunde inte bekräftas. Kontrollera Sonos innan du försöker igen.",
+      );
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function pause(room: string) {
+    setBusy(true);
+    try {
+      const r = await fetch("/api/music", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ householdId, room }),
+        signal: AbortSignal.timeout(15000),
+      });
+      const data = await r.json();
+      setMessage(data.message ?? "Kontrollera uppspelningen.");
+    } catch {
+      setMessage("Paus kunde inte bekräftas. Kontrollera spelaren.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function disconnect() {
+    setBusy(true);
+    try {
+      await fetch("/api/music", { method: "DELETE" });
+      await refresh();
+    } catch {
+      setMessage("Kontona kunde inte kopplas från. Försök igen.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return {
+    status: connection?.home === householdId ? connection.data : null,
+    busy,
+    message,
+    refresh,
+    activate,
+    pause,
+    disconnect,
+  };
+}
+export type MusicController = ReturnType<typeof useMusic>;
