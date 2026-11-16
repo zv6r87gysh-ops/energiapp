@@ -183,6 +183,11 @@ export function MoodSettingsForm({
         spelas via Spotify Connect på vald Sonos-enhet. Ingen Home Assistant
         eller Raspberry Pi behövs för musikfunktionen.
       </p>
+      {cloud.loginMessage && (
+        <p className="music-login-feedback" role="status">
+          {cloud.loginMessage}
+        </p>
+      )}
       <div className="music-account-links">
         {(["sonos", "spotify"] as const).map((provider) => (
           <div key={provider}>
@@ -192,6 +197,9 @@ export function MoodSettingsForm({
                 ? "Anslutet"
                 : "Inte anslutet"}
             </span>
+            {cloud.status?.[provider].message && (
+              <p role="status">{cloud.status[provider].message}</p>
+            )}
             {cloud.status?.[provider].configured ? (
               <a
                 className="button secondary"

@@ -276,3 +276,43 @@ for (const viewport of [
     ).toBe(true);
   });
 }
+
+test("Spotify-retur visar en tydlig orsak även utan ny inloggning eller högtalarlista", async ({
+  page,
+}) => {
+  await page.route("**/api/music?*", (r) =>
+    r.fulfill({
+      json: {
+        ...connected,
+        devices: [],
+        spotify: {
+          configured: true,
+          connected: true,
+          message:
+            "Spotify: Inloggningen är sparad, men åtkomst till högtalarlistan nekas. Kontrollera User Management.",
+        },
+      },
+    }),
+  );
+  await page.goto(
+    "/installningar?music=oauth-invalid-client&provider=spotify#music-settings",
+  );
+  const settings = page.locator("#music-settings");
+  await expect(settings.locator(".music-login-feedback")).toContainText(
+    "Client ID eller Client Secret",
+  );
+  await expect(settings.locator(".music-login-feedback")).toContainText(
+    "kod: oauth-invalid-client",
+  );
+  await expect(settings).toContainText("User Management");
+  await expect(
+    settings
+      .locator(".music-account-links > div")
+      .filter({ has: page.getByText("Spotify", { exact: true }) }),
+  ).toContainText("Anslutet");
+  await expect(
+    settings
+      .locator(".music-account-links > div")
+      .filter({ has: page.getByText("Sonos", { exact: true }) }),
+  ).toContainText("Anslutet");
+});

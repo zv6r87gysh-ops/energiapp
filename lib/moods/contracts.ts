@@ -61,8 +61,8 @@ export type MoodResult = {
   lights: { status: "preview"; message: string };
 };
 export type CloudStatus = {
-  sonos: { configured: boolean; connected: boolean };
-  spotify: { configured: boolean; connected: boolean };
+  sonos: { configured: boolean; connected: boolean; message?: string };
+  spotify: { configured: boolean; connected: boolean; message?: string };
   rooms: { id: string; name: string }[];
   devices: { id: string; name: string; restricted: boolean }[];
   message?: string;

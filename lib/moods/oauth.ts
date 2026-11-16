@@ -6,6 +6,7 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 import { z } from "zod";
+import { loginMessages } from "./login-feedback";
 export const providerSchema = z.enum(["sonos", "spotify"]);
 export type Provider = z.infer<typeof providerSchema>;
 export const endpoints = {
@@ -166,7 +167,21 @@ export async function tokenExchange(
   } catch {
     throw new MusicError("provider-unavailable");
   }
-  if (!r.ok) throw new MusicError("login-required", 401);
+  if (!r.ok) {
+    let reason: unknown;
+    try {
+      reason = (await r.json()).error;
+    } catch {
+      /* Ignore untrusted error bodies. */
+    }
+    const code =
+      reason === "invalid_client" || r.status === 401
+        ? "oauth-invalid-client"
+        : reason === "invalid_grant"
+          ? "oauth-invalid-grant"
+          : "oauth-token-rejected";
+    throw new MusicError(code, 401);
+  }
   const parsed = tokenSchema.safeParse(await r.json());
   if (!parsed.success || !(parsed.data.refresh_token ?? previous?.refresh))
     throw new MusicError("invalid-provider-response");
@@ -234,6 +249,7 @@ export function musicMessage(code: string) {
   };
   return (
     messages[code] ??
+    loginMessages[code] ??
     "Musikkommandot kunde inte bekräftas. Kontrollera spelaren innan du försöker igen."
   );
 }

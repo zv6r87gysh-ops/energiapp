@@ -11,7 +11,7 @@ import {
 } from "../lib/moods/oauth";
 import { GET as connect } from "../app/api/music/connect/route";
 import { GET as callback } from "../app/api/music/callback/route";
-import { POST as activate } from "../app/api/music/route";
+import { GET as musicStatus, POST as activate } from "../app/api/music/route";
 const origin = "https://energihem.example";
 const secret = "test-only-session-encryption-secret-123456789";
 const session: Session = {
@@ -110,7 +110,7 @@ it("rejects OAuth callbacks with wrong state before making any token request", a
       { headers: { cookie: `${cookieName("sonos", true)}=${state}` } },
     ),
   );
-  expect(r.headers.get("location")).toContain("login-failed");
+  expect(r.headers.get("location")).toContain("music=login-state-invalid");
   expect(f).not.toHaveBeenCalled();
 });
 it("exchanges a valid OAuth code server-side and stores only an encrypted browser cookie", async () => {
@@ -288,4 +288,95 @@ it("reports that Sonos volume already changed when Spotify rejects the following
   );
   expect(r.status).toBe(403);
   expect((await r.json()).message).toContain("Sonos-volymen har redan ändrats");
+});
+
+it("returns a safe specific callback reason for rejected Spotify app credentials", async () => {
+  const f = vi
+    .fn()
+    .mockResolvedValue(
+      Response.json(
+        {
+          error: "invalid_client",
+          error_description: "DO-NOT-ECHO-test-secret",
+        },
+        { status: 400 },
+      ),
+    );
+  vi.stubGlobal("fetch", f);
+  const state = seal(
+    {
+      state: "expected",
+      verifier: "test-verifier",
+      householdId: "demo-home",
+      until: Date.now() + 10000,
+    },
+    secret,
+  );
+  const r = await callback(
+    new Request(
+      `${origin}/api/music/callback?provider=spotify&code=DO-NOT-ECHO-code&state=expected`,
+      { headers: { cookie: `${cookieName("spotify", true)}=${state}` } },
+    ),
+  );
+  const location = r.headers.get("location")!;
+  expect(location).toContain("music=oauth-invalid-client");
+  expect(location).toContain("provider=spotify");
+  expect(location).not.toContain("DO-NOT-ECHO");
+});
+it("reports a missing OAuth flow cookie instead of silently returning unconnected", async () => {
+  const f = vi.fn();
+  vi.stubGlobal("fetch", f);
+  const r = await callback(
+    new Request(
+      `${origin}/api/music/callback?provider=spotify&code=test&state=test`,
+    ),
+  );
+  expect(r.headers.get("location")).toContain("music=login-state-missing");
+  expect(f).not.toHaveBeenCalled();
+});
+it.each([403, 429, 503])(
+  "keeps successful Sonos and Spotify logins when device listing fails with %s",
+  async (status) => {
+    const f = vi.fn(async (url: string) => {
+      if (url.endsWith("/households"))
+        return Response.json({ households: [{ id: "h1" }] });
+      if (url.endsWith("/groups"))
+        return Response.json({ groups: [{ id: "r1", name: "Vardagsrum" }] });
+      return Response.json({ error: "DO-NOT-ECHO" }, { status });
+    });
+    vi.stubGlobal("fetch", f);
+    const r = await musicStatus(
+      new Request(`${origin}/api/music?householdId=demo-home`, {
+        headers: { cookie: cookies() },
+      }),
+    );
+    const result = await r.json();
+    expect(result.sonos.connected).toBe(true);
+    expect(result.spotify.connected).toBe(true);
+    expect(result.devices).toEqual([]);
+    expect(result.spotify.message).toBeTruthy();
+    expect(JSON.stringify(result)).not.toContain("DO-NOT-ECHO");
+    if (status === 403)
+      expect(result.spotify.message).toContain("User Management");
+  },
+);
+it("marks an actually rejected Spotify token unconnected while preserving Sonos", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) => {
+      if (url.endsWith("/households"))
+        return Response.json({ households: [{ id: "h1" }] });
+      if (url.endsWith("/groups")) return Response.json({ groups: [] });
+      return new Response(null, { status: 401 });
+    }),
+  );
+  const result = await (
+    await musicStatus(
+      new Request(`${origin}/api/music?householdId=demo-home`, {
+        headers: { cookie: cookies() },
+      }),
+    )
+  ).json();
+  expect(result.sonos.connected).toBe(true);
+  expect(result.spotify.connected).toBe(false);
 });

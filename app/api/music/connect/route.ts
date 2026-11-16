@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   if (!config || url.origin !== config.origin)
     return Response.redirect(
       new URL(
-        "/installningar?music=not-configured#music-settings",
+        `/installningar?music=not-configured&provider=${provider.data}#music-settings`,
         request.url,
       ),
       303,
@@ -38,6 +38,7 @@ export async function GET(request: Request) {
     state,
   }).toString();
   if (provider.data === "spotify") {
+    destination.searchParams.set("show_dialog", "true");
     destination.searchParams.set("code_challenge_method", "S256");
     destination.searchParams.set(
       "code_challenge",

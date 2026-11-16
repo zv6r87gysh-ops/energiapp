@@ -63,13 +63,19 @@ export async function GET(request: Request) {
         home.data,
         headers,
       );
+      status[provider].connected = true;
       if (provider === "sonos") status.rooms = await sonosRooms(session);
       else status.devices = await spotifyDevices(session);
-      status[provider].connected = true;
     } catch (error) {
-      status.message = musicMessage(
-        error instanceof MusicError ? error.code : "invalid-provider-response",
-      );
+      const code =
+        error instanceof MusicError ? error.code : "invalid-provider-response";
+      if (error instanceof MusicError && error.status === 401)
+        status[provider].connected = false;
+      const name = provider === "spotify" ? "Spotify" : "Sonos";
+      status[provider].message =
+        code === "premium-required"
+          ? `${name}: Inloggningen är sparad, men tjänsten nekar åtkomst till högtalarlistan. ${provider === "spotify" ? "Kontrollera att rätt Spotify-konto är tillagt under User Management i utvecklarappen och har Premium." : "Kontrollera integrationens kontobehörighet."}`
+          : `${name}: ${musicMessage(code)}`;
     }
   }
   return Response.json(status, { headers });

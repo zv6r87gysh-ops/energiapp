@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { loginFeedback } from "./login-feedback";
 import type { Activation, CloudStatus, MoodResult } from "./contracts";
 export function useMusic(householdId: string, enabled: boolean) {
   const [connection, setConnection] = useState<{
@@ -8,6 +9,13 @@ export function useMusic(householdId: string, enabled: boolean) {
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [loginMessage, setLoginMessage] = useState("");
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    queueMicrotask(() =>
+      setLoginMessage(loginFeedback(query.get("music"), query.get("provider"))),
+    );
+  }, []);
   const refresh = useCallback(async () => {
     if (!enabled) return;
     try {
@@ -101,6 +109,7 @@ export function useMusic(householdId: string, enabled: boolean) {
     status: connection?.home === householdId ? connection.data : null,
     busy,
     message,
+    loginMessage,
     refresh,
     activate,
     pause,
