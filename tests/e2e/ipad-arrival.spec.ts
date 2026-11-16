@@ -227,6 +227,8 @@ for (const viewport of [
       await r.fulfill({
         json: {
           status: "available",
+          area: "SE3",
+          date: day,
           data: {
             area: "SE3",
             date: day,
@@ -260,7 +262,15 @@ for (const viewport of [
     await expect(
       page.getByLabel("Klocka svensk tid", { exact: true }),
     ).toHaveText(/17:00:/);
+    const chart = page.getByRole("img", { name: "Publicerade kvartspriser" });
+    await expect(chart).toBeVisible();
+    await expect(chart.locator("[data-price-state]")).toHaveCount(96);
+    const clock = page.getByLabel("Klocka svensk tid", { exact: true });
+    expect(
+      await clock.evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
+    ).toBeGreaterThanOrEqual(24);
     for (const locator of [
+      chart,
       price,
       forecast,
       page.getByLabel("Klocka svensk tid", { exact: true }),

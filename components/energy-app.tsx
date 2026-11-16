@@ -504,13 +504,22 @@ export default function EnergyApp({ section }: { section: string }) {
                   />
                 }
               />
-              <MusicMoods
-                key={home.id}
-                home={home.id}
-                settings={moodSettings}
-                cloud={music}
-                onPreview={previewMood}
-              />
+              <div className="arrival-side">
+                <MusicMoods
+                  key={home.id}
+                  home={home.id}
+                  settings={moodSettings}
+                  cloud={music}
+                  onPreview={previewMood}
+                />
+                <div className="arrival-prices">
+                  <PricePanel
+                    area={home.region as PriceArea}
+                    chartOnly
+                    arrival
+                  />
+                </div>
+              </div>
             </div>
           )}
           <div className="demo-banner">
@@ -614,7 +623,6 @@ export default function EnergyApp({ section }: { section: string }) {
                     Se din besparing <ArrowUpRight size={18} />
                   </Link>
                 </Card>
-                <PricePanel area={home.region as PriceArea} chartOnly />
                 <Card title="Ditt hem just nu">
                   <div className="device-row">
                     <span className="device-icon">

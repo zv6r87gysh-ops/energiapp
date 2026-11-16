@@ -3711,3 +3711,127 @@ th {
     transform: translateY(-50%);
   }
 }
+.arrival-side {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.arrival-prices .price-arrival {
+  padding: 12px;
+  margin: 0;
+}
+.arrival-prices .toolbar {
+  margin-bottom: 4px;
+  gap: 4px;
+}
+.arrival-prices h2 {
+  font-size: 14px;
+}
+.arrival-prices .badge {
+  display: none;
+}
+.arrival-prices .graph {
+  height: 135px;
+}
+.arrival-prices .price-arrival > p {
+  display: none;
+}
+.arrival-prices .price-arrival > p:last-child {
+  display: block;
+  font-size: 9px;
+  line-height: 1.3;
+  margin: 5px 0 0;
+}
+.arrival-prices .price-legend {
+  gap: 4px 7px;
+  font-size: 9px;
+  margin-top: 3px;
+}
+.arrival-prices .warning {
+  font-size: 11px;
+  padding: 6px;
+}
+.home-arrival .house-clock time {
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+}
+.home-arrival .house-sun-times {
+  justify-content: flex-start;
+}
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .home-arrival .house-scene-info {
+    grid-template-columns: auto 1fr;
+  }
+  .home-arrival .house-sun-times {
+    justify-self: start;
+    margin-left: 6px;
+  }
+  .home-arrival .house-clock time {
+    font-size: 24px;
+  }
+  .arrival-side {
+    gap: 8px;
+  }
+  .arrival-side .music-moods {
+    padding: 12px;
+  }
+  .arrival-side .music-moods h2 {
+    font-size: 19px;
+    margin: 6px 0;
+  }
+  .arrival-side .music-moods > p {
+    font-size: 10px;
+    margin: 5px 0;
+  }
+  .arrival-side .mood-buttons {
+    gap: 6px;
+  }
+  .arrival-side .mood-button {
+    min-height: 90px;
+    padding: 9px 5px;
+  }
+  .arrival-side .mood-button b {
+    font-size: 12px;
+  }
+  .arrival-side .mood-button small {
+    font-size: 9px;
+  }
+  .arrival-side .mood-button > svg {
+    width: 22px;
+    height: 22px;
+  }
+  .arrival-side .music-connection-status,
+  .arrival-side .mood-light-note {
+    font-size: 9px;
+  }
+  .arrival-side .music-mood-actions {
+    margin-top: 6px;
+    gap: 5px;
+  }
+  .arrival-side .music-mood-actions .button {
+    min-height: 36px;
+    font-size: 10px;
+  }
+  .arrival-side .music-mood-actions .text-link {
+    font-size: 10px;
+  }
+}
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .arrival-side .mood-buttons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 12px 0;
+  }
+  .arrival-side .mood-button {
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+  }
+  .arrival-side .mood-button > svg:last-child {
+    display: none;
+  }
+}
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .home-arrival .house-photo-scene {
+    max-height: calc(100svh - 390px);
+  }
+}

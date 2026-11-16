@@ -26,10 +26,12 @@ export function PricePanel({
   area,
   compact = false,
   chartOnly = false,
+  arrival = false,
 }: {
   area: PriceArea;
   compact?: boolean;
   chartOnly?: boolean;
+  arrival?: boolean;
 }) {
   const [day, setDay] = useState<"today" | "tomorrow">("today");
   const [clock, setClock] = useState(() => Date.now());
@@ -184,7 +186,10 @@ export function PricePanel({
           </Button>
         </div>
       )}
-      <section className="card">
+      <section
+        className={`card ${arrival ? "price-arrival" : ""}`}
+        aria-label={arrival ? "Dagens elpriser" : undefined}
+      >
         <div className="toolbar">
           <h2 style={{ margin: 0 }}>
             {chartOnly ? "Dagens kvartspriser" : "Spotpriser"} · {area}
