@@ -69,7 +69,6 @@ const areas = [
 type AreaId = (typeof areas)[number]["id"];
 export function InteractiveHouse({
   householdId,
-  householdSelector,
   simulation,
   controls,
   lighting,
@@ -88,7 +87,6 @@ export function InteractiveHouse({
   postcode: string;
   onPostcode: (postcode: string) => void;
   controls?: React.ReactNode;
-  householdSelector?: React.ReactNode;
   weather: Weather | null;
   location: SceneLocation | null;
   lighting: OutdoorLighting;
@@ -256,22 +254,6 @@ export function InteractiveHouse({
         if (e.pointerType === "mouse") scheduleHide();
       }}
     >
-      <div className="house-photo-heading">
-        <div>
-          <span className="eyebrow">DITT HEM</span>
-          <h1>Utforska ditt hus</h1>
-        </div>
-        <div className="house-photo-actions">
-          {householdSelector}
-          <button
-            className="button secondary"
-            onClick={() => file.current?.click()}
-          >
-            <Camera size={16} />
-            {photo ? "Byt husfoto" : "Välj ditt husfoto"}
-          </button>
-        </div>
-      </div>
       <HouseClock
         key={postcode}
         scene={atmosphere}

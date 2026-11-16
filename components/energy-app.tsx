@@ -466,19 +466,6 @@ export default function EnergyApp({ section }: { section: string }) {
               <InteractiveHouse
                 key={`house-photo-${home.id}`}
                 householdId={home.id}
-                householdSelector={
-                  <select
-                    aria-label="Aktivt hushåll"
-                    value={home.id}
-                    onChange={(e) => setActive(e.target.value)}
-                  >
-                    {homes.map((h) => (
-                      <option key={h.id} value={h.id}>
-                        {h.name}
-                      </option>
-                    ))}
-                  </select>
-                }
                 simulation={sim}
                 lighting={lighting}
                 onIndoorChange={(indoorPreview) =>
