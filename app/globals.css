@@ -3858,3 +3858,119 @@ th {
   min-height: 36px;
   accent-color: #1c7653;
 }
+
+/* Keep the arrival information in a compact strip above the photograph. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .home-arrival .house-photo-heading {
+    margin-bottom: 3px;
+  }
+  .home-arrival .house-photo-heading h1 {
+    font-size: 13px;
+  }
+  .home-arrival .house-photo-actions select {
+    min-height: 32px;
+    padding: 4px 7px;
+    font-size: 11px;
+    max-width: 130px;
+  }
+  .home-arrival .house-photo-actions .button {
+    min-height: 32px;
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+  .home-arrival .house-scene-info {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 3px 8px;
+    margin-top: 0;
+    padding-bottom: 5px;
+  }
+  .home-arrival .house-clock {
+    gap: 4px;
+  }
+  .home-arrival .house-clock time {
+    font-size: 24px;
+    line-height: 1.1;
+  }
+  .home-arrival .house-clock small {
+    display: none;
+  }
+  .home-arrival .house-sun-times {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    justify-self: start;
+    font-size: 9px;
+  }
+  .home-arrival .house-sun-times span {
+    gap: 3px;
+  }
+  .home-arrival .house-sun-times svg {
+    width: 13px;
+    height: 13px;
+  }
+  .home-arrival .house-energy-summary {
+    grid-column: auto;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+  .home-arrival .house-daily-cost,
+  .home-arrival .house-spot-price {
+    display: grid;
+    align-content: center;
+    padding: 4px 6px;
+    gap: 1px;
+    border-radius: 8px;
+  }
+  .home-arrival .house-daily-cost b,
+  .home-arrival .house-spot-price b {
+    font-size: 12px;
+  }
+  .home-arrival .house-daily-cost small,
+  .home-arrival .house-spot-price small {
+    font-size: 7px;
+    line-height: 1.2;
+  }
+  .home-arrival .house-scene-info > span,
+  .home-arrival .house-scene-info > small {
+    display: none;
+  }
+  .home-arrival .house-day-forecast {
+    grid-column: 1/-1;
+    padding-top: 3px;
+  }
+  .home-arrival .house-forecast-heading {
+    font-size: 9px;
+    gap: 5px;
+  }
+  .home-arrival .house-forecast-heading input,
+  .home-arrival .house-forecast-heading .button {
+    min-height: 27px;
+    padding: 3px 5px;
+    font-size: 9px;
+  }
+  .home-arrival .house-day-forecast .weather-timeline {
+    margin-top: 3px;
+  }
+  .home-arrival .house-day-forecast .weather-timeline ol {
+    padding: 3px;
+  }
+  .home-arrival .house-day-forecast .weather-timeline li {
+    row-gap: 0;
+  }
+  .home-arrival .house-day-forecast .weather-timeline li > svg {
+    width: 17px;
+    height: 17px;
+  }
+  .home-arrival .house-day-forecast .weather-timeline strong {
+    font-size: 11px;
+  }
+  .home-arrival .house-day-forecast > small {
+    font-size: 7px;
+    margin-top: 1px;
+  }
+  .home-arrival .house-photo-scene {
+    max-height: calc(100svh - 295px);
+  }
+}

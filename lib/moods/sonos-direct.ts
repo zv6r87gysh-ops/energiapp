@@ -128,6 +128,17 @@ export async function activateSonosMood(
         playModes: { shuffle: true },
       },
     );
+    // Explicitly re-enable shuffle even if it was changed in another Sonos app.
+    await sonosRequest(`/groups/${room}/playback/playMode`, session, "POST", {
+      playModes: { shuffle: true, repeatOne: false },
+    });
+    // Loading a container may begin on its first item; advance in the shuffled queue.
+    await sonosRequest(
+      `/groups/${room}/playback/skipToNextTrack`,
+      session,
+      "POST",
+      {},
+    );
   } catch (error) {
     if (error instanceof MusicError) error.volumeApplied = true;
     throw error;

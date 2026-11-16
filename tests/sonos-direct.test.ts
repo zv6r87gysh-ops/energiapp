@@ -63,9 +63,22 @@ it("starts Sonos directly without any Spotify or phone call and avoids immediate
     ([url, init]) => url.endsWith("/favorites") && init?.method === "POST",
   );
   expect(starts).toHaveLength(2);
+  const modes = fetcher.mock.calls.filter(([url]) =>
+    url.endsWith("/playback/playMode"),
+  );
+  expect(modes).toHaveLength(2);
+  expect(JSON.parse(modes[0][1]!.body as string)).toMatchObject({
+    playModes: { shuffle: true, repeatOne: false },
+  });
+  expect(
+    fetcher.mock.calls.filter(([url]) =>
+      url.endsWith("/playback/skipToNextTrack"),
+    ),
+  ).toHaveLength(2);
   expect(JSON.parse(starts[0][1]!.body as string)).toMatchObject({
     action: "REPLACE",
     playOnCompletion: true,
+    playModes: { shuffle: true },
   });
 });
 it("rejects stale selections before changing volume or starting music", async () => {

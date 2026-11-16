@@ -234,6 +234,16 @@ it("starts the random playlist on the selected Connect device, sets Sonos volume
   const f = mockCloud();
   const result = await activateMood(input(), session, session);
   expect(result.music.status).toBe("playing");
+  expect(
+    f.mock.calls.some(([url]) =>
+      url.includes("/me/player/shuffle?state=true&device_id=device1"),
+    ),
+  ).toBe(true);
+  expect(
+    f.mock.calls.some(([url]) =>
+      url.includes("/me/player/next?device_id=device1"),
+    ),
+  ).toBe(true);
   expect(result.lights.status).toBe("preview");
   expect(result.playlist.url).toBe("https://open.spotify.com/playlist/chosen");
   const put = f.mock.calls.find(([, o]) => o?.method === "PUT")!;
