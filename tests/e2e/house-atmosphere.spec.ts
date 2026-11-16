@@ -56,6 +56,9 @@ test("svensk klocka och regnvisualisering använder prognosen och lamporna sakna
     page.getByLabel("Klocka svensk tid", { exact: true }),
   ).toHaveText("12:00:02");
   await expect(page.locator(".house-rain-field")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   await page.getByRole("button", { name: "Utebelysning", exact: true }).click();
   const overlay = page.getByTestId("outdoor-lighting-overlay");
   await expect(overlay).toHaveAttribute("data-power", "on");
@@ -101,6 +104,9 @@ test("utomhus- och poolbelysning följer solen; manuellt poolval påverkar inte 
     "data-power",
     "on",
   );
+  await page
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "Poolbelysning", exact: true })
     .click();
@@ -170,6 +176,9 @@ test("bildknapparna ligger i fotot, grönt följer lampornas läge och dagens v�
     name: "Ditt interaktiva hus",
     exact: true,
   });
+  await house
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   const buttons = house.locator(".house-photo-scene > .house-category-tabs");
   await expect(buttons.getByRole("button")).toHaveCount(7);
   const outdoor = buttons.getByRole("button", {

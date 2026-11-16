@@ -83,8 +83,9 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
       alignment.heightError,
   ).toBeLessThan(2);
   await card
-    .getByRole("button", { name: "Visa kostnad för Pool", exact: true })
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
     .click();
+  await card.getByRole("button", { name: "Pool", exact: true }).click();
   await expect(card.locator(".house-hit-pool")).toHaveClass(/is-active/);
   await expect(card.locator(".house-cost-tooltip")).toContainText(
     "Kostnad hittills idag",
@@ -127,6 +128,9 @@ test("eget husfoto sparas, markeringar lyser och kostnadsrutan länkar till rät
   ).toContainText("Valda kategorier: Pool");
 
   await page.reload();
+  await page
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   await expect(
     card.getByRole("img", { name: /Ditt hus med interaktiva/ }),
   ).toBeVisible();
@@ -187,6 +191,9 @@ test("muspekare och tangentbordsfokus väljer markering utan att navigera", asyn
   await card
     .getByLabel("Välj husfoto", { exact: true })
     .setInputFiles(path.resolve("public/icon-512.png"));
+  await card
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   const pool = card.getByRole("button", {
     name: "Visa kostnad för Pool",
     exact: true,

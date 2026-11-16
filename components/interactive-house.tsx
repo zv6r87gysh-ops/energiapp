@@ -106,6 +106,7 @@ export function InteractiveHouse({
   const [active, setActive] = useState<AreaId>("house");
   const [error, setError] = useState("");
   const [preview, setPreview] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   function cancelHide() {
     if (hoverTimer.current) clearTimeout(hoverTimer.current);
@@ -276,6 +277,7 @@ export function InteractiveHouse({
         scene={atmosphere}
         price={simulation?.currentPrice ?? null}
         priceArea={priceArea}
+        dailyCost={simulation?.cost ?? null}
         location={location}
         weather={weather}
         message={weatherMessage}
@@ -304,6 +306,23 @@ export function InteractiveHouse({
       {photo ? (
         <div
           className={`house-photo-scene house-active-${preview ? active : "none"}`}
+          data-menu-open={menuOpen}
+          onClickCapture={(e) => {
+            if (
+              !menuOpen &&
+              !(e.target as Element).closest(".house-smart-controls")
+            ) {
+              e.preventDefault();
+              e.stopPropagation();
+              setMenuOpen(true);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setMenuOpen(false);
+              clearPreview();
+            }
+          }}
           style={
             {
               "--photo-aspect": layout.width / layout.height,
@@ -321,6 +340,20 @@ export function InteractiveHouse({
             else scheduleHide();
           }}
         >
+          <button
+            type="button"
+            className="house-menu-toggle"
+            aria-expanded={menuOpen}
+            aria-label={
+              menuOpen ? "Dölj husets kontroller" : "Visa husets kontroller"
+            }
+            onClick={() => {
+              setMenuOpen(!menuOpen);
+              clearPreview();
+            }}
+          >
+            {menuOpen ? "Stäng ×" : "Visa kontroller"}
+          </button>
           <div className="house-photo-visual">
             {/* eslint-disable-next-line @next/next/no-img-element -- Local user-selected Blob URL, no remote image service. */}
             <img
@@ -331,7 +364,7 @@ export function InteractiveHouse({
               data-season={atmosphere?.season}
               style={{
                 filter: atmosphere
-                  ? `brightness(${atmosphere.brightness}) saturate(${atmosphere.season === "winter" ? 0.72 : atmosphere.season === "summer" ? 1.08 : 0.94}) sepia(${atmosphere.season === "autumn" ? 0.12 : 0.02})`
+                  ? `brightness(${Math.min(1.1, atmosphere.brightness * 0.78 + 0.24)}) saturate(${atmosphere.season === "winter" ? 0.72 : atmosphere.season === "summer" ? 1.08 : 0.94}) sepia(${atmosphere.season === "autumn" ? 0.12 : 0.02})`
                   : undefined,
               }}
               onLoad={(event) =>
@@ -594,10 +627,11 @@ export function InteractiveHouse({
         </Link>
       </div>
       <p className="muted house-photo-help">
-        Hovra eller välj en markering för kostnad. Klicka på det lysande området
-        eller Öppna för att gå till vyn. På mobilen: tryck på en markering och
-        sedan Öppna. Golvslingor och laddsymbol är schematiska. Fotot sparas
-        endast i denna webbläsare för valt hushåll.
+        Tryck på bilden för att visa kontrollerna till vänster. Välj ett område
+        för kostnad. Klicka på det lysande området eller Öppna för att gå till
+        vyn. På mobilen: tryck på en markering och sedan Öppna. Golvslingor och
+        laddsymbol är schematiska. Fotot sparas endast i denna webbläsare för
+        valt hushåll.
       </p>
     </section>
   );

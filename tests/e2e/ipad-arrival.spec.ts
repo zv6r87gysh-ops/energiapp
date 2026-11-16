@@ -419,3 +419,26 @@ test("Sonos direkt startar med ett tryck utan Spotify eller telefon", async ({
   });
   expect(payload).not.toHaveProperty("device");
 });
+test("husbilden fyller kortet och kontroller visas först efter tryck", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.route("**/api/music?*", (r) => r.fulfill({ json: disconnected }));
+  await page.goto("/");
+  const scene = page.locator(".house-photo-scene");
+  await expect(scene.locator("img")).toBeVisible();
+  await expect(scene.locator(".house-category-tabs")).toBeHidden();
+  await expect(
+    page.getByRole("link", { name: "Elkostnad hittills idag" }),
+  ).toBeVisible();
+  const cardWidth = await page
+    .locator(".interactive-house")
+    .evaluate((el) => el.clientWidth);
+  const bounds = await scene.boundingBox();
+  expect(bounds!.width).toBeGreaterThan(cardWidth - 25);
+  await scene.locator("img").click({ position: { x: 200, y: 150 } });
+  await expect(scene.locator(".house-category-tabs")).toBeVisible();
+  await scene.getByRole("button", { name: "Dölj husets kontroller" }).click();
+  await expect(scene.locator(".house-category-tabs")).toBeHidden();
+  await page.screenshot({ path: "/tmp/energihem-ipad-overview.png" });
+});

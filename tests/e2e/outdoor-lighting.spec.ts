@@ -35,6 +35,9 @@ test("av/på visar spotlights på samma foto, sparas per hushåll och skickar in
     "opacity",
     "0",
   );
+  await card
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   const photoToggle = card.getByRole("button", {
     name: "Utebelysning",
     exact: true,
@@ -49,6 +52,9 @@ test("av/på visar spotlights på samma foto, sparas per hushåll och skickar in
   await expect(overlay.locator("[data-spot]")).toHaveCount(20);
   await expect(photo).toHaveAttribute("src", original!);
   await page.reload();
+  await page
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   await expect(photoToggle).toHaveAttribute("aria-pressed", "true");
   await expect(photo).toBeVisible();
   await photoToggle.focus();
@@ -135,6 +141,9 @@ test("belysning saknar hovringsytor och popupreglage men knapparna fungerar", as
       ".lighting-hit-overlay,.pool-lamp-hit,.house-lighting-popover",
     ),
   ).toHaveCount(0);
+  await card
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   for (const [name, overlay] of [
     ["Utebelysning", "outdoor-lighting-overlay"],
     ["Poolbelysning", "pool-lighting-overlay"],

@@ -45,6 +45,9 @@ test("inomhusgrupper och alla utelampor samlas under Belysning; foto och val spa
     overlay.locator('[data-indoor-group="large-left"]'),
   ).toHaveAttribute("data-power", "on");
   await expect(overlay.locator('[data-power="off"]')).toHaveCount(4);
+  await page
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   const all = page.getByRole("button", {
     name: "Inomhusbelysning",
     exact: true,
@@ -54,6 +57,9 @@ test("inomhusgrupper och alla utelampor samlas under Belysning; foto och val spa
   await all.click();
   await expect(overlay.locator('[data-power="off"]')).toHaveCount(5);
   await page.reload();
+  await page
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   await expect(all).toHaveAttribute("aria-pressed", "false");
   await page.goto("/belysning");
   await page.locator("#inomhus summary").click();

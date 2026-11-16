@@ -12,7 +12,7 @@ import { sunTimes } from "@/lib/scene/sun-times";
 import { priceTime } from "@/lib/prices/time";
 import { postcodeSchema } from "@/lib/weather/contracts";
 import { WeatherTimeline } from "./weather-timeline";
-import { number } from "@/lib/energy";
+import { money, number } from "@/lib/energy";
 export function useHouseAtmosphere(
   weather: Weather | null,
   location: SceneLocation | null,
@@ -41,8 +41,10 @@ export function HouseClock({
   onPostcode,
   price,
   priceArea,
+  dailyCost,
 }: {
   price: number | null;
+  dailyCost: number | null;
   priceArea: string;
   scene: HouseAtmosphere | null;
   location: SceneLocation | null;
@@ -105,16 +107,29 @@ export function HouseClock({
         )}
         {!sun && <small>Ange postnummer för soltider</small>}
       </div>
-      <Link
-        href="/elpriser"
-        className="house-spot-price"
-        aria-label={`Aktuellt spotpris ${priceArea}`}
-        title="Elprisetjustnu.se · exklusive moms, skatter och avgifter"
-      >
-        <small>Spotpris nu · {priceArea}</small>
-        <b>{price === null ? "Pris saknas" : `${number(price, 1)} öre/kWh`}</b>
-        <small>Exkl. moms och avgifter</small>
-      </Link>
+      <div className="house-energy-summary">
+        <Link
+          href="/kostnad"
+          className="house-daily-cost"
+          aria-label="Elkostnad hittills idag"
+        >
+          <small>Elkostnad idag</small>
+          <b>{dailyCost === null ? "Underlag saknas" : money(dailyCost)}</b>
+          <small>Modell · inkl. moms och rörliga avgifter</small>
+        </Link>
+        <Link
+          href="/elpriser"
+          className="house-spot-price"
+          aria-label={`Aktuellt spotpris ${priceArea}`}
+          title="Elprisetjustnu.se · exklusive moms, skatter och avgifter"
+        >
+          <small>Spotpris nu · {priceArea}</small>
+          <b>
+            {price === null ? "Pris saknas" : `${number(price, 1)} öre/kWh`}
+          </b>
+          <small>Exkl. moms och avgifter</small>
+        </Link>
+      </div>
       <span>
         {scene
           ? `${scene.seasonLabel} · ${scene.phaseLabel} · ${scene.conditionLabel}${scene.temperature === null ? "" : ` · ${number(scene.temperature, 1)} °C`}`

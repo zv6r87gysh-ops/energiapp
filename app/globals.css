@@ -3582,3 +3582,132 @@ th {
     line-height: 1.1;
   }
 }
+
+/* A quieter arrival view: the photograph stays visible until controls are requested. */
+.home-arrival .interactive-house {
+  padding: 10px;
+}
+.home-arrival .house-photo-heading {
+  margin-bottom: 6px;
+  gap: 6px;
+}
+.home-arrival .house-photo-heading h1 {
+  font-size: 15px;
+  margin: 0;
+}
+.home-arrival .house-photo-actions .button {
+  font-size: 11px;
+  padding: 6px 9px;
+}
+.home-arrival .house-photo-scene {
+  width: 100%;
+  align-self: stretch;
+}
+.house-menu-toggle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 8;
+  min-height: 44px;
+  border: 1px solid #ffffff80;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: #fffffff0;
+  color: #243b43;
+  cursor: pointer;
+  font-size: 12px;
+}
+.house-photo-scene[data-menu-open="false"] .house-category-tabs,
+.house-photo-scene[data-menu-open="false"] .house-photo-pin,
+.house-photo-scene[data-menu-open="false"] .house-photo-hover-card {
+  display: none !important;
+}
+.house-photo-scene[data-menu-open="false"] .house-photo-overlay {
+  pointer-events: none;
+  visibility: hidden;
+}
+.house-photo-scene[data-menu-open="true"] > .house-category-tabs {
+  top: 60px;
+  max-height: calc(100% - 70px);
+  overflow-y: auto;
+}
+.house-energy-summary {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+.house-daily-cost {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 7px 9px;
+  border: 1px solid #c6ded1;
+  border-radius: 12px;
+  background: #edf6ef;
+  color: #1c4a38;
+  text-decoration: none;
+}
+.house-daily-cost small {
+  font-size: 9px;
+}
+.house-daily-cost b {
+  font-size: 15px;
+}
+.house-night-wash {
+  background: linear-gradient(150deg, #061a4e18, #07172b12);
+}
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .home-arrival .house-scene-info {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 8px;
+  }
+  .home-arrival .house-energy-summary {
+    grid-column: 1/-1;
+    justify-content: space-between;
+  }
+  .home-arrival .house-daily-cost,
+  .home-arrival .house-spot-price {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px 7px;
+    padding: 4px 7px;
+  }
+  .home-arrival .house-daily-cost small,
+  .home-arrival .house-spot-price small {
+    font-size: 8px;
+  }
+  .home-arrival .house-daily-cost small:last-child {
+    flex-basis: 100%;
+  }
+  .home-arrival .house-daily-cost b {
+    font-size: 13px;
+  }
+  .home-arrival .house-photo-help {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .house-energy-summary {
+    flex-wrap: wrap;
+  }
+  .house-photo-scene[data-menu-open="true"] > .house-category-tabs {
+    width: 145px;
+  }
+}
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .home-arrival .house-photo-scene {
+    max-height: calc(100svh - 370px);
+  }
+}
+@media (min-width: 900px) and (max-width: 1400px) and (orientation: landscape) {
+  .home-arrival .house-photo-scene {
+    aspect-ratio: var(--photo-aspect, 1.3333);
+  }
+  .home-arrival .house-photo-visual {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
