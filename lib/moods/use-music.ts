@@ -108,14 +108,18 @@ export function useMusic(householdId: string, enabled: boolean) {
       setBusy(false);
     }
   }
-  async function pause(room: string, action: "pause" | "next" = "pause") {
+  async function pause(
+    room: string,
+    action: "pause" | "next" | "volume" = "pause",
+    volume?: number,
+  ) {
     setMessage("");
     setBusy(true);
     try {
       const r = await fetch("/api/music", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ householdId, room, action }),
+        body: JSON.stringify({ householdId, room, action, volume }),
         signal: AbortSignal.timeout(15000),
       });
       const data = await r.json();

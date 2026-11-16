@@ -279,3 +279,20 @@ export async function pauseMusic(
     {},
   );
 }
+
+export async function setMusicVolume(
+  room: string,
+  sonos: Session,
+  volume: number,
+) {
+  if (!Number.isInteger(volume) || volume < 0 || volume > 100)
+    throw new MusicError("invalid-volume", 400);
+  if (!(await sonosRooms(sonos)).some((r) => r.id === room))
+    throw new MusicError("invalid-room", 400);
+  await cloudFetch(
+    `${sonosBase}/groups/${encodeURIComponent(room)}/groupVolume`,
+    sonos,
+    "POST",
+    { volume },
+  );
+}

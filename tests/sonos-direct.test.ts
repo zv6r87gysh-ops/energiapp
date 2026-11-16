@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { activateSonosMood, sonosCatalog } from "../lib/moods/sonos-direct";
-import { pauseMusic } from "../lib/moods/cloud";
+import { pauseMusic, setMusicVolume } from "../lib/moods/cloud";
 import { defaultMoods } from "../lib/moods/contracts";
 import type { Session } from "../lib/moods/oauth";
 const session: Session = {
@@ -108,4 +108,24 @@ it("next track rejects an unrelated group without sending commands", async () =>
   expect(fetcher.mock.calls.some(([, init]) => init?.method === "POST")).toBe(
     false,
   );
+});
+
+it("volume validates the target and sends a bounded integer to Sonos", async () => {
+  const fetcher = mock();
+  await expect(setMusicVolume("room", session, 101)).rejects.toMatchObject({
+    code: "invalid-volume",
+  });
+  expect(fetcher).not.toHaveBeenCalled();
+  await expect(setMusicVolume("other", session, 30)).rejects.toMatchObject({
+    code: "invalid-room",
+  });
+  await setMusicVolume("room", session, 30);
+  const writes = fetcher.mock.calls.filter(
+    ([, init]) => init?.method === "POST",
+  );
+  expect(writes).toHaveLength(1);
+  expect(writes[0][0]).toBe(
+    "https://api.ws.sonos.com/control/api/v1/groups/room/groupVolume",
+  );
+  expect(JSON.parse(writes[0][1]!.body as string)).toEqual({ volume: 30 });
 });

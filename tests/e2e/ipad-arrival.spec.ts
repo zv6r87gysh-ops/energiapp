@@ -437,6 +437,16 @@ test("Sonos direkt startar med ett tryck utan Spotify eller telefon", async ({
     room: "room1",
     action: "next",
   });
+  await page.getByRole("button", { name: "Volym", exact: true }).click();
+  const slider = page.getByRole("slider", { name: "Sonos-volym", exact: true });
+  await slider.focus();
+  await page.keyboard.press("ArrowRight");
+  expect(payload).toMatchObject({
+    householdId: home.id,
+    room: "room1",
+    action: "volume",
+    volume: 19,
+  });
 });
 test("husbilden fyller kortet och kontroller visas först efter tryck", async ({
   page,

@@ -3835,3 +3835,26 @@ th {
     max-height: calc(100svh - 390px);
   }
 }
+.mood-playback-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mood-playback-controls .button {
+  min-height: 44px;
+  font-size: 12px;
+  padding: 8px 10px;
+}
+.mood-volume-slider {
+  flex-basis: 100%;
+  display: grid;
+  gap: 4px;
+  font-size: 11px;
+}
+.mood-volume-slider input {
+  width: 100%;
+  min-height: 36px;
+  accent-color: #1c7653;
+}

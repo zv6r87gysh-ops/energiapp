@@ -17,6 +17,7 @@ import {
 import {
   activateMood,
   pauseMusic,
+  setMusicVolume,
   sonosRooms,
   spotifyDeviceSnapshot,
 } from "../../../lib/moods/cloud";
@@ -139,9 +140,19 @@ export async function PATCH(request: Request) {
       .object({
         householdId: homeSchema,
         room: z.string().min(1).max(200),
-        action: z.enum(["pause", "next"]).default("pause"),
+        action: z.enum(["pause", "next", "volume"]).default("pause"),
+        volume: z.number().int().min(0).max(100).optional(),
       })
+      .refine((v) => v.action !== "volume" || v.volume !== undefined)
       .parse(await request.json());
+    if (input.action === "volume") {
+      await setMusicVolume(
+        input.room,
+        await authorizedSession(request, "sonos", input.householdId, headers),
+        input.volume!,
+      );
+      return Response.json({ ok: true }, { headers });
+    }
     await pauseMusic(
       input.room,
       await authorizedSession(request, "sonos", input.householdId, headers),
