@@ -91,17 +91,17 @@ export function MusicMoods({
         <Music2 size={22} />
       </div>
       <h2>Vilken känsla idag?</h2>
-      <p className="muted">
-        {ready
-          ? direct
-            ? "Tryck för ett slumpvalt sparat Sonos-musikval. Ingen telefon behövs."
-            : "Tryck för en slumpvald spellista i din musikstil."
-          : connected
-            ? hasSpeaker
-              ? "Välj Sonos-rum och tillhörande högtalare i inställningarna."
-              : "Spotify visar ännu ingen styrbar högtalare. Se anslutningsstatus i inställningarna."
-            : "Prova ljuset nu. Anslut musiken i inställningarna."}
-      </p>
+      {!(ready && direct) && (
+        <p className="muted">
+          {ready
+            ? "Tryck för en slumpvald spellista i din musikstil."
+            : connected
+              ? hasSpeaker
+                ? "Välj Sonos-rum och tillhörande högtalare i inställningarna."
+                : "Spotify visar ännu ingen styrbar högtalare. Se anslutningsstatus i inställningarna."
+              : "Prova ljuset nu. Anslut musiken i inställningarna."}
+        </p>
+      )}
       <div className="mood-buttons">
         {moodIds.map((id) => {
           const Icon = icons[id];
