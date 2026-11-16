@@ -239,6 +239,14 @@ export function musicMessage(code: string) {
     "invalid-provider-response": "Musiktjänstens svar kunde inte verifieras.",
     "no-playlists":
       "Inga spellistor hittades för musikstilen. Prova andra sökord.",
+    "sonos-permission-denied":
+      "Sonos nekar åtkomst. Kontrollera Control-integrationens behörighet och att rätt Sonos-konto är anslutet.",
+    "sonos-catalog-unavailable":
+      "Sonos kunde inte lämna favoriter eller sparade spellistor. Uppdatera Sonos-valen och kontrollera anslutningen.",
+    "sonos-pool-empty":
+      "Välj minst ett Sonos-musikval för denna stämning i inställningarna. Välj flera för slumpvariation.",
+    "sonos-selection-missing":
+      "Ett sparat Sonos-musikval finns inte längre i det valda rummets hem. Hämta Sonos-valen igen och uppdatera stämningen.",
     "device-not-speaker":
       "Vald Spotify-enhet är en telefon, dator eller en okänd enhet. Sonos-läget startar inte musik där. Välj en tillgänglig högtalare.",
     "device-unavailable":

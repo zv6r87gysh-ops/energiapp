@@ -364,3 +364,58 @@ test("ett tidigare sparat iPhone-val kan inte starta musik från Sonos-knapparna
     true,
   );
 });
+test("Sonos direkt startar med ett tryck utan Spotify eller telefon", async ({
+  page,
+}) => {
+  const home = {
+    ...structuredClone(initialHousehold),
+    moodSettings: {
+      ...structuredClone(defaultMoods),
+      sourceMode: "sonos",
+      room: "room1",
+    },
+  };
+  Object.assign(home.moodSettings.styles.lounge, {
+    sonosItems: [{ id: "chill", kind: "favorite" }],
+  });
+  await page.addInitScript(
+    (h) =>
+      localStorage.setItem(
+        "energihem-demo-v1",
+        JSON.stringify({ homes: [h], active: h.id }),
+      ),
+    home,
+  );
+  await page.route("**/api/music?*", (r) =>
+    r.fulfill({
+      json: {
+        ...connected,
+        spotify: { configured: false, connected: false },
+        devices: [],
+      },
+    }),
+  );
+  let payload: Record<string, unknown> | null = null;
+  await page.route("**/api/music", async (r) => {
+    payload = r.request().postDataJSON();
+    await r.fulfill({
+      json: {
+        mood: "lounge",
+        playlist: { name: "Chillfavorit" },
+        music: { status: "requested", message: "Sonos tog emot startbegäran." },
+        lights: { status: "preview", message: "Plejd är inte anslutet." },
+      },
+    });
+  });
+  await page.goto("/");
+  await page
+    .getByRole("button", { name: "Spela Lounge/chill", exact: true })
+    .click();
+  await expect(page.getByText("Chillfavorit", { exact: true })).toBeVisible();
+  expect(payload).toMatchObject({
+    sourceMode: "sonos",
+    room: "room1",
+    style: { sonosItems: [{ id: "chill", kind: "favorite" }] },
+  });
+  expect(payload).not.toHaveProperty("device");
+});

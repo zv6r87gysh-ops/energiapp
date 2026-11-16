@@ -46,7 +46,7 @@ export async function sonosRooms(session: Session) {
     .object({ households: z.array(z.object({ id: z.string() })).max(20) })
     .safeParse(await cloudFetch(`${sonosBase}/households`, session));
   if (!homes.success) throw new MusicError("invalid-provider-response");
-  const rooms: { id: string; name: string }[] = [];
+  const rooms: { id: string; name: string; householdId: string }[] = [];
   for (const home of homes.data.households) {
     const groups = z
       .object({
@@ -61,7 +61,12 @@ export async function sonosRooms(session: Session) {
         ),
       );
     if (!groups.success) throw new MusicError("invalid-provider-response");
-    rooms.push(...groups.data.groups);
+    rooms.push(
+      ...groups.data.groups.map((group) => ({
+        ...group,
+        householdId: home.id,
+      })),
+    );
   }
   return rooms;
 }
@@ -212,7 +217,7 @@ export async function activateMood(
   );
   try {
     await cloudFetch(
-      `${spotifyBase}/me/player/play?${new URLSearchParams({ device_id: input.device })}`,
+      `${spotifyBase}/me/player/play?${new URLSearchParams({ device_id: selected.id })}`,
       spotify,
       "PUT",
       { context_uri: playlist.uri },

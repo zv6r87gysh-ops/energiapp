@@ -3,7 +3,23 @@ import { indoorGroupSchema } from "../lighting/contracts";
 export const moodIds = ["children", "lounge", "ambience"] as const;
 export const moodIdSchema = z.enum(moodIds);
 export type MoodId = z.infer<typeof moodIdSchema>;
+export const sonosSelectionSchema = z.object({
+  id: z.string().min(1).max(128),
+  kind: z.enum(["favorite", "playlist"]),
+});
+export type SonosSelection = z.infer<typeof sonosSelectionSchema>;
+export type SonosItem = SonosSelection & { name: string; service?: string };
+export type SonosCatalog = {
+  room: string;
+  items: SonosItem[];
+  messages: string[];
+};
 export const moodStyleSchema = z.object({
+  sonosItems: z
+    .array(sonosSelectionSchema)
+    .max(170)
+    .refine((v) => new Set(v.map((x) => `${x.kind}:${x.id}`)).size === v.length)
+    .optional(),
   query: z.string().trim().min(2).max(100),
   volume: z.number().int().min(0).max(100),
   brightness: z.number().int().min(0).max(100),
@@ -14,6 +30,7 @@ export const moodStyleSchema = z.object({
 });
 export type MoodStyle = z.infer<typeof moodStyleSchema>;
 export const moodSettingsSchema = z.object({
+  sourceMode: z.enum(["spotify", "sonos"]).optional(),
   styles: z.object({
     children: moodStyleSchema,
     lounge: moodStyleSchema,
@@ -50,13 +67,14 @@ export const activationSchema = z.object({
   mood: moodIdSchema,
   style: moodStyleSchema,
   room: z.string().min(1).max(200),
-  device: z.string().min(1).max(200),
+  device: z.string().max(200).optional(),
+  sourceMode: z.enum(["spotify", "sonos"]).optional(),
   requestId: z.string().uuid(),
 });
 export type Activation = z.infer<typeof activationSchema>;
 export type MoodResult = {
   mood: MoodId;
-  playlist: { name: string; url: string };
+  playlist: { name: string; url?: string };
   music: { status: "requested" | "playing"; message: string };
   lights: { status: "preview"; message: string };
 };

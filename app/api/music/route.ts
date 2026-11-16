@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { activateSonosMood } from "../../../lib/moods/sonos-direct";
 import {
   activationSchema,
   type CloudStatus,
@@ -113,6 +114,8 @@ export async function POST(request: Request) {
       input.householdId,
       headers,
     );
+    if (input.sourceMode === "sonos")
+      return Response.json(await activateSonosMood(input, sonos), { headers });
     const spotify = await authorizedSession(
       request,
       "spotify",

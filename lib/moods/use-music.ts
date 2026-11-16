@@ -1,12 +1,44 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { loginFeedback } from "./login-feedback";
-import type { Activation, CloudStatus, MoodResult } from "./contracts";
+import type {
+  Activation,
+  CloudStatus,
+  MoodResult,
+  SonosCatalog,
+} from "./contracts";
 export function useMusic(householdId: string, enabled: boolean) {
   const [connection, setConnection] = useState<{
     home: string;
     data: CloudStatus;
   } | null>(null);
+  const [catalog, setCatalog] = useState<{
+    home: string;
+    data: SonosCatalog;
+  } | null>(null);
+  const [catalogMessage, setCatalogMessage] = useState("");
+  const loadSonosCatalog = useCallback(
+    async (room: string) => {
+      setCatalogMessage("Hämtar Sonos-musik…");
+      setCatalog(null);
+      try {
+        const r = await fetch(
+          `/api/music/sonos?${new URLSearchParams({ householdId, room })}`,
+          { cache: "no-store", signal: AbortSignal.timeout(30000) },
+        );
+        const data = await r.json();
+        if (!r.ok || !Array.isArray(data.items))
+          throw Error(data.message ?? "Sonos-musiken kunde inte hämtas.");
+        setCatalog({ home: householdId, data });
+        setCatalogMessage(data.messages.join(" "));
+      } catch (e) {
+        setCatalogMessage(
+          e instanceof Error ? e.message : "Sonos-musiken kunde inte hämtas.",
+        );
+      }
+    },
+    [householdId],
+  );
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [loginMessage, setLoginMessage] = useState("");
@@ -59,7 +91,6 @@ export function useMusic(householdId: string, enabled: boolean) {
       if (!r.ok) throw Error(data.message ?? "Musiken kunde inte startas.");
       if (
         !data.playlist?.name ||
-        !data.playlist?.url ||
         !["playing", "requested"].includes(data.music?.status)
       )
         throw Error("Svaret kunde inte verifieras. Kontrollera spelaren.");
@@ -107,6 +138,9 @@ export function useMusic(householdId: string, enabled: boolean) {
   }
   return {
     status: connection?.home === householdId ? connection.data : null,
+    catalog: catalog?.home === householdId ? catalog.data : null,
+    catalogMessage,
+    loadSonosCatalog,
     busy,
     message,
     loginMessage,
