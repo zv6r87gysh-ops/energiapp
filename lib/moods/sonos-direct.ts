@@ -89,7 +89,6 @@ export async function sonosCatalog(
   if (!selected) throw new MusicError("invalid-room", 400);
   return { room, ...(await catalogForHome(selected.householdId, session)) };
 }
-const lastPlayed = new Map<string, string>();
 export async function activateSonosMood(
   input: Activation,
   session: Session,
@@ -105,12 +104,13 @@ export async function activateSonosMood(
   // Fail rather than silently substituting other content if a saved selection disappeared.
   if (candidates.length !== wanted.size)
     throw new MusicError("sonos-selection-missing", 409);
-  const key = `${input.householdId}/${input.room}/${input.mood}`;
-  const alternatives = candidates.filter(
-    (x) => `${x.kind}:${x.id}` !== lastPlayed.get(key),
-  );
-  const choices = alternatives.length ? alternatives : candidates;
-  const chosen = choices[randomInt(choices.length)];
+  // Shuffle the source order as well, but load every selected source into one queue.
+  const sources = [...candidates];
+  for (let i = sources.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    [sources[i], sources[j]] = [sources[j], sources[i]];
+  }
+  const sourceName = candidates.map((x) => x.name).join(" + ");
   const room = encodeURIComponent(input.room);
   const trackIdentity = async () => {
     try {
@@ -140,23 +140,44 @@ export async function activateSonosMood(
     volume: input.style.volume,
   });
   try {
-    await sonosRequest(
-      `/groups/${room}/${chosen.kind === "favorite" ? "favorites" : "playlists"}`,
-      session,
-      "POST",
-      {
-        ...(chosen.kind === "favorite"
-          ? { favoriteId: chosen.id }
-          : { playlistId: chosen.id }),
-        action: "REPLACE",
-        playOnCompletion: true,
-        playModes: { shuffle: true, repeatOne: false, repeat: false },
-      },
-    );
+    for (let i = 0; i < sources.length; i++) {
+      const source = sources[i];
+      await sonosRequest(
+        `/groups/${room}/${source.kind === "favorite" ? "favorites" : "playlists"}`,
+        session,
+        "POST",
+        {
+          ...(source.kind === "favorite"
+            ? { favoriteId: source.id }
+            : { playlistId: source.id }),
+          action: i === 0 ? "REPLACE" : "APPEND",
+          playOnCompletion: false,
+          playModes: { shuffle: true, repeatOne: false, repeat: false },
+        },
+      );
+      if (sources.length > 1 && source.kind === "favorite") {
+        const meta = z
+          .object({
+            container: z.object({ type: z.string().optional() }).optional(),
+          })
+          .safeParse(
+            await sonosRequest(`/groups/${room}/playbackMetadata`, session),
+          );
+        if (
+          meta.success &&
+          ["station", "radio", "program"].includes(
+            meta.data.container?.type ?? "",
+          )
+        )
+          throw new MusicError("sonos-mix-unavailable", 409);
+      }
+    }
     // Explicitly re-enable shuffle even if it was changed in another Sonos app.
     await sonosRequest(`/groups/${room}/playback/playMode`, session, "POST", {
       playModes: { shuffle: true, repeatOne: false, repeat: false },
     });
+    // Only start after all favorites have been appended and shuffle has been requested.
+    await sonosRequest(`/groups/${room}/playback/play`, session, "POST", {});
     // A successful mode command alone does not prove that the service applied it.
     let state = playbackSchema.parse(
       await sonosRequest(`/groups/${room}/playback`, session),
@@ -200,9 +221,7 @@ export async function activateSonosMood(
     if (error instanceof MusicError) error.volumeApplied = true;
     throw error;
   }
-  if (lastPlayed.size > 1000) lastPlayed.clear();
-  lastPlayed.set(key, `${chosen.kind}:${chosen.id}`);
-  let message = `Sonos tog emot startbegäran för ${chosen.name}.`;
+  let message = `Sonos tog emot startbegäran för ${sourceName}.`;
   try {
     const state = z
       .object({ playbackState: z.string() })
@@ -216,7 +235,7 @@ export async function activateSonosMood(
   }
   return {
     mood: input.mood,
-    playlist: { name: chosen.name },
+    playlist: { name: sourceName },
     music: { status: "requested", message },
     lights: {
       status: "preview",

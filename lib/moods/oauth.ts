@@ -245,6 +245,8 @@ export function musicMessage(code: string) {
       "Sonos kunde inte lämna favoriter eller sparade spellistor. Uppdatera Sonos-valen och kontrollera anslutningen.",
     "player-action-unavailable":
       "Sonos eller musiktjänsten tillåter inte den här åtgärden för den aktuella låten.",
+    "sonos-mix-unavailable":
+      "Den valda radioströmmen kan inte blandas med andra favoriter. Välj spellistor eller album för den här stämningen.",
     "same-track":
       "Sonos rapporterar fortfarande samma låt. Kontrollera att musikvalet innehåller flera låtar och tillåter spårbyte.",
     "shuffle-unavailable":

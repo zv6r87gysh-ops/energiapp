@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { activateSonosMood, sonosCatalog } from "../lib/moods/sonos-direct";
 import { pauseMusic, setMusicVolume } from "../lib/moods/cloud";
-import { defaultMoods } from "../lib/moods/contracts";
+import { defaultMoods, type SonosSelection } from "../lib/moods/contracts";
 import type { Session } from "../lib/moods/oauth";
 const session: Session = {
   access: "test",
@@ -27,6 +27,7 @@ function mock(shuffle = true, repeatOne = false) {
       });
     if (url.endsWith("/playlists"))
       return Response.json({ playlists: [{ id: "kids", name: "Barn" }] });
+    if (url.endsWith("/playbackMetadata")) return Response.json({});
     if (url.endsWith("/playback"))
       return Response.json({
         playbackState: "PLAYBACK_STATE_PLAYING",
@@ -50,15 +51,16 @@ function input() {
       sonosItems: [
         { id: "chill", kind: "favorite" as const },
         { id: "lounge", kind: "favorite" as const },
-      ],
+      ] as SonosSelection[],
     },
   };
 }
-it("starts Sonos directly without any Spotify or phone call and avoids immediate repeat", async () => {
+it("combines every selected favorite into one shuffled queue without Spotify or a phone", async () => {
   const fetcher = mock();
   const first = await activateSonosMood(input(), session);
   const second = await activateSonosMood(input(), session);
-  expect(first.playlist.name).not.toBe(second.playlist.name);
+  expect(first.playlist.name).toBe("Chill + Lounge");
+  expect(second.playlist.name).toBe("Chill + Lounge");
   expect(first.playlist.url).toBeUndefined();
   expect(first.music.status).toBe("requested");
   for (const [url] of fetcher.mock.calls)
@@ -66,7 +68,19 @@ it("starts Sonos directly without any Spotify or phone call and avoids immediate
   const starts = fetcher.mock.calls.filter(
     ([url, init]) => url.endsWith("/favorites") && init?.method === "POST",
   );
-  expect(starts).toHaveLength(2);
+  expect(starts).toHaveLength(4);
+  for (const offset of [0, 2]) {
+    const loads = starts
+      .slice(offset, offset + 2)
+      .map(([, init]) => JSON.parse(init!.body as string));
+    expect(loads.map((x) => x.favoriteId).sort()).toEqual(["chill", "lounge"]);
+    expect(loads.map((x) => x.action)).toEqual(["REPLACE", "APPEND"]);
+    expect(loads.every((x) => x.playOnCompletion === false)).toBe(true);
+  }
+  const playIndex = fetcher.mock.calls.findIndex(([url]) =>
+    url.endsWith("/playback/play"),
+  );
+  expect(playIndex).toBeGreaterThan(fetcher.mock.calls.indexOf(starts[1]));
   const modes = fetcher.mock.calls.filter(([url]) =>
     url.endsWith("/playback/playMode"),
   );
@@ -81,7 +95,7 @@ it("starts Sonos directly without any Spotify or phone call and avoids immediate
   expect(skips.length).toBeLessThanOrEqual(6);
   expect(JSON.parse(starts[0][1]!.body as string)).toMatchObject({
     action: "REPLACE",
-    playOnCompletion: true,
+    playOnCompletion: false,
     playModes: { shuffle: true },
   });
 });
@@ -177,4 +191,40 @@ it("reports when Sonos keeps returning the same track despite shuffle and skippi
   await expect(activateSonosMood(input(), session)).rejects.toMatchObject({
     code: "same-track",
   });
+});
+
+it("mixes favorites and saved Sonos playlists in the same queue", async () => {
+  const f = mock();
+  const data = input();
+  data.style.sonosItems = [
+    { id: "chill", kind: "favorite" },
+    { id: "kids", kind: "playlist" },
+  ] as typeof data.style.sonosItems;
+  await activateSonosMood(data, session);
+  const loads = f.mock.calls.filter(
+    ([url, init]) =>
+      init?.method === "POST" &&
+      (url.endsWith("/favorites") || url.endsWith("/playlists")),
+  );
+  expect(loads).toHaveLength(2);
+  expect(
+    loads
+      .map(([, init]) => JSON.parse(init!.body as string))
+      .some((x) => x.playlistId === "kids"),
+  ).toBe(true);
+});
+it("does not start a partial mix if appending a selected favorite fails", async () => {
+  const f = mock(),
+    original = f.getMockImplementation()!;
+  f.mockImplementation(async (url, init) =>
+    init?.method === "POST" &&
+    init.body &&
+    JSON.parse(init.body as string).action === "APPEND"
+      ? new Response(null, { status: 503 })
+      : original(url, init),
+  );
+  await expect(activateSonosMood(input(), session)).rejects.toThrow();
+  expect(f.mock.calls.some(([url]) => url.endsWith("/playback/play"))).toBe(
+    false,
+  );
 });

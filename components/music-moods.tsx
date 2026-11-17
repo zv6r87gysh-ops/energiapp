@@ -411,8 +411,8 @@ export function MoodSettingsForm({
                 ))}
                 <p>
                   {values.styles[id].sonosItems?.length ?? 0} musikval. Flera
-                  val ger slumpning mellan dem; ett val spelar alltid samma
-                  sparade musikval.
+                  val blandas i samma Sonos-kö. Låtar från alla valda favoriter
+                  shufflas tillsammans. Radioströmmar kan inte blandas.
                 </p>
                 {!!values.styles[id].sonosItems?.length && (
                   <button
