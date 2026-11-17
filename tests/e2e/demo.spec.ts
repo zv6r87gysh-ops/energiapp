@@ -6,7 +6,7 @@ test("alla tio sidor fungerar utan horisontell scroll", async ({ page }) => {
     await page.goto(s.id === "oversikt" ? "/" : `/${s.id}`);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(
-      page.getByText("Du utforskar Energihem i demoläge"),
+      page.getByText("Du utforskar Jarvis i demoläge"),
     ).toBeVisible();
     expect(
       await page.evaluate(

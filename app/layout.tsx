@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 export const metadata: Metadata = {
-  title: "Energihem – ditt hem, i balans",
+  title: "Jarvis – ditt hem, i balans",
   description: "Smart energi för ditt hem. Lokal demonstration.",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "Energihem", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Jarvis", statusBarStyle: "default" },
   icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
 };
 export const viewport: Viewport = {

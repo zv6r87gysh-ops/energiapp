@@ -295,7 +295,7 @@ export function DeviceManager({
         <p id="device-dialog-description" className="muted">
           {step === 1
             ? "Välj typ av enhet. Du behöver tillverkare, exakt modell och ett serienummer eller enhets-ID."
-            : "Registrera din enhet för det valda hushållet. Den är inte ansluten till Energihem ännu."}
+            : "Registrera din enhet för det valda hushållet. Den är inte ansluten till Jarvis ännu."}
         </p>
         {error && (
           <p role="alert" className="device-error">

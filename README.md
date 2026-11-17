@@ -1,4 +1,4 @@
-# Energihem
+# Jarvis
 
 Svensk, responsiv energiapplikation byggd med Next.js App Router, TypeScript strict, Tailwind CSS, en shadcn/ui-baserad lokal Button-komponent, Lucide, Recharts och Zod. **Hushållets värden är demo. Elpriser hämtas från en publik källa. Ingen hårdvara eller användarautentisering är ansluten.**
 

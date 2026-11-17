@@ -14,7 +14,7 @@ export const deviceKinds = [
     shortName: "Poolens WiFi-box",
     description: "Registrera modulen till poolvärmepumpen.",
     help: "Ange numret från WiFi-boxens etikett eller tillverkarens app. Värmepumpens nummer är inte alltid samma som WiFi-boxens.",
-    next: "Tillverkarens app kan behövas för installation. Vi behöver verifiera exakt WiFi-modell innan temperatur eller drift kan läsas i Energihem.",
+    next: "Tillverkarens app kan behövas för installation. Vi behöver verifiera exakt WiFi-modell innan temperatur eller drift kan läsas i Jarvis.",
   },
   {
     id: "energy-meter",

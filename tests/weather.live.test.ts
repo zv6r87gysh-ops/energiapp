@@ -13,7 +13,7 @@ it.skipIf(process.env.RUN_LIVE_WEATHER_TESTS !== "1")(
       {
         headers: {
           "User-Agent":
-            "Energihem/1.0 https://github.com/zv6r87gysh-ops/energiapp",
+            "Jarvis/1.0 https://github.com/zv6r87gysh-ops/energiapp",
         },
         signal: AbortSignal.timeout(15000),
       },

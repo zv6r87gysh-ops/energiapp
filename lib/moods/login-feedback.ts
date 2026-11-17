@@ -9,7 +9,7 @@ export const loginMessages: Record<string, string> = {
   "login-denied":
     "Åtkomst godkändes inte. Starta inloggningen igen och godkänn anslutningen.",
   "login-state-missing":
-    "Inloggningens tillfälliga cookie saknas. Öppna Energihem och logga in i samma Safari-fönster igen.",
+    "Inloggningens tillfälliga cookie saknas. Öppna Jarvis och logga in i samma Safari-fönster igen.",
   "login-state-invalid":
     "Inloggningen kunde inte kopplas till detta webbläsarfönster. Starta en ny inloggning härifrån.",
   "login-expired": "Inloggningsförsöket har gått ut. Starta inloggningen igen.",

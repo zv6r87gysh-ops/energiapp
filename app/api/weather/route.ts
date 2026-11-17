@@ -7,7 +7,7 @@ import {
 } from "../../../lib/weather/errors";
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
-const agent = "Energihem/1.0 https://github.com/zv6r87gysh-ops/energiapp";
+const agent = "Jarvis/1.0 https://github.com/zv6r87gysh-ops/energiapp";
 const locations = new Map<
   string,
   { value: ReturnType<typeof parseLocation>; until: number }

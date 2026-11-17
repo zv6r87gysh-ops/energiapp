@@ -314,7 +314,7 @@ export default function EnergyApp({ section }: { section: string }) {
           <span className="logo">
             <Zap size={24} fill="currentColor" />
           </span>
-          energihem<span className="brand-dot">.</span>
+          Jarvis<span className="brand-dot">.</span>
         </Link>
         <p className="nav-caption">DITT SMARTA HEM</p>
         <nav>
@@ -390,7 +390,7 @@ export default function EnergyApp({ section }: { section: string }) {
           <span className="badge">Energimodell · musik kan anslutas</span>
         </div>
         <div className="profile">
-          <span className="avatar">EH</span>
+          <span className="avatar">J</span>
           <div>
             <b>Mitt demohushåll</b>
             <small>Lokalt på den här enheten</small>
@@ -419,7 +419,7 @@ export default function EnergyApp({ section }: { section: string }) {
             >
               {dark ? <Sun size={19} /> : <Moon size={19} />}
             </button>
-            <span className="avatar">EH</span>
+            <span className="avatar">J</span>
           </div>
         </header>
         <main>
@@ -512,7 +512,7 @@ export default function EnergyApp({ section }: { section: string }) {
           <div className="demo-banner">
             <span>
               <span className="status-dot" />
-              Du utforskar Energihem i demoläge
+              Du utforskar Jarvis i demoläge
             </span>
             <small>
               Hushåll: Levande modell · {sim?.settings.adults ?? 2} vuxna och{" "}
@@ -1525,7 +1525,7 @@ export default function EnergyApp({ section }: { section: string }) {
             </>
           )}
           <footer>
-            Energihem <span>Lite smartare. Lite grönare.</span>
+            Jarvis <span>Lite smartare. Lite grönare.</span>
             <small>
               Hushållsdata: Demo · Elpriser: separat källa · Inga styrkommandon
             </small>

@@ -65,7 +65,7 @@ export function LightingPage({
         <a href="#utomhus">Utomhus · inklusive poolbelysning</a>
       </nav>
       <p className="muted">
-        Din befintliga Plejd-installation är ännu inte ansluten till Energihem.
+        Din befintliga Plejd-installation är ännu inte ansluten till Jarvis.
         Knapparna ändrar förhandsvisningen; de skickar inga kommandon till
         lamporna.
       </p>
