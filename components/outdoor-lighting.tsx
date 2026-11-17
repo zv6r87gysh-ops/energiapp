@@ -331,9 +331,11 @@ export function PoolLightingOverlay({
   viewBox,
   brightness,
   lamp = poolLamp,
+  poolShape = "438,856 869,1067 744,1187 305,971",
 }: {
   on: boolean;
   lamp?: typeof poolLamp;
+  poolShape?: string;
   photo: string;
   viewBox: string;
   brightness: number;
@@ -356,7 +358,7 @@ export function PoolLightingOverlay({
           <stop offset="1" stopColor="white" stopOpacity="0" />
         </radialGradient>
         <clipPath id={`${id}-pool`}>
-          <polygon points="438,856 869,1067 744,1187 305,971" />
+          <polygon points={poolShape} />
         </clipPath>
         <mask
           id={`${id}-glow`}
@@ -406,7 +408,23 @@ export function PoolLightingOverlay({
           preserveAspectRatio="xMidYMid slice"
           filter={`url(#${id}-bright)`}
         />
-        <rect x={x} y={y} width={w} height={h} fill="#81ebff" opacity=".25" />
+        <rect x={x} y={y} width={w} height={h} fill="#81ebff" opacity=".35" />
+        <ellipse
+          cx={lamp.x}
+          cy={lamp.y + 4}
+          rx="35"
+          ry="12"
+          fill="#ffe8a2"
+          opacity=".55"
+        />
+        <ellipse
+          cx={lamp.x}
+          cy={lamp.y + 3}
+          rx="12"
+          ry="4"
+          fill="#fff6da"
+          opacity=".95"
+        />
       </g>
     </svg>
   );

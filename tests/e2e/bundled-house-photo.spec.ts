@@ -6,7 +6,10 @@ test("husvisualiseringen är inbyggd och rätt linjerat även i en tom ny sessio
   await page.goto("/");
   const photo = page.getByRole("img", { name: /Ditt hus med interaktiva/ });
   await expect(photo).toBeVisible();
-  await expect(photo).toHaveAttribute("src", "/images/jarvis-house.webp");
+  await expect(photo).toHaveAttribute(
+    "src",
+    "/images/jarvis-house-pool-off.webp",
+  );
   const dimensions = await photo.evaluate((img) => ({
     w: (img as HTMLImageElement).naturalWidth,
     h: (img as HTMLImageElement).naturalHeight,
@@ -51,7 +54,7 @@ test("husvisualiseringen är inbyggd och rätt linjerat även i en tom ny sessio
     await fresh.goto("http://127.0.0.1:3000/");
     await expect(
       fresh.getByRole("img", { name: /Ditt hus med interaktiva/ }),
-    ).toHaveAttribute("src", "/images/jarvis-house.webp");
+    ).toHaveAttribute("src", "/images/jarvis-house-pool-off.webp");
   } finally {
     await ctx.close();
   }

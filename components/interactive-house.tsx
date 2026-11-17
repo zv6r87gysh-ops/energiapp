@@ -6,6 +6,7 @@ import {
   modernIndoorGroups,
   modernSpots,
   modernPoolLamp,
+  modernPoolShape,
 } from "@/lib/modern-house";
 import { useEffect, useId, useRef, useState } from "react";
 import { Camera, Car, Flame, Home, Lightbulb, Waves } from "lucide-react";
@@ -233,7 +234,7 @@ export function InteractiveHouse({
       : active === "charging"
         ? simulation?.devices.charging.cost
         : houseCost;
-  const modern = photo?.includes("/images/jarvis-house.webp") ?? false;
+  const modern = photo?.startsWith("/images/jarvis-house") ?? false;
   const shownAreas = areas.map((a) => ({
     ...a,
     ...(modern ? modernAreas[a.id] : {}),
@@ -391,6 +392,7 @@ export function InteractiveHouse({
             <PoolLightingOverlay
               on={poolState.on}
               lamp={modern ? modernPoolLamp : undefined}
+              poolShape={modern ? modernPoolShape : undefined}
               photo={photo}
               viewBox={layout.viewBox}
               brightness={atmosphere?.brightness ?? 1}

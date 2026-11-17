@@ -538,3 +538,49 @@ test("husbilden fyller kortet och kontroller visas först efter tryck", async ({
   await expect(page.locator(".app")).toHaveClass(/dark/);
   await page.screenshot({ path: "/tmp/jarvis-dark-preview.png" });
 });
+test("poollampan ändrar faktiskt poolens bildpixlar och slocknar igen", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.route("**/api/music?*", (r) => r.fulfill({ json: disconnected }));
+  await page.goto("/");
+  const scene = page.locator(".house-photo-scene");
+  await expect(scene.locator("img")).toHaveAttribute(
+    "src",
+    "/images/jarvis-house-pool-off.webp",
+  );
+  await scene
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
+  const button = scene.getByRole("button", {
+    name: "Poolbelysning",
+    exact: true,
+  });
+  const overlay = page.getByTestId("pool-lighting-overlay");
+  await expect(overlay).toHaveAttribute("data-power", "off");
+  const crop = await overlay.evaluate((el) => {
+    const svg = el as unknown as SVGSVGElement;
+    const p = new DOMPoint(824, 795).matrixTransform(svg.getScreenCTM()!);
+    return { x: p.x - 14, y: p.y - 8, width: 28, height: 16 };
+  });
+  const off = await page.screenshot({ clip: crop, animations: "disabled" });
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "true");
+  await expect(overlay.locator(".outdoor-light-wash")).toHaveCSS(
+    "opacity",
+    "1",
+  );
+  const on = await page.screenshot({ clip: crop, animations: "disabled" });
+  expect(on.equals(off)).toBe(false);
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "false");
+  await expect(overlay.locator(".outdoor-light-wash")).toHaveCSS(
+    "opacity",
+    "0",
+  );
+  const restored = await page.screenshot({
+    clip: crop,
+    animations: "disabled",
+  });
+  expect(restored.equals(off)).toBe(true);
+});

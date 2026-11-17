@@ -94,3 +94,5 @@ export const modernSpots = [
   ].map(([x, y], i) => ({ id: `right-${i}`, x, y, kind: "right" })),
 ];
 export const modernPoolLamp = { x: 824, y: 771 };
+
+export const modernPoolShape = "365,842 500,750 1113,765 1092,871";
