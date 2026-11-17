@@ -4,6 +4,7 @@ import { priceTime } from "@/lib/prices/time";
 import { Fragment, useEffect, useState } from "react";
 import {
   Activity,
+  LayoutGrid,
   ArrowDownRight,
   ArrowUpRight,
   Car,
@@ -407,16 +408,25 @@ export default function EnergyApp({ section }: { section: string }) {
             {menu ? <X /> : <Menu />}
           </button>
           <Link href="/" className="dashboard-wordmark">
-            JARVIS
+            <Home className="jarvis-logo-icon" size={28} />
+            <span>JARVIS</span>
           </Link>
           <nav className="dashboard-quick-nav" aria-label="Snabbnavigation">
             <Link href="/" aria-label="Översikt">
-              <Home size={19} />
+              <Home size={21} />
             </Link>
-            <Link href="/belysning" aria-label="Belysning">
-              <Lightbulb size={19} />
+            <button
+              type="button"
+              onClick={() => setMenu(!menu)}
+              aria-label="Öppna meny"
+            >
+              <LayoutGrid size={21} />
+            </button>
+            <Link href="/elpriser" aria-label="Elpriser">
+              <ChartColumn size={21} />
             </Link>
           </nav>
+          {section === "oversikt" && <div id="dashboard-status-slot" />}
           <div className="breadcrumb">
             Mitt hem <ChevronRight size={14} />
             <strong>{title}</strong>

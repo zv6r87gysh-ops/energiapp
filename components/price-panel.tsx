@@ -196,6 +196,7 @@ export function PricePanel({
       time: priceTime(p.start),
       price: p.ore,
       start: p.start,
+      timestamp: Date.parse(p.start),
       band: classifyPrice(p.ore ?? 0, bands),
       state:
         Date.parse(p.end) <= clock
@@ -204,6 +205,18 @@ export function PricePanel({
             ? "current"
             : "future",
     })) ?? [];
+  const center = Math.floor(clock / 900000) * 900000;
+  const timeTicks = Array.from(
+    { length: 7 },
+    (_, i) => center + (i - 3) * 4 * 3600000,
+  );
+  const priced = intervals.flatMap((p) => (p.ore === null ? [] : [p.ore]));
+  const chartMin = Math.min(0, Math.floor(Math.min(...priced) / 40) * 40);
+  const chartMax = Math.max(40, Math.ceil(Math.max(...priced) / 40) * 40);
+  const tickTime = (value: string | number) =>
+    priceTime(
+      typeof value === "number" ? new Date(value).toISOString() : value,
+    );
   const average = data
     ? data.intervals.reduce((s, p) => s + p.ore, 0) / data.intervals.length
     : null;
@@ -337,6 +350,7 @@ export function PricePanel({
                 </span>
               </p>
             )}
+            {arrival && <div className="arrival-price-unit">öre/kWh</div>}
             <div
               className="graph"
               role="img"
@@ -349,14 +363,29 @@ export function PricePanel({
                 >
                   <CartesianGrid vertical={false} stroke="var(--line)" />
                   <XAxis
-                    dataKey="start"
-                    tickFormatter={(start: string) => priceTime(start)}
-                    minTickGap={45}
-                    fontSize={10}
+                    dataKey={arrival ? "timestamp" : "start"}
+                    type={arrival ? "number" : "category"}
+                    domain={arrival ? [timeTicks[0], timeTicks[6]] : undefined}
+                    ticks={arrival ? timeTicks : undefined}
+                    tickFormatter={tickTime}
+                    interval={arrival ? 0 : "preserveEnd"}
+                    minTickGap={arrival ? 5 : 45}
+                    fontSize={arrival ? 11 : 10}
+                    tickMargin={6}
+                    height={28}
                   />
-                  <YAxis width={45} fontSize={10} />
+                  <YAxis
+                    width={arrival ? 33 : 45}
+                    fontSize={arrival ? 11 : 10}
+                    domain={arrival ? [chartMin, chartMax] : undefined}
+                    tickCount={5}
+                  />
                   <Tooltip
-                    labelFormatter={(start) => priceTime(String(start), true)}
+                    labelFormatter={(start) =>
+                      tickTime(
+                        typeof start === "number" ? start : String(start),
+                      )
+                    }
                     formatter={(v) => [
                       `${number(Number(v), 2)} öre/kWh`,
                       "Spotpris exkl. moms",
@@ -401,7 +430,7 @@ export function PricePanel({
                   />
                   {current && (
                     <ReferenceLine
-                      x={current.start}
+                      x={arrival ? center : current.start}
                       stroke="var(--price-now)"
                       strokeWidth={2}
                       strokeDasharray="4 3"
@@ -427,7 +456,7 @@ export function PricePanel({
                 <i className="price-swatch price-swatch-past" />
                 Passerat
               </span>
-              {current && (
+              {current && !arrival && (
                 <span>
                   <i className="price-swatch price-swatch-now" />
                   Nu · aktuell kvart

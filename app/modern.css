@@ -854,3 +854,377 @@
   box-shadow: none;
   border-radius: 0;
 }
+/* Approved weather and price layout: full-size forecast cells and a readable plot. */
+#dashboard-status-slot {
+  display: none;
+}
+.jarvis-logo-icon {
+  flex-shrink: 0;
+}
+.weather-place {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+}
+.weather-place > div {
+  display: grid;
+  gap: 4px;
+}
+.weather-place strong {
+  font-size: 14px;
+}
+.weather-place small {
+  font-size: 10px;
+  color: var(--muted);
+}
+.weather-location-editor {
+  position: relative;
+  z-index: 10;
+}
+.weather-location-editor summary {
+  cursor: pointer;
+  list-style: none;
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  min-height: 28px;
+  color: var(--muted);
+}
+.weather-location-editor summary::-webkit-details-marker {
+  display: none;
+}
+.weather-location-editor[open] .house-forecast-heading {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 270px;
+  height: auto;
+  padding: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 6px 22px #0002;
+}
+.weather-location-editor[open] input {
+  width: 80px;
+}
+@media (min-width: 900px) and (orientation: landscape) {
+  .app.app-overview .topbar {
+    display: grid;
+    grid-template-columns: 140px 108px minmax(0, 1fr) 32px;
+    padding: 0 16px;
+    gap: 12px;
+    height: 56px;
+  }
+  .app.app-overview .dashboard-wordmark {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.03em;
+    font-size: 22px;
+    font-weight: 750;
+  }
+  .app.app-overview .topbar .mobile-menu {
+    display: none;
+  }
+  .app.app-overview .dashboard-quick-nav {
+    display: flex;
+    gap: 4px;
+  }
+  .app.app-overview .dashboard-quick-nav a,
+  .app.app-overview .dashboard-quick-nav button {
+    display: grid;
+    place-items: center;
+    min-width: 32px;
+    min-height: 36px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: var(--text);
+    border-radius: 10px;
+  }
+  .app.app-overview .dashboard-quick-nav a:first-child {
+    background: color-mix(in srgb, var(--text) 8%, var(--bg));
+  }
+  .app.app-overview #dashboard-status-slot {
+    display: block;
+    order: 2;
+    min-width: 0;
+  }
+  .app.app-overview .top-actions {
+    order: 3;
+    margin: 0;
+  }
+  .app.app-overview .house-status-row {
+    position: static;
+    width: 100%;
+    height: 56px;
+    gap: 12px;
+  }
+  .app.app-overview .house-clock time {
+    font-size: 25px;
+  }
+  .app.app-overview .house-sun-times {
+    font-size: 10px;
+    gap: 11px;
+  }
+  .app.app-overview .house-energy-summary {
+    gap: 7px;
+  }
+  .app.app-overview .house-energy-summary small {
+    font-size: 8px;
+  }
+  .app.app-overview .house-energy-summary b {
+    font-size: 13px;
+  }
+  .app.app-overview .home-arrival {
+    height: calc(100svh - 148px);
+    grid-template-rows: 0px 104px minmax(0, 1fr);
+  }
+  .app.app-overview .house-day-forecast {
+    display: grid;
+    grid-template-columns: 155px minmax(0, 1fr);
+    align-items: center;
+  }
+  .app.app-overview .weather-place {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 10px;
+    align-self: center;
+  }
+  .app.app-overview .weather-place strong {
+    font-size: 14px;
+    letter-spacing: -0.025em;
+  }
+  .app.app-overview .weather-place small {
+    font-size: 10px;
+    color: var(--text);
+  }
+  .app.app-overview .weather-location-editor {
+    position: absolute;
+    left: 8px;
+    bottom: 2px;
+  }
+  .app.app-overview .weather-location-editor summary {
+    min-width: 22px;
+    min-height: 22px;
+  }
+  .app.app-overview .weather-location-editor[open] .house-forecast-heading {
+    height: auto;
+    padding: 10px;
+  }
+  .app.app-overview .weather-location-editor[open] input,
+  .app.app-overview .weather-location-editor[open] .button {
+    min-height: 36px;
+    height: auto;
+    font-size: 11px;
+  }
+  .app.app-overview .house-day-forecast .weather-timeline {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    align-items: center;
+  }
+  .app.app-overview .house-day-forecast .weather-timeline ol {
+    width: 100%;
+    padding: 5px 3px;
+  }
+  .app.app-overview .house-day-forecast .weather-timeline li {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 0 3px;
+    align-items: center;
+    justify-content: center;
+  }
+  .app.app-overview .house-day-forecast .weather-timeline time {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .app.app-overview .house-day-forecast .weather-timeline li > small {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .app.app-overview .house-day-forecast .weather-timeline li > svg {
+    width: 32px;
+    height: 32px;
+    stroke-width: 1.8;
+  }
+  .app.app-overview .house-day-forecast .weather-timeline strong {
+    font-size: 17px;
+    line-height: 1.15;
+    font-weight: 700;
+  }
+  .app.app-overview .house-day-forecast .forecast-cloud {
+    color: #8a9390;
+    fill: #acb6af30;
+  }
+  .app.app-overview .house-day-forecast .forecast-clear,
+  .app.app-overview .house-day-forecast .forecast-partly {
+    color: #e2b42c;
+  }
+  .app.app-overview .house-day-forecast .forecast-clear circle,
+  .app.app-overview .house-day-forecast .forecast-partly circle {
+    fill: #ffd959;
+  }
+  .app.app-overview .house-day-forecast .forecast-partly > path {
+    stroke: #87928c;
+    fill: #bdc8c339;
+  }
+  .app.app-overview .house-day-forecast .forecast-rain,
+  .app.app-overview .house-day-forecast .forecast-sleet {
+    color: #219fc9;
+  }
+  .app.app-overview .house-day-forecast .forecast-rain > path:first-child,
+  .app.app-overview .house-day-forecast .forecast-sleet > path:first-child {
+    stroke: #87928c;
+    fill: #bdc8c339;
+  }
+  .app.app-overview .house-day-forecast > p {
+    grid-column: 2;
+  }
+  .app.app-overview .arrival-side {
+    grid-template-rows: minmax(250px, 1fr) minmax(220px, 1fr);
+    gap: 10px;
+  }
+  .app.app-overview .music-moods[data-ready="true"] .music-connection-status {
+    display: none;
+  }
+  .app.app-overview .music-moods {
+    padding: 12px 14px;
+  }
+  .app.app-overview .music-moods h2 {
+    font-size: 19px;
+    margin-bottom: 8px;
+  }
+  .app.app-overview .mood-buttons {
+    margin: 5px 0;
+  }
+  .app.app-overview .mood-button {
+    min-height: 44px;
+    border-radius: 18px;
+  }
+  .app.app-overview .mood-children {
+    background: #dce6cb;
+    color: #143b28;
+  }
+  .app.app-overview .mood-lounge {
+    background: #315f76;
+    color: #fff;
+  }
+  .app.app-overview .mood-ambience {
+    background: #7c3b51;
+    color: #fff;
+  }
+  .app.app-overview .mini-player {
+    margin-top: 5px;
+    padding-top: 6px;
+  }
+  .app.app-overview .arrival-prices > .card {
+    padding: 10px 12px;
+  }
+  .app.app-overview .arrival-prices h2 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  .app.app-overview .arrival-price-subtitle {
+    font-size: 10px;
+    color: var(--text);
+  }
+  .app.app-overview .arrival-price-unit {
+    font-size: 10px;
+    margin-top: 3px;
+  }
+  .app.app-overview .arrival-prices .graph {
+    min-height: 125px;
+    margin: 1px 0 3px;
+  }
+  .app.app-overview .arrival-prices .price-legend {
+    justify-content: space-between;
+    font-size: 8px;
+    gap: 4px;
+  }
+  .app.app-overview {
+    --price-past: #c3c7c5;
+    --price-low: #8ab969;
+    --price-middle: #edc34e;
+    --price-high: #ed8d76;
+    --price-now: #205c39;
+    --price-now-text: #205c39;
+  }
+  .app.app-overview.dark {
+    --price-past: #7c8e83;
+    --price-low: #9ccf84;
+    --price-middle: #e5c35d;
+    --price-high: #ef9c8b;
+    --price-now: #b5dca7;
+    --price-now-text: #c5e7b9;
+  }
+  .app.app-overview.dark .forecast-cloud {
+    color: #c2cdc6;
+    fill: #b9c8be1a;
+  }
+}
+@media (max-width: 899px) {
+  #dashboard-status-slot {
+    display: none;
+  }
+  .dashboard-wordmark {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .jarvis-logo-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .weather-location-editor {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+  }
+  .house-day-forecast {
+    position: relative;
+  }
+  .weather-place {
+    padding-right: 40px;
+  }
+}
+
+/* Keep the compact location editor clear of the forecast and mobile clock. */
+.weather-location-editor {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+.weather-location-editor[open] {
+  z-index: 40;
+}
+.app.app-overview .mood-children b,
+.app.app-overview .mood-children > svg {
+  color: #143b28;
+}
+@media (min-width: 900px) and (orientation: landscape) {
+  .app.app-overview .weather-location-editor {
+    left: 132px;
+    bottom: 6px;
+  }
+}
+@media (max-width: 899px) {
+  .house-day-forecast:has(.weather-location-editor[open]) {
+    z-index: 40;
+  }
+  .weather-location-editor[open] .house-forecast-heading {
+    left: auto;
+    right: 0;
+  }
+}

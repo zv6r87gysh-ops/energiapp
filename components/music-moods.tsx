@@ -77,7 +77,11 @@ export function MusicMoods({
     }
   }
   return (
-    <section className="card music-moods" aria-label="Musik och stämningar">
+    <section
+      className="card music-moods"
+      aria-label="Musik och stämningar"
+      data-ready={ready}
+    >
       <div className="music-moods-heading">
         <span className="eyebrow">MUSIK FÖR STUNDEN</span>
         <Music2 size={22} />

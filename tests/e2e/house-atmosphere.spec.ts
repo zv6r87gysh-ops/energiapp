@@ -191,10 +191,10 @@ test("bildknapparna ligger i fotot, grönt följer lampornas läge och dagens v�
   });
   await expect(outdoor).toHaveClass(/lighting-is-on/);
   await expect(pool).toHaveClass(/lighting-is-on/);
-  await expect(house.getByLabel("Soltider idag")).toContainText(
+  await expect(page.getByLabel("Soltider idag")).toContainText(
     /Soluppgång\s*\d{2}:\d{2}/,
   );
-  await expect(house.getByLabel("Soltider idag")).toContainText(
+  await expect(page.getByLabel("Soltider idag")).toContainText(
     /Solnedgång\s*\d{2}:\d{2}/,
   );
   const timeline = house.getByRole("region", {
@@ -247,6 +247,7 @@ test("bildknapparna ligger i fotot, grönt följer lampornas läge och dagens v�
       json: { status: "unavailable", code: "forecast-unavailable" },
     }),
   );
+  await house.getByLabel("Ändra väderplats", { exact: true }).click();
   await house
     .getByRole("button", { name: "Uppdatera väder", exact: true })
     .click();
@@ -256,6 +257,7 @@ test("bildknapparna ligger i fotot, grönt följer lampornas läge och dagens v�
     const w = weatherFixture(7, Date.parse("2026-10-21T18:00:00Z"));
     return route.fulfill({ json: { status: "available", data: w } });
   });
+  await house.getByLabel("Ändra väderplats", { exact: true }).click();
   await house.getByRole("button", { name: "Hämta väder", exact: true }).click();
   await expect(timeline).toBeVisible();
 });

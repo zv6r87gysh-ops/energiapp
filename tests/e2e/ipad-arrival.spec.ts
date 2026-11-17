@@ -330,6 +330,10 @@ for (const viewport of [
       await page.screenshot({ path: "/tmp/jarvis-modern-light.png" });
       await page.getByRole("button", { name: "Växla färgtema" }).click();
       await expect(page.locator(".app")).toHaveClass(/dark/);
+      await expect(page.locator(".mood-children b")).toHaveCSS(
+        "color",
+        "rgb(20, 59, 40)",
+      );
       await page.screenshot({ path: "/tmp/jarvis-modern-dark.png" });
     }
   });

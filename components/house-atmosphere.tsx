@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { useEffect, useId, useMemo, useState } from "react";
-import { Clock3, Sunrise, Sunset } from "lucide-react";
+import { Clock3, Sunrise, Sunset, MapPin } from "lucide-react";
 import {
   houseAtmosphere,
   type HouseAtmosphere,
@@ -31,6 +32,22 @@ export function useHouseAtmosphere(
     };
   }, []);
   return now === null ? null : houseAtmosphere(now, weather, location);
+}
+function DashboardStatus({ children }: { children: React.ReactNode }) {
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    const media = window.matchMedia(
+      "(min-width: 900px) and (orientation: landscape)",
+    );
+    const update = () =>
+      setHost(
+        media.matches ? document.getElementById("dashboard-status-slot") : null,
+      );
+    queueMicrotask(update);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  return host ? createPortal(children, host) : children;
 }
 export function HouseClock({
   scene,
@@ -67,109 +84,123 @@ export function HouseClock({
   );
   return (
     <div className="house-scene-info">
-      <div className="house-status-row">
-        <div className="house-clock">
-          <Clock3 size={15} />
-          <time
-            dateTime={scene ? new Date(scene.now).toISOString() : undefined}
-            aria-label="Klocka svensk tid"
-          >
+      <DashboardStatus>
+        <div className="house-status-row">
+          <div className="house-clock">
+            <Clock3 size={15} />
+            <time
+              dateTime={scene ? new Date(scene.now).toISOString() : undefined}
+              aria-label="Klocka svensk tid"
+            >
+              {scene
+                ? new Intl.DateTimeFormat("sv-SE", {
+                    timeZone: "Europe/Stockholm",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hourCycle: "h23",
+                  }).format(scene.now)
+                : "––:––:––"}
+            </time>
+            <small>Svensk tid</small>
+          </div>
+          <div className="house-sun-times" aria-label="Soltider idag">
+            <span>
+              <Sunrise size={18} />{" "}
+              <span className="sun-caption">Soluppgång</span>{" "}
+              <b>
+                {sun?.sunrise != null
+                  ? priceTime(new Date(sun.sunrise).toISOString())
+                  : "—"}
+              </b>
+            </span>
+            <span>
+              <Sunset size={18} />{" "}
+              <span className="sun-caption">Solnedgång</span>{" "}
+              <b>
+                {sun?.sunset != null
+                  ? priceTime(new Date(sun.sunset).toISOString())
+                  : "—"}
+              </b>
+            </span>
+            {sun && sun.sunrise === null && sun.sunset === null && (
+              <small>{sun.polarDay ? "Midnattssol" : "Polarnatt"}</small>
+            )}
+            {!sun && <small>Ange postnummer för soltider</small>}
+          </div>
+          <div className="house-energy-summary">
+            <Link
+              href="/kostnad"
+              className="house-daily-cost"
+              aria-label="Elkostnad hittills idag"
+            >
+              <small>Elkostnad idag</small>
+              <b>{dailyCost === null ? "Underlag saknas" : money(dailyCost)}</b>
+              <small>Modell · inkl. moms och rörliga avgifter</small>
+            </Link>
+            <Link
+              href="/elpriser"
+              className="house-spot-price"
+              aria-label={`Aktuellt spotpris ${priceArea}`}
+              title="Elprisetjustnu.se · exklusive moms, skatter och avgifter"
+            >
+              <small>Spotpris nu · {priceArea}</small>
+              <b>
+                {price === null ? "Pris saknas" : `${number(price, 1)} öre/kWh`}
+              </b>
+              <small>Exkl. moms och avgifter</small>
+            </Link>
+          </div>
+          <span>
             {scene
-              ? new Intl.DateTimeFormat("sv-SE", {
-                  timeZone: "Europe/Stockholm",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hourCycle: "h23",
-                }).format(scene.now)
-              : "––:––:––"}
-          </time>
-          <small>Svensk tid</small>
-        </div>
-        <div className="house-sun-times" aria-label="Soltider idag">
-          <span>
-            <Sunrise size={18} />{" "}
-            <span className="sun-caption">Soluppgång</span>{" "}
-            <b>
-              {sun?.sunrise != null
-                ? priceTime(new Date(sun.sunrise).toISOString())
-                : "—"}
-            </b>
+              ? `${scene.seasonLabel} · ${scene.phaseLabel} · ${scene.conditionLabel}${scene.temperature === null ? "" : ` · ${number(scene.temperature, 1)} °C`}`
+              : "Förbereder bildvisualisering…"}
           </span>
-          <span>
-            <Sunset size={18} /> <span className="sun-caption">Solnedgång</span>{" "}
-            <b>
-              {sun?.sunset != null
-                ? priceTime(new Date(sun.sunset).toISOString())
-                : "—"}
-            </b>
-          </span>
-          {sun && sun.sunrise === null && sun.sunset === null && (
-            <small>{sun.polarDay ? "Midnattssol" : "Polarnatt"}</small>
-          )}
-          {!sun && <small>Ange postnummer för soltider</small>}
         </div>
-        <div className="house-energy-summary">
-          <Link
-            href="/kostnad"
-            className="house-daily-cost"
-            aria-label="Elkostnad hittills idag"
-          >
-            <small>Elkostnad idag</small>
-            <b>{dailyCost === null ? "Underlag saknas" : money(dailyCost)}</b>
-            <small>Modell · inkl. moms och rörliga avgifter</small>
-          </Link>
-          <Link
-            href="/elpriser"
-            className="house-spot-price"
-            aria-label={`Aktuellt spotpris ${priceArea}`}
-            title="Elprisetjustnu.se · exklusive moms, skatter och avgifter"
-          >
-            <small>Spotpris nu · {priceArea}</small>
-            <b>
-              {price === null ? "Pris saknas" : `${number(price, 1)} öre/kWh`}
-            </b>
-            <small>Exkl. moms och avgifter</small>
-          </Link>
-        </div>
-        <span>
-          {scene
-            ? `${scene.seasonLabel} · ${scene.phaseLabel} · ${scene.conditionLabel}${scene.temperature === null ? "" : ` · ${number(scene.temperature, 1)} °C`}`
-            : "Förbereder bildvisualisering…"}
-        </span>
-      </div>
+      </DashboardStatus>
       <div className="house-day-forecast">
-        <div className="house-forecast-heading">
-          <strong>
-            Väder kommande 24 timmar{weather ? ` · ${weather.place}` : ""}
-          </strong>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              const parsed = postcodeSchema.safeParse(code);
-              if (!parsed.success) {
-                setError("Ange ett svenskt postnummer med fem siffror.");
-                return;
-              }
-              setError("");
-              onPostcode(parsed.data);
-            }}
-          >
-            <input
-              aria-label="Postnummer för husbildens väder"
-              inputMode="numeric"
-              autoComplete="postal-code"
-              placeholder="Postnummer"
-              maxLength={6}
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-            />
-            <button type="submit" className="button secondary">
-              {weather ? "Uppdatera väder" : "Hämta väder"}
-            </button>
-          </form>
+        <div className="weather-place">
+          <MapPin size={20} />
+          <div>
+            <strong>{weather?.place ?? "Väder vid huset"}</strong>
+            <small>Kommande 24 timmar</small>
+          </div>
         </div>
-        {error && <p role="alert">{error}</p>}
+        <details className="weather-location-editor">
+          <summary aria-label="Ändra väderplats">
+            <MapPin size={15} />
+          </summary>
+          <div className="house-forecast-heading">
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                const parsed = postcodeSchema.safeParse(code);
+                if (!parsed.success) {
+                  setError("Ange ett svenskt postnummer med fem siffror.");
+                  return;
+                }
+                setError("");
+                onPostcode(parsed.data);
+                const editor = event.currentTarget.closest("details");
+                if (editor) editor.open = false;
+              }}
+            >
+              <input
+                aria-label="Postnummer för husbildens väder"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                placeholder="Postnummer"
+                maxLength={6}
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+              <button type="submit" className="button secondary">
+                {weather ? "Uppdatera väder" : "Hämta väder"}
+              </button>
+            </form>
+          </div>
+          {error && <p role="alert">{error}</p>}
+        </details>
         {weather && scene ? (
           <>
             <WeatherTimeline
