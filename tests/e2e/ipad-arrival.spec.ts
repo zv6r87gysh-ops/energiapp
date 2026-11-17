@@ -221,7 +221,7 @@ for (const viewport of [
   test(`väder, tid, aktuellt spotpris, hus och musik är synliga samtidigt på iPad ${viewport.width}`, async ({
     page,
   }) => {
-    const now = Date.parse("2026-11-16T16:00:00Z");
+    const now = Date.parse("2026-11-16T13:00:00Z");
     await page.setViewportSize(viewport);
     await page.clock.install({ time: new Date(now) });
     await page.addInitScript(
@@ -230,11 +230,17 @@ for (const viewport of [
           "energihem-demo-v1",
           JSON.stringify({ homes: [home], active: home.id }),
         ),
-      { ...structuredClone(initialHousehold), postcode: "13230" },
+      {
+        ...structuredClone(initialHousehold),
+        postcode: "13230",
+        moodSettings: {
+          ...structuredClone(defaultMoods),
+          sourceMode: "sonos",
+          room: "room1",
+        },
+      },
     );
-    await page.route("**/api/music?*", (r) =>
-      r.fulfill({ json: disconnected }),
-    );
+    await page.route("**/api/music?*", (r) => r.fulfill({ json: connected }));
     const { weatherFixture } = await import("../fixtures/weather");
     await page.route("**/api/weather?*", (r) =>
       r.fulfill({
@@ -264,7 +270,10 @@ for (const viewport of [
               (_, i) => ({
                 start: new Date(start + i * 900000).toISOString(),
                 end: new Date(start + (i + 1) * 900000).toISOString(),
-                ore: 123.4,
+                ore:
+                  start + i * 900000 <= now && now < start + (i + 1) * 900000
+                    ? 123.4
+                    : Math.round(80 + 60 * Math.sin(i / 9)),
               }),
             ),
           },
@@ -285,7 +294,7 @@ for (const viewport of [
     await expect(forecast.getByRole("listitem")).toHaveCount(8);
     await expect(
       page.getByLabel("Klocka svensk tid", { exact: true }),
-    ).toHaveText(/17:00:/);
+    ).toHaveText(/14:00/);
     const chart = page.getByRole("img", { name: "Publicerade kvartspriser" });
     await expect(chart).toBeVisible();
     await expect(chart.locator("[data-price-state]")).toHaveCount(96);
@@ -310,6 +319,19 @@ for (const viewport of [
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
+    const player = page.getByRole("region", { name: "Sonos mediaspelare" });
+    await expect(player).toContainText("Testlåt");
+    const smart = page.getByRole("button", {
+      name: "Aktivera smart styrning",
+      exact: true,
+    });
+    await expect(smart).toBeVisible();
+    if (viewport.width === 1024) {
+      await page.screenshot({ path: "/tmp/jarvis-modern-light.png" });
+      await page.getByRole("button", { name: "Växla färgtema" }).click();
+      await expect(page.locator(".app")).toHaveClass(/dark/);
+      await page.screenshot({ path: "/tmp/jarvis-modern-dark.png" });
+    }
   });
 }
 
@@ -505,10 +527,14 @@ test("husbilden fyller kortet och kontroller visas först efter tryck", async ({
     .locator(".interactive-house")
     .evaluate((el) => el.clientWidth);
   const bounds = await scene.boundingBox();
-  expect(bounds!.width).toBeGreaterThan(cardWidth - 25);
+  expect(bounds!.width).toBeGreaterThan(cardWidth * 0.55);
+  expect(bounds!.width).toBeLessThan(cardWidth * 0.75);
   await scene.locator("img").click({ position: { x: 200, y: 150 } });
   await expect(scene.locator(".house-category-tabs")).toBeVisible();
   await scene.getByRole("button", { name: "Dölj husets kontroller" }).click();
   await expect(scene.locator(".house-category-tabs")).toBeHidden();
-  await page.screenshot({ path: "/tmp/energihem-ipad-overview.png" });
+  await page.screenshot({ path: "/tmp/jarvis-light-preview.png" });
+  await page.getByRole("button", { name: "Växla färgtema" }).click();
+  await expect(page.locator(".app")).toHaveClass(/dark/);
+  await page.screenshot({ path: "/tmp/jarvis-dark-preview.png" });
 });

@@ -4,7 +4,11 @@ import { sections } from "../../lib/demo";
 test("alla tio sidor fungerar utan horisontell scroll", async ({ page }) => {
   for (const s of sections) {
     await page.goto(s.id === "oversikt" ? "/" : `/${s.id}`);
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    if (s.id === "oversikt")
+      await expect(
+        page.getByRole("region", { name: "Ditt interaktiva hus", exact: true }),
+      ).toBeVisible();
+    else await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(
       page.getByText("Du utforskar Jarvis i demoläge"),
     ).toBeVisible();

@@ -67,74 +67,76 @@ export function HouseClock({
   );
   return (
     <div className="house-scene-info">
-      <div className="house-clock">
-        <Clock3 size={15} />
-        <time
-          dateTime={scene ? new Date(scene.now).toISOString() : undefined}
-          aria-label="Klocka svensk tid"
-        >
+      <div className="house-status-row">
+        <div className="house-clock">
+          <Clock3 size={15} />
+          <time
+            dateTime={scene ? new Date(scene.now).toISOString() : undefined}
+            aria-label="Klocka svensk tid"
+          >
+            {scene
+              ? new Intl.DateTimeFormat("sv-SE", {
+                  timeZone: "Europe/Stockholm",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hourCycle: "h23",
+                }).format(scene.now)
+              : "––:––:––"}
+          </time>
+          <small>Svensk tid</small>
+        </div>
+        <div className="house-sun-times" aria-label="Soltider idag">
+          <span>
+            <Sunrise size={18} />{" "}
+            <span className="sun-caption">Soluppgång</span>{" "}
+            <b>
+              {sun?.sunrise != null
+                ? priceTime(new Date(sun.sunrise).toISOString())
+                : "—"}
+            </b>
+          </span>
+          <span>
+            <Sunset size={18} /> <span className="sun-caption">Solnedgång</span>{" "}
+            <b>
+              {sun?.sunset != null
+                ? priceTime(new Date(sun.sunset).toISOString())
+                : "—"}
+            </b>
+          </span>
+          {sun && sun.sunrise === null && sun.sunset === null && (
+            <small>{sun.polarDay ? "Midnattssol" : "Polarnatt"}</small>
+          )}
+          {!sun && <small>Ange postnummer för soltider</small>}
+        </div>
+        <div className="house-energy-summary">
+          <Link
+            href="/kostnad"
+            className="house-daily-cost"
+            aria-label="Elkostnad hittills idag"
+          >
+            <small>Elkostnad idag</small>
+            <b>{dailyCost === null ? "Underlag saknas" : money(dailyCost)}</b>
+            <small>Modell · inkl. moms och rörliga avgifter</small>
+          </Link>
+          <Link
+            href="/elpriser"
+            className="house-spot-price"
+            aria-label={`Aktuellt spotpris ${priceArea}`}
+            title="Elprisetjustnu.se · exklusive moms, skatter och avgifter"
+          >
+            <small>Spotpris nu · {priceArea}</small>
+            <b>
+              {price === null ? "Pris saknas" : `${number(price, 1)} öre/kWh`}
+            </b>
+            <small>Exkl. moms och avgifter</small>
+          </Link>
+        </div>
+        <span>
           {scene
-            ? new Intl.DateTimeFormat("sv-SE", {
-                timeZone: "Europe/Stockholm",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hourCycle: "h23",
-              }).format(scene.now)
-            : "––:––:––"}
-        </time>
-        <small>Svensk tid</small>
-      </div>
-      <div className="house-sun-times" aria-label="Soltider idag">
-        <span>
-          <Sunrise size={18} /> Soluppgång{" "}
-          <b>
-            {sun?.sunrise != null
-              ? priceTime(new Date(sun.sunrise).toISOString())
-              : "—"}
-          </b>
+            ? `${scene.seasonLabel} · ${scene.phaseLabel} · ${scene.conditionLabel}${scene.temperature === null ? "" : ` · ${number(scene.temperature, 1)} °C`}`
+            : "Förbereder bildvisualisering…"}
         </span>
-        <span>
-          <Sunset size={18} /> Solnedgång{" "}
-          <b>
-            {sun?.sunset != null
-              ? priceTime(new Date(sun.sunset).toISOString())
-              : "—"}
-          </b>
-        </span>
-        {sun && sun.sunrise === null && sun.sunset === null && (
-          <small>{sun.polarDay ? "Midnattssol" : "Polarnatt"}</small>
-        )}
-        {!sun && <small>Ange postnummer för soltider</small>}
       </div>
-      <div className="house-energy-summary">
-        <Link
-          href="/kostnad"
-          className="house-daily-cost"
-          aria-label="Elkostnad hittills idag"
-        >
-          <small>Elkostnad idag</small>
-          <b>{dailyCost === null ? "Underlag saknas" : money(dailyCost)}</b>
-          <small>Modell · inkl. moms och rörliga avgifter</small>
-        </Link>
-        <Link
-          href="/elpriser"
-          className="house-spot-price"
-          aria-label={`Aktuellt spotpris ${priceArea}`}
-          title="Elprisetjustnu.se · exklusive moms, skatter och avgifter"
-        >
-          <small>Spotpris nu · {priceArea}</small>
-          <b>
-            {price === null ? "Pris saknas" : `${number(price, 1)} öre/kWh`}
-          </b>
-          <small>Exkl. moms och avgifter</small>
-        </Link>
-      </div>
-      <span>
-        {scene
-          ? `${scene.seasonLabel} · ${scene.phaseLabel} · ${scene.conditionLabel}${scene.temperature === null ? "" : ` · ${number(scene.temperature, 1)} °C`}`
-          : "Förbereder bildvisualisering…"}
-      </span>
       <div className="house-day-forecast">
         <div className="house-forecast-heading">
           <strong>

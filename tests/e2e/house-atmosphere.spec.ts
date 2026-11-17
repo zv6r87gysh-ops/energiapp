@@ -50,11 +50,11 @@ test("svensk klocka och regnvisualisering använder prognosen och lamporna sakna
   await prepare(page, "rain");
   await expect(
     page.getByLabel("Klocka svensk tid", { exact: true }),
-  ).toHaveText("12:00:00");
-  await page.clock.runFor(2000);
+  ).toHaveText("12:00");
+  await page.clock.fastForward(60000);
   await expect(
     page.getByLabel("Klocka svensk tid", { exact: true }),
-  ).toHaveText("12:00:02");
+  ).toHaveText("12:01");
   await expect(page.locator(".house-rain-field")).toBeVisible();
   await page
     .getByRole("button", { name: "Visa husets kontroller", exact: true })

@@ -80,8 +80,10 @@ export function OutdoorLightingOverlay({
   viewBox = "0 0 1596 1422",
   photo,
   brightness = 1,
+  spots = outdoorSpots,
 }: {
   on: boolean;
+  spots?: typeof outdoorSpots;
   viewBox?: string;
   photo: string;
   brightness?: number;
@@ -95,7 +97,7 @@ export function OutdoorLightingOverlay({
       data-testid="outdoor-lighting-overlay"
       data-power={on ? "on" : "off"}
       viewBox={viewBox}
-      preserveAspectRatio="none"
+      preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"
     >
       <defs>
@@ -113,7 +115,7 @@ export function OutdoorLightingOverlay({
           height={height}
         >
           <rect x={x} y={y} width={width} height={height} fill="black" />
-          {outdoorSpots.map((s) => (
+          {spots.map((s) => (
             <g key={s.id} data-spot={s.id}>
               <ellipse
                 cx={
@@ -151,7 +153,7 @@ export function OutdoorLightingOverlay({
           y={y}
           width={width}
           height={height}
-          preserveAspectRatio="none"
+          preserveAspectRatio="xMidYMid slice"
           filter={`url(#${id}-warm)`}
         />
         <rect
@@ -254,7 +256,7 @@ export function OutdoorLightingHitAreas({
   return (
     <svg
       viewBox={viewBox}
-      preserveAspectRatio="none"
+      preserveAspectRatio="xMidYMid slice"
       className={`lighting-hit-overlay ${active ? "is-active" : ""}`}
       aria-label="Belysningsområden på huset"
     >
@@ -328,8 +330,10 @@ export function PoolLightingOverlay({
   photo,
   viewBox,
   brightness,
+  lamp = poolLamp,
 }: {
   on: boolean;
+  lamp?: typeof poolLamp;
   photo: string;
   viewBox: string;
   brightness: number;
@@ -342,7 +346,7 @@ export function PoolLightingOverlay({
       data-testid="pool-lighting-overlay"
       data-power={on ? "on" : "off"}
       viewBox={viewBox}
-      preserveAspectRatio="none"
+      preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"
     >
       <defs>
@@ -364,8 +368,8 @@ export function PoolLightingOverlay({
         >
           <rect x={x} y={y} width={w} height={h} fill="black" />
           <ellipse
-            cx={poolLamp.x}
-            cy={poolLamp.y + 35}
+            cx={lamp.x}
+            cy={lamp.y + 35}
             rx="220"
             ry="145"
             fill={`url(#${id}-water)`}
@@ -399,7 +403,7 @@ export function PoolLightingOverlay({
           y={y}
           width={w}
           height={h}
-          preserveAspectRatio="none"
+          preserveAspectRatio="xMidYMid slice"
           filter={`url(#${id}-bright)`}
         />
         <rect x={x} y={y} width={w} height={h} fill="#81ebff" opacity=".25" />

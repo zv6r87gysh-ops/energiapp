@@ -1,6 +1,14 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SkipBack, SkipForward, Play, Pause, Minus, Plus } from "lucide-react";
+import {
+  SkipBack,
+  SkipForward,
+  Play,
+  Pause,
+  Minus,
+  Plus,
+  Music2,
+} from "lucide-react";
 import type { PlayerState, PlayerCommand } from "@/lib/moods/player";
 const time = (ms: number | null) =>
   ms === null
@@ -117,6 +125,9 @@ export function MusicPlayer({
   return (
     <section className="mini-player" aria-label="Sonos mediaspelare">
       <div className="mini-player-track">
+        <span className="mini-player-art" aria-hidden="true">
+          <Music2 size={20} />
+        </span>
         <strong>{state?.title ?? "Låtinformation saknas"}</strong>
         {state?.artist && <small>{state.artist}</small>}
       </div>

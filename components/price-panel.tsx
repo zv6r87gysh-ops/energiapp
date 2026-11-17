@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -260,7 +261,7 @@ export function PricePanel({
         <div className="toolbar">
           <h2 style={{ margin: 0 }}>
             {arrival
-              ? "Elpris · −12 / +12 timmar"
+              ? "Elpris · 24 timmar"
               : chartOnly
                 ? "Dagens kvartspriser"
                 : "Spotpriser"}{" "}
@@ -270,6 +271,11 @@ export function PricePanel({
             {data ? "Publicerade priser" : "Inga verifierade priser"}
           </span>
         </div>
+        {arrival && (
+          <div className="arrival-price-subtitle">
+            12 timmar bakåt · 12 timmar framåt
+          </div>
+        )}
         <p className="muted">
           {data
             ? `${data.date} · ${data.intervals.length} kvartar · Svensk tid (Stockholm)`
@@ -469,12 +475,19 @@ export function PricePanel({
             </p>
           </>
         )}
-        <p className="muted">
-          Spotpris exklusive moms, elhandelspåslag, energiskatt och
-          elnätsavgifter. Detta är inte ditt totala elpris. Kostnadsprognoser,
-          laddning och besparingar i övriga appen använder fortfarande tydligt
-          märkta demodata.
-        </p>
+        {arrival ? (
+          <p className="muted">
+            Spotpris · öre/kWh · exkl. moms och avgifter ·{" "}
+            <Link href="/elpriser">Detaljer ↗</Link>
+          </p>
+        ) : (
+          <p className="muted">
+            Spotpris exklusive moms, elhandelspåslag, energiskatt och
+            elnätsavgifter. Detta är inte ditt totala elpris. Kostnadsprognoser,
+            laddning och besparingar i övriga appen använder fortfarande tydligt
+            märkta demodata.
+          </p>
+        )}
       </section>
     </>
   );
