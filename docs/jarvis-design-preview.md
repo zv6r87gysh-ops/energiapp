@@ -9,3 +9,7 @@ Illustrationen bygger på användarens foto och den godkända bildskissen, med �
 Priser, väder och Sonos använder samma leverantörer och API-rutter som tidigare. Inga exempelvärden har lagts till i produktflödet. Skärmbilder från automatiska tester använder testdata. Musikanslutning på en ny Preview-domän kräver att OAuth-konfiguration och tillåtna callback-adresser stöder den domänen; produktionscookies delas inte med Preview.
 
 Layouten använder CSS subgrid (stöds i moderna Safari-versioner på iPad). På smalare skärmar ligger innehållet i en följd som går att scrolla. Behåll main för att avstå från designen, eller granska diffen och merga branchen när förhandsversionen är godkänd.
+
+## Reviderad skiss
+
+Förhandsversionen följer nu den kompaktare skissen: klocka och soltider ligger i toppraden, vädret direkt under, och husvyn är mer utzoomad. Häcken längst fram i bild är ersatt av gräsmatta. De mörka masker som tidigare lades ovanpå lampor och fönster är borttagna; bildens varma fotografiska ljus bevaras. Grundbildens ljus är illustrativt och utgör fortfarande inte faktisk Plejd-status.

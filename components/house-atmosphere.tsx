@@ -79,7 +79,6 @@ export function HouseClock({
                   timeZone: "Europe/Stockholm",
                   hour: "2-digit",
                   minute: "2-digit",
-                  second: "2-digit",
                   hourCycle: "h23",
                 }).format(scene.now)
               : "––:––:––"}
@@ -88,7 +87,8 @@ export function HouseClock({
         </div>
         <div className="house-sun-times" aria-label="Soltider idag">
           <span>
-            <Sunrise size={18} /> Soluppgång{" "}
+            <Sunrise size={18} />{" "}
+            <span className="sun-caption">Soluppgång</span>{" "}
             <b>
               {sun?.sunrise != null
                 ? priceTime(new Date(sun.sunrise).toISOString())
@@ -96,7 +96,7 @@ export function HouseClock({
             </b>
           </span>
           <span>
-            <Sunset size={18} /> Solnedgång{" "}
+            <Sunset size={18} /> <span className="sun-caption">Solnedgång</span>{" "}
             <b>
               {sun?.sunset != null
                 ? priceTime(new Date(sun.sunset).toISOString())

@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { ModernPhotoDimmer } from "./modern-photo-dimmer";
 import {
   modernLayout,
   modernAreas,
@@ -374,13 +373,6 @@ export function InteractiveHouse({
                 )
               }
             />
-            {modern && (
-              <ModernPhotoDimmer
-                lighting={lighting}
-                outdoorOn={exteriorState.on}
-                poolOn={poolState.on}
-              />
-            )}
             <HouseWeatherEffects scene={atmosphere} />
             <OutdoorLightingOverlay
               on={exteriorState.on}

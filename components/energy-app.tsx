@@ -409,6 +409,14 @@ export default function EnergyApp({ section }: { section: string }) {
           <Link href="/" className="dashboard-wordmark">
             JARVIS
           </Link>
+          <nav className="dashboard-quick-nav" aria-label="Snabbnavigation">
+            <Link href="/" aria-label="Översikt">
+              <Home size={19} />
+            </Link>
+            <Link href="/belysning" aria-label="Belysning">
+              <Lightbulb size={19} />
+            </Link>
+          </nav>
           <div className="breadcrumb">
             Mitt hem <ChevronRight size={14} />
             <strong>{title}</strong>

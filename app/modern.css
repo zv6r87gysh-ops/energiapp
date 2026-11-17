@@ -716,3 +716,141 @@
   border-radius: 50%;
   background: #73ac84;
 }
+.dashboard-quick-nav {
+  display: none;
+}
+@media (min-width: 900px) and (orientation: landscape) {
+  .app.app-overview .topbar {
+    gap: 12px;
+  }
+  .app.app-overview .topbar .mobile-menu {
+    display: grid;
+  }
+  .app.app-overview .dashboard-quick-nav {
+    display: flex;
+    gap: 8px;
+    order: 1;
+  }
+  .dashboard-quick-nav a {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 36px;
+    border-radius: 12px;
+  }
+  .dashboard-quick-nav a:first-child {
+    background: color-mix(in srgb, var(--text) 7%, var(--bg));
+  }
+  .app.app-overview .top-actions .badge {
+    display: none;
+  }
+  .app.app-overview .house-status-row {
+    position: fixed;
+    top: 0;
+    left: 280px;
+    right: 64px;
+    height: 52px;
+    z-index: 31;
+    padding: 0;
+    gap: 12px;
+    background: var(--bg);
+  }
+  .app.app-overview .house-clock time {
+    font-size: 25px;
+    letter-spacing: -0.035em;
+  }
+  .app.app-overview .house-sun-times {
+    gap: 12px;
+    font-size: 10px;
+  }
+  .app.app-overview .house-sun-times svg {
+    width: 16px;
+    height: 16px;
+  }
+  .app.app-overview .sun-caption {
+    display: none;
+  }
+  .app.app-overview .house-sun-times > span {
+    gap: 4px;
+  }
+  .app.app-overview .house-energy-summary {
+    gap: 8px;
+  }
+  .app.app-overview .house-daily-cost,
+  .app.app-overview .house-spot-price {
+    min-width: 0;
+    padding: 5px 9px;
+    column-gap: 7px;
+  }
+  .app.app-overview .house-energy-summary b {
+    font-size: 13px;
+  }
+  .app.app-overview .house-energy-summary small {
+    font-size: 8px;
+  }
+  .app.app-overview .house-energy-summary small:last-child {
+    font-size: 6px;
+  }
+  .app.app-overview .home-arrival {
+    grid-template-rows: 0px 76px minmax(0, 1fr);
+  }
+  .app.app-overview .arrival-side {
+    grid-template-rows: minmax(0, 1.15fr) minmax(190px, 1fr);
+  }
+  .app.app-overview .music-moods {
+    padding: 14px 15px;
+  }
+  .app.app-overview .arrival-prices h2 {
+    font-size: 17px;
+  }
+  .app.app-overview .arrival-price-subtitle {
+    font-size: 9px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .app.app-overview .arrival-prices .graph {
+    min-height: 115px;
+  }
+  .app.app-overview .house-photo-visual > img {
+    object-fit: cover;
+    background: var(--card);
+  }
+}
+@media (min-width: 1200px) and (orientation: landscape) {
+  .app.app-overview .house-status-row {
+    left: 340px;
+    right: 76px;
+    gap: 24px;
+  }
+  .app.app-overview .house-clock time {
+    font-size: 30px;
+  }
+  .app.app-overview .house-sun-times {
+    font-size: 12px;
+    gap: 18px;
+  }
+  .app.app-overview .house-energy-summary small {
+    font-size: 10px;
+  }
+  .app.app-overview .house-energy-summary b {
+    font-size: 16px;
+  }
+}
+@media (min-width: 900px) and (orientation: landscape) {
+  .app.app-overview .house-energy-summary > a {
+    height: 40px;
+    line-height: 1.1;
+  }
+  .app.app-overview .house-energy-summary small:first-child {
+    grid-column: auto;
+  }
+  .app.app-overview .house-energy-summary b {
+    line-height: 1.1;
+  }
+}
+.app .mini-player-progress input {
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+}

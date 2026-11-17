@@ -261,7 +261,7 @@ export function PricePanel({
         <div className="toolbar">
           <h2 style={{ margin: 0 }}>
             {arrival
-              ? "Elpris · −12 / +12 timmar"
+              ? "Elpris · 24 timmar"
               : chartOnly
                 ? "Dagens kvartspriser"
                 : "Spotpriser"}{" "}
@@ -271,6 +271,11 @@ export function PricePanel({
             {data ? "Publicerade priser" : "Inga verifierade priser"}
           </span>
         </div>
+        {arrival && (
+          <div className="arrival-price-subtitle">
+            12 timmar bakåt · 12 timmar framåt
+          </div>
+        )}
         <p className="muted">
           {data
             ? `${data.date} · ${data.intervals.length} kvartar · Svensk tid (Stockholm)`

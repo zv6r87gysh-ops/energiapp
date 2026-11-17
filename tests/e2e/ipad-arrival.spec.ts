@@ -294,7 +294,7 @@ for (const viewport of [
     await expect(forecast.getByRole("listitem")).toHaveCount(8);
     await expect(
       page.getByLabel("Klocka svensk tid", { exact: true }),
-    ).toHaveText(/14:00:/);
+    ).toHaveText(/14:00/);
     const chart = page.getByRole("img", { name: "Publicerade kvartspriser" });
     await expect(chart).toBeVisible();
     await expect(chart.locator("[data-price-state]")).toHaveCount(96);
