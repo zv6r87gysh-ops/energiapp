@@ -15,6 +15,30 @@ const connected = {
     { id: "device1", name: "Vardagsrum", restricted: false, kind: "Speaker" },
   ],
 };
+const playerSnapshot = {
+  room: "room1",
+  playing: true,
+  itemId: "track-1",
+  title: "Testlåt",
+  artist: "Testartist",
+  position: 60000,
+  duration: 240000,
+  volume: 18,
+  fixedVolume: false,
+  shuffle: true,
+  repeatOne: false,
+  canNext: true,
+  canPrevious: true,
+  canSeek: true,
+};
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/music/player?*", (r) =>
+    r.fulfill({ json: { ...playerSnapshot, sampledAt: Date.now() } }),
+  );
+  await page.route("**/api/music/player", (r) =>
+    r.fulfill({ json: { ...playerSnapshot, sampledAt: Date.now() } }),
+  );
+});
 for (const viewport of [
   { width: 1024, height: 768 },
   { width: 1366, height: 1024 },
@@ -406,6 +430,13 @@ test("Sonos direkt startar med ett tryck utan Spotify eller telefon", async ({
     }),
   );
   let payload: Record<string, unknown> | null = null;
+  await page.route("**/api/music/player", async (r) => {
+    payload = r.request().postDataJSON();
+    await r.fulfill({
+      json: { ...playerSnapshot, volume: 23, sampledAt: Date.now() },
+    });
+  });
+
   await page.route("**/api/music", async (r) => {
     payload = r.request().postDataJSON();
     await r.fulfill({
@@ -437,15 +468,25 @@ test("Sonos direkt startar med ett tryck utan Spotify eller telefon", async ({
     room: "room1",
     action: "next",
   });
-  await page.getByRole("button", { name: "Volym", exact: true }).click();
-  const slider = page.getByRole("slider", { name: "Sonos-volym", exact: true });
-  await slider.focus();
+  await expect(
+    page.getByRole("region", { name: "Sonos mediaspelare" }),
+  ).toContainText("Testlåt");
+  await page
+    .getByRole("button", { name: "Föregående låt", exact: true })
+    .click();
+  expect(payload).toMatchObject({ action: "previous", room: "room1" });
+  await page.getByRole("button", { name: "Höj volym", exact: true }).click();
+  expect(payload).toMatchObject({ action: "volume", delta: 5, room: "room1" });
+  await expect(page.getByLabel("Sonos-volym", { exact: true })).toHaveText(
+    "23 %",
+  );
+  const seek = page.getByRole("slider", { name: "Spola i låten" });
+  await seek.focus();
   await page.keyboard.press("ArrowRight");
   expect(payload).toMatchObject({
-    householdId: home.id,
+    action: "seek",
+    itemId: "track-1",
     room: "room1",
-    action: "volume",
-    volume: 19,
   });
 });
 test("husbilden fyller kortet och kontroller visas först efter tryck", async ({

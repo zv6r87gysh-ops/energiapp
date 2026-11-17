@@ -11,7 +11,7 @@ const session: Session = {
   until: Date.now() + 60000,
 };
 afterEach(() => vi.unstubAllGlobals());
-function mock() {
+function mock(shuffle = true, repeatOne = false) {
   const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
     if (init?.method === "POST") return Response.json({});
     if (url.endsWith("/households"))
@@ -28,7 +28,11 @@ function mock() {
     if (url.endsWith("/playlists"))
       return Response.json({ playlists: [{ id: "kids", name: "Barn" }] });
     if (url.endsWith("/playback"))
-      return Response.json({ playbackState: "PLAYBACK_STATE_PLAYING" });
+      return Response.json({
+        playbackState: "PLAYBACK_STATE_PLAYING",
+        playModes: { shuffle, repeatOne, repeat: false },
+        availablePlaybackActions: { canSkip: true },
+      });
     throw Error("Unexpected endpoint");
   });
   vi.stubGlobal("fetch", fetcher);
@@ -70,11 +74,11 @@ it("starts Sonos directly without any Spotify or phone call and avoids immediate
   expect(JSON.parse(modes[0][1]!.body as string)).toMatchObject({
     playModes: { shuffle: true, repeatOne: false },
   });
-  expect(
-    fetcher.mock.calls.filter(([url]) =>
-      url.endsWith("/playback/skipToNextTrack"),
-    ),
-  ).toHaveLength(2);
+  const skips = fetcher.mock.calls.filter(([url]) =>
+    url.endsWith("/playback/skipToNextTrack"),
+  );
+  expect(skips.length).toBeGreaterThanOrEqual(2);
+  expect(skips.length).toBeLessThanOrEqual(6);
   expect(JSON.parse(starts[0][1]!.body as string)).toMatchObject({
     action: "REPLACE",
     playOnCompletion: true,
@@ -141,4 +145,36 @@ it("volume validates the target and sends a bounded integer to Sonos", async () 
     "https://api.ws.sonos.com/control/api/v1/groups/room/groupVolume",
   );
   expect(JSON.parse(writes[0][1]!.body as string)).toEqual({ volume: 30 });
+});
+
+it("refuses to claim shuffle works when Sonos still reports repeat-one or shuffle off", async () => {
+  for (const modes of [
+    [false, false],
+    [true, true],
+  ]) {
+    const f = mock(...(modes as [boolean, boolean]));
+    await expect(activateSonosMood(input(), session)).rejects.toMatchObject({
+      code: "shuffle-unavailable",
+    });
+    expect(f.mock.calls.some(([url]) => url.endsWith("skipToNextTrack"))).toBe(
+      false,
+    );
+  }
+});
+
+it("reports when Sonos keeps returning the same track despite shuffle and skipping", async () => {
+  const fetcher = mock();
+  const original = fetcher.getMockImplementation()!;
+  fetcher.mockImplementation(async (url, init) =>
+    url.endsWith("/playbackMetadata")
+      ? Response.json({
+          currentItem: {
+            track: { name: "Stuck song", artist: { name: "Artist" } },
+          },
+        })
+      : original(url, init),
+  );
+  await expect(activateSonosMood(input(), session)).rejects.toMatchObject({
+    code: "same-track",
+  });
 });

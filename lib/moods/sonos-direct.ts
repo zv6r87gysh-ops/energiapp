@@ -1,4 +1,5 @@
 import { randomInt } from "node:crypto";
+import { playbackSchema } from "./player";
 import { z } from "zod";
 import { cloudFetch, sonosRooms } from "./cloud";
 import { MusicError, type Session } from "./oauth";
@@ -111,6 +112,30 @@ export async function activateSonosMood(
   const choices = alternatives.length ? alternatives : candidates;
   const chosen = choices[randomInt(choices.length)];
   const room = encodeURIComponent(input.room);
+  const trackIdentity = async () => {
+    try {
+      const raw = z
+        .object({
+          currentItem: z
+            .object({
+              track: z.object({
+                name: z.string(),
+                artist: z.object({ name: z.string() }).optional(),
+              }),
+            })
+            .optional(),
+        })
+        .safeParse(
+          await sonosRequest(`/groups/${room}/playbackMetadata`, session),
+        );
+      const track = raw.success ? raw.data.currentItem?.track : null;
+      return track ? `${track.name}/${track.artist?.name ?? ""}` : null;
+    } catch {
+      return null;
+    }
+  };
+  const previousTrack = await trackIdentity();
+
   await sonosRequest(`/groups/${room}/groupVolume`, session, "POST", {
     volume: input.style.volume,
   });
@@ -125,20 +150,52 @@ export async function activateSonosMood(
           : { playlistId: chosen.id }),
         action: "REPLACE",
         playOnCompletion: true,
-        playModes: { shuffle: true },
+        playModes: { shuffle: true, repeatOne: false, repeat: false },
       },
     );
     // Explicitly re-enable shuffle even if it was changed in another Sonos app.
     await sonosRequest(`/groups/${room}/playback/playMode`, session, "POST", {
-      playModes: { shuffle: true, repeatOne: false },
+      playModes: { shuffle: true, repeatOne: false, repeat: false },
     });
-    // Loading a container may begin on its first item; advance in the shuffled queue.
-    await sonosRequest(
-      `/groups/${room}/playback/skipToNextTrack`,
-      session,
-      "POST",
-      {},
+    // A successful mode command alone does not prove that the service applied it.
+    let state = playbackSchema.parse(
+      await sonosRequest(`/groups/${room}/playback`, session),
     );
+    if (
+      state.playModes?.shuffle !== true ||
+      state.playModes?.repeatOne !== false
+    )
+      throw new MusicError("shuffle-unavailable", 409);
+    // A single fixed skip can repeatedly start on the same second song after reload.
+    const jumps = randomInt(1, 4);
+    for (let i = 0; i < jumps; i++) {
+      if (state.availablePlaybackActions?.canSkip === false) break;
+      await sonosRequest(
+        `/groups/${room}/playback/skipToNextTrack`,
+        session,
+        "POST",
+        {},
+      );
+      if (i + 1 < jumps)
+        state = playbackSchema.parse(
+          await sonosRequest(`/groups/${room}/playback`, session),
+        );
+    }
+    if (previousTrack && (await trackIdentity()) === previousTrack) {
+      const current = playbackSchema.parse(
+        await sonosRequest(`/groups/${room}/playback`, session),
+      );
+      if (current.availablePlaybackActions?.canSkip === true) {
+        await sonosRequest(
+          `/groups/${room}/playback/skipToNextTrack`,
+          session,
+          "POST",
+          {},
+        );
+      }
+      if ((await trackIdentity()) === previousTrack)
+        throw new MusicError("same-track", 409);
+    }
   } catch (error) {
     if (error instanceof MusicError) error.volumeApplied = true;
     throw error;

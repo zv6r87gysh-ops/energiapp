@@ -1,15 +1,8 @@
 "use client";
 import Link from "next/link";
+import { MusicPlayer } from "./music-player";
 import { useState } from "react";
-import {
-  Music2,
-  Pause,
-  SkipForward,
-  Volume2,
-  Sparkles,
-  Smile,
-  Waves,
-} from "lucide-react";
+import { Music2, Sparkles, Smile, Waves } from "lucide-react";
 import {
   moodIds,
   moodLabels,
@@ -33,8 +26,7 @@ export function MusicMoods({
   onPreview: (style: MoodStyle) => void;
 }) {
   const [last, setLast] = useState<MoodId | null>(null);
-  const [volumeOpen, setVolumeOpen] = useState(false);
-  const [volume, setVolume] = useState(25);
+  const [playerRevision, setPlayerRevision] = useState(0);
   const [result, setResult] = useState("");
   const [playlist, setPlaylist] = useState<{
     name: string;
@@ -81,7 +73,7 @@ export function MusicMoods({
       setLast(mood);
       setPlaylist(response.playlist);
       setResult("");
-      setVolume(style.volume);
+      setPlayerRevision((v) => v + 1);
     }
   }
   return (
@@ -142,68 +134,11 @@ export function MusicMoods({
       </div>
       {cloud.busy && <p role="status">Kontaktar musiktjänsten…</p>}
       {cloud.status?.sonos.connected && settings.room && (
-        <div className="mood-playback-controls">
-          <button
-            type="button"
-            className="button secondary mood-next-track"
-            disabled={cloud.busy}
-            onClick={() => void cloud.pause(settings.room!, "next")}
-          >
-            <SkipForward size={18} />
-            Nästa låt
-          </button>
-          <button
-            type="button"
-            className="button secondary"
-            aria-expanded={volumeOpen}
-            disabled={cloud.busy}
-            onClick={() => setVolumeOpen((v) => !v)}
-          >
-            <Volume2 size={18} />
-            Volym
-          </button>
-          {volumeOpen && (
-            <label className="mood-volume-slider">
-              Välj volym · {volume} %
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                aria-label="Sonos-volym"
-                value={volume}
-                disabled={cloud.busy}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                onPointerUp={(e) =>
-                  void cloud.pause(
-                    settings.room!,
-                    "volume",
-                    Number(e.currentTarget.value),
-                  )
-                }
-                onKeyUp={(e) => {
-                  if (
-                    [
-                      "ArrowLeft",
-                      "ArrowRight",
-                      "ArrowUp",
-                      "ArrowDown",
-                      "Home",
-                      "End",
-                      "PageUp",
-                      "PageDown",
-                    ].includes(e.key)
-                  )
-                    void cloud.pause(
-                      settings.room!,
-                      "volume",
-                      Number(e.currentTarget.value),
-                    );
-                }}
-              />
-            </label>
-          )}
-        </div>
+        <MusicPlayer
+          home={home}
+          room={settings.room}
+          revision={playerRevision}
+        />
       )}
       {result && (
         <p className="mood-result" role="status">
@@ -227,16 +162,6 @@ export function MusicMoods({
         </p>
       )}
       <div className="music-mood-actions">
-        {cloud.status?.sonos.connected && settings.room && (
-          <button
-            className="button secondary"
-            disabled={cloud.busy}
-            onClick={() => void cloud.pause(settings.room!)}
-          >
-            <Pause size={17} />
-            Pausa musik
-          </button>
-        )}
         <Link href="/installningar#music-settings" className="text-link">
           Musik & ljusinställningar →
         </Link>

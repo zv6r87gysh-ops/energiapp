@@ -243,6 +243,12 @@ export function musicMessage(code: string) {
       "Sonos nekar åtkomst. Kontrollera Control-integrationens behörighet och att rätt Sonos-konto är anslutet.",
     "sonos-catalog-unavailable":
       "Sonos kunde inte lämna favoriter eller sparade spellistor. Uppdatera Sonos-valen och kontrollera anslutningen.",
+    "player-action-unavailable":
+      "Sonos eller musiktjänsten tillåter inte den här åtgärden för den aktuella låten.",
+    "same-track":
+      "Sonos rapporterar fortfarande samma låt. Kontrollera att musikvalet innehåller flera låtar och tillåter spårbyte.",
+    "shuffle-unavailable":
+      "Sonos bekräftar inte shuffle utan låtrepetition. Välj en spellista som stöder shuffle.",
     "sonos-pool-empty":
       "Välj minst ett Sonos-musikval för denna stämning i inställningarna. Välj flera för slumpvariation.",
     "sonos-selection-missing":

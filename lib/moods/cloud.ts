@@ -223,6 +223,11 @@ export async function activateMood(
       { context_uri: playlist.uri },
     );
     await cloudFetch(
+      `${spotifyBase}/me/player/repeat?${new URLSearchParams({ state: "off", device_id: selected.id })}`,
+      spotify,
+      "PUT",
+    );
+    await cloudFetch(
       `${spotifyBase}/me/player/shuffle?${new URLSearchParams({ state: "true", device_id: selected.id })}`,
       spotify,
       "PUT",
