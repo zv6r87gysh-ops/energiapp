@@ -82,7 +82,7 @@ export function MusicMoods({
         <span className="eyebrow">MUSIK FÖR STUNDEN</span>
         <Music2 size={22} />
       </div>
-      <h2>Vilken känsla idag?</h2>
+      <h2>Musik & stämning</h2>
       {!(ready && direct) && (
         <p className="muted">
           {ready

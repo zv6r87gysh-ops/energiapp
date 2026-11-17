@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -469,12 +470,19 @@ export function PricePanel({
             </p>
           </>
         )}
-        <p className="muted">
-          Spotpris exklusive moms, elhandelspåslag, energiskatt och
-          elnätsavgifter. Detta är inte ditt totala elpris. Kostnadsprognoser,
-          laddning och besparingar i övriga appen använder fortfarande tydligt
-          märkta demodata.
-        </p>
+        {arrival ? (
+          <p className="muted">
+            Spotpris · öre/kWh · exkl. moms och avgifter ·{" "}
+            <Link href="/elpriser">Detaljer ↗</Link>
+          </p>
+        ) : (
+          <p className="muted">
+            Spotpris exklusive moms, elhandelspåslag, energiskatt och
+            elnätsavgifter. Detta är inte ditt totala elpris. Kostnadsprognoser,
+            laddning och besparingar i övriga appen använder fortfarande tydligt
+            märkta demodata.
+          </p>
+        )}
       </section>
     </>
   );

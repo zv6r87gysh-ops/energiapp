@@ -8,7 +8,9 @@ export function IndoorLightingOverlay({
   viewBox,
   preview,
   levels = {},
+  groups = indoorGroups,
 }: {
+  groups?: typeof indoorGroups;
   levels?: Partial<Record<IndoorGroup, number>>;
   photo: string;
   viewBox: string;
@@ -19,7 +21,7 @@ export function IndoorLightingOverlay({
   return (
     <svg
       viewBox={viewBox}
-      preserveAspectRatio="none"
+      preserveAspectRatio="xMidYMid slice"
       className="indoor-lighting-overlay"
       data-testid="indoor-lighting-overlay"
       aria-hidden="true"
@@ -41,12 +43,12 @@ export function IndoorLightingOverlay({
             values="1 0 0 0 .06  0 .9 0 0 .03  0 0 .65 0 0  0 0 0 1 0"
           />
         </filter>
-        {indoorGroups.map((g) => (
+        {groups.map((g) => (
           <clipPath key={g.id} id={`${id}-${g.id}`}>
             <polygon points={g.window} />
           </clipPath>
         ))}
-        {indoorGroups.map((g) => (
+        {groups.map((g) => (
           <mask
             key={g.id}
             id={`${id}-${g.id}-wash`}
@@ -69,7 +71,7 @@ export function IndoorLightingOverlay({
           </mask>
         ))}
       </defs>
-      {indoorGroups.map((g) => (
+      {groups.map((g) => (
         <g
           key={g.id}
           data-indoor-group={g.id}
@@ -84,7 +86,7 @@ export function IndoorLightingOverlay({
               y={y}
               width={width}
               height={height}
-              preserveAspectRatio="none"
+              preserveAspectRatio="xMidYMid slice"
               filter={`url(#${id}-warm)`}
             />
             <rect

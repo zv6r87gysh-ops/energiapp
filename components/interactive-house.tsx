@@ -1,5 +1,13 @@
 "use client";
 import Link from "next/link";
+import { ModernPhotoDimmer } from "./modern-photo-dimmer";
+import {
+  modernLayout,
+  modernAreas,
+  modernIndoorGroups,
+  modernSpots,
+  modernPoolLamp,
+} from "@/lib/modern-house";
 import { useEffect, useId, useRef, useState } from "react";
 import { Camera, Car, Flame, Home, Lightbulb, Waves } from "lucide-react";
 import {
@@ -226,7 +234,12 @@ export function InteractiveHouse({
       : active === "charging"
         ? simulation?.devices.charging.cost
         : houseCost;
-  const area = areas.find((a) => a.id === active)!;
+  const modern = photo?.includes("/images/jarvis-house.webp") ?? false;
+  const shownAreas = areas.map((a) => ({
+    ...a,
+    ...(modern ? modernAreas[a.id] : {}),
+  }));
+  const area = shownAreas.find((a) => a.id === active)!;
   const savings = simulation?.continuousComparison[active] ?? null;
   const exteriorState = lightingPower(
     lighting,
@@ -288,6 +301,7 @@ export function InteractiveHouse({
       {photo ? (
         <div
           className={`house-photo-scene house-active-${preview ? active : "none"}`}
+          data-photo-style={modern ? "modern" : "original"}
           data-menu-open={menuOpen}
           onClickCapture={(e) => {
             if (
@@ -334,7 +348,7 @@ export function InteractiveHouse({
               clearPreview();
             }}
           >
-            {menuOpen ? "Stäng ×" : "Visa kontroller"}
+            {menuOpen ? "Stäng ×" : "Husets kontroller"}
           </button>
           <div className="house-photo-visual">
             {/* eslint-disable-next-line @next/next/no-img-element -- Local user-selected Blob URL, no remote image service. */}
@@ -351,16 +365,26 @@ export function InteractiveHouse({
               }}
               onLoad={(event) =>
                 setLayout(
-                  housePhotoLayout(
-                    event.currentTarget.naturalWidth,
-                    event.currentTarget.naturalHeight,
-                  ),
+                  modern
+                    ? modernLayout
+                    : housePhotoLayout(
+                        event.currentTarget.naturalWidth,
+                        event.currentTarget.naturalHeight,
+                      ),
                 )
               }
             />
+            {modern && (
+              <ModernPhotoDimmer
+                lighting={lighting}
+                outdoorOn={exteriorState.on}
+                poolOn={poolState.on}
+              />
+            )}
             <HouseWeatherEffects scene={atmosphere} />
             <OutdoorLightingOverlay
               on={exteriorState.on}
+              spots={modern ? modernSpots : undefined}
               viewBox={layout.viewBox}
               photo={photo}
               brightness={atmosphere?.brightness ?? 1}
@@ -369,17 +393,19 @@ export function InteractiveHouse({
               photo={photo}
               viewBox={layout.viewBox}
               preview={lighting.indoorPreview ?? {}}
+              groups={modern ? modernIndoorGroups : undefined}
               levels={lighting.indoorBrightness}
             />
             <PoolLightingOverlay
               on={poolState.on}
+              lamp={modern ? modernPoolLamp : undefined}
               photo={photo}
               viewBox={layout.viewBox}
               brightness={atmosphere?.brightness ?? 1}
             />
             <svg
               viewBox={layout.viewBox}
-              preserveAspectRatio="none"
+              preserveAspectRatio="xMidYMid slice"
               className="house-photo-overlay"
               aria-label="Kategorier på husfotot"
             >
@@ -392,7 +418,7 @@ export function InteractiveHouse({
                   </feMerge>
                 </filter>
               </defs>
-              {areas.map((a) => (
+              {shownAreas.map((a) => (
                 <a
                   key={a.id}
                   href={a.href}
@@ -420,7 +446,7 @@ export function InteractiveHouse({
                 </a>
               ))}
             </svg>
-            {areas.map((a) => {
+            {shownAreas.map((a) => {
               const Icon = a.icon;
               return (
                 <button
@@ -541,7 +567,7 @@ export function InteractiveHouse({
                     : "Släckt"}
               </small>
             </button>
-            {areas.map((a) => {
+            {shownAreas.map((a) => {
               const Icon = a.icon;
               return (
                 <button

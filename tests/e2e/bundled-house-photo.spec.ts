@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
-test("originalfotot är inbyggt och rätt linjerat även i en tom ny session", async ({
+test("husvisualiseringen är inbyggd och rätt linjerat även i en tom ny session", async ({
   page,
   browser,
 }) => {
   await page.goto("/");
   const photo = page.getByRole("img", { name: /Ditt hus med interaktiva/ });
   await expect(photo).toBeVisible();
-  await expect(photo).toHaveAttribute("src", "/images/house-photo.jpg");
+  await expect(photo).toHaveAttribute("src", "/images/jarvis-house.webp");
   const dimensions = await photo.evaluate((img) => ({
     w: (img as HTMLImageElement).naturalWidth,
     h: (img as HTMLImageElement).naturalHeight,
@@ -18,7 +18,7 @@ test("originalfotot är inbyggt och rätt linjerat även i en tom ny session", a
   });
   await expect(card.locator(".house-photo-overlay")).toHaveAttribute(
     "viewBox",
-    /-279/,
+    "0 0 1448 1086",
   );
   const viewBox = await card
     .locator(".house-photo-overlay")
@@ -37,6 +37,9 @@ test("originalfotot är inbyggt och rätt linjerat även i en tom ny session", a
   const box = await smart.boundingBox();
   expect(box!.y - frame!.y).toBeLessThan(20);
   expect(frame!.x + frame!.width - (box!.x + box!.width)).toBeLessThan(20);
+  await card
+    .getByRole("button", { name: "Visa husets kontroller", exact: true })
+    .click();
   await card.getByRole("button", { name: "Utebelysning", exact: true }).click();
   await expect(card.getByTestId("outdoor-lighting-overlay")).toHaveAttribute(
     "data-power",
@@ -48,7 +51,7 @@ test("originalfotot är inbyggt och rätt linjerat även i en tom ny session", a
     await fresh.goto("http://127.0.0.1:3000/");
     await expect(
       fresh.getByRole("img", { name: /Ditt hus med interaktiva/ }),
-    ).toHaveAttribute("src", "/images/house-photo.jpg");
+    ).toHaveAttribute("src", "/images/jarvis-house.webp");
   } finally {
     await ctx.close();
   }

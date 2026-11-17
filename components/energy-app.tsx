@@ -406,6 +406,9 @@ export default function EnergyApp({ section }: { section: string }) {
           >
             {menu ? <X /> : <Menu />}
           </button>
+          <Link href="/" className="dashboard-wordmark">
+            JARVIS
+          </Link>
           <div className="breadcrumb">
             Mitt hem <ChevronRight size={14} />
             <strong>{title}</strong>
@@ -415,6 +418,7 @@ export default function EnergyApp({ section }: { section: string }) {
             <button
               className="icon-button"
               aria-label="Växla färgtema"
+              aria-pressed={dark}
               onClick={() => setDark(!dark)}
             >
               {dark ? <Sun size={19} /> : <Moon size={19} />}
@@ -1532,6 +1536,38 @@ export default function EnergyApp({ section }: { section: string }) {
           </footer>
         </main>
       </div>
+      <nav className="jarvis-navigation" aria-label="Huvudnavigation">
+        {[
+          { href: "/", id: "oversikt", label: "Översikt", Icon: Home },
+          {
+            href: "/belysning",
+            id: "belysning",
+            label: "Belysning",
+            Icon: Lightbulb,
+          },
+          {
+            href: "/forbrukning",
+            id: "forbrukning",
+            label: "Förbrukning",
+            Icon: Activity,
+          },
+          {
+            href: "/installningar",
+            id: "installningar",
+            label: "Inställningar",
+            Icon: Settings,
+          },
+        ].map(({ href, id, label, Icon }) => (
+          <Link
+            key={id}
+            href={href}
+            aria-current={section === id ? "page" : undefined}
+          >
+            <Icon size={21} />
+            <span>{label}</span>
+          </Link>
+        ))}
+      </nav>
       <nav className="bottom-nav">
         {[0, 3, 5, 8].map((i) => {
           const Icon = icons[i];

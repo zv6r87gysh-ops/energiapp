@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./modern.css";
 export const metadata: Metadata = {
   title: "Jarvis – ditt hem, i balans",
   description: "Smart energi för ditt hem. Lokal demonstration.",
